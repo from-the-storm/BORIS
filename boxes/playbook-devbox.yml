@@ -1,0 +1,27 @@
+---
+- hosts: all
+  become: true
+  vars:
+    # The app domain name.
+    boris_app_domain: "boris.local"
+    # The current mode. Either "development" or "production". Affects static files and auto-reload.
+    boris_app_mode: "development"
+    # The name of this instance (e.g. "devbox", "staging", "prod"). Can be anything, but no special characters.
+    boris_instance_name: "devbox"
+    # The IP address of the postgresql server:
+    boris_db_host: "127.0.0.1"
+    # How many app processes to run
+    boris_app_num_processes: 1
+  pre_tasks:
+    - name: update apt cache
+      apt: update_cache=yes
+    - name: Set hostname
+      hostname: name="boris-{{boris_instance_name}}"
+    - name: Add hostname to /etc/hosts
+      lineinfile:
+        dest="/etc/hosts"
+        regexp="127\.0\.0\.1.*"
+        line="127.0.0.1 localhost boris-{{boris_instance_name}}"
+  roles:
+    - { role: database }
+    - { role: app }

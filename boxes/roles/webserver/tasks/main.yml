@@ -1,0 +1,16 @@
+---
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - nginx
+
+- name: Configure firewall for HTTP
+  ufw: rule=allow port=80 proto=tcp
+- name: Configure firewall for HTTPS
+  ufw: rule=allow port=443 proto=tcp
+
+- name: Create SSL certs dir
+  file: path=/etc/nginx/ssl state=directory owner=www-data group=root mode=700
+
+- name: Install nginx default page
+  template: src=default.html dest=/var/www/html/index.html

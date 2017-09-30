@@ -1,0 +1,17 @@
+---
+# Common tasks required to use PostgreSQL as either a client or a server
+#
+
+- name: Configure official PostgreSQL repository
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main' state=present
+
+- name: Install PostgreSQL repository key
+  apt_key: id=ACCC4CF8 url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+
+- apt: update_cache=yes
+
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - postgresql-server-dev-{{boris_postgresql_version}}
+    - python-psycopg2

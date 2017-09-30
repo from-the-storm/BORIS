@@ -1,0 +1,50 @@
+boris_app_domain: "set.me.boris.none"
+boris_app_user: boris
+boris_app_user_home: /home/boris
+boris_app_dir: "{{boris_app_user_home}}/boris"
+boris_app_python_venv_dir: "{{boris_app_user_home}}/.venv-boris"
+boris_app_env_file: "{{boris_app_user_home}}/.boris-env"
+boris_app_port: 8432
+boris_app_mode: production
+boris_app_num_processes: 1
+boris_app_credentials_dir:  "./{{boris_instance_name}}/credentials/app/"
+# Clone the app code?
+boris_app_clone_repo: false
+boris_app_version: master
+boris_app_src: "git@github.com:from-the-storm/BORIS.git"
+boris_app_deploy_key: null
+# Database credentials:
+boris_app_db_name: "boris_app_{{boris_instance_name}}"
+boris_app_db_user: "boris_app_{{boris_instance_name}}"
+boris_app_db_password: "{{ lookup('password', boris_app_credentials_dir + 'pgpassword length=15') }}"
+# Django secret key:
+boris_app_secret: "{{ lookup('password', boris_app_credentials_dir + 'secret length=50') }}"
+
+boris_config_base:
+  app_domain: "{{boris_app_domain}}"
+  instance_name: "{{boris_instance_name}}"
+  listen_port: "{{boris_app_port}}"
+  secret_key: "{{boris_app_secret}}"
+  db_host: '{{boris_db_host}}'
+  db_name: "{{boris_app_db_name}}"
+  db_user: "{{boris_app_db_user}}"
+  db_password: "{{boris_app_db_password}}"
+  redis_prefix: "boris:"
+
+# Test environment, only created/included if boris_include_test_environment is true:
+boris_include_test_environment: "{{boris_app_mode == 'development'}}"
+boris_app_testdb_name: "test_{{boris_app_db_name}}"  # To work with django, should be same as the normal DB but prefixed with "test_"
+boris_app_testdb_user: "{{boris_app_db_user}}_test"
+boris_app_testdb_password: "{% if boris_include_test_environment %}{{ lookup('password', boris_app_credentials_dir + 'pgpassword_tests length=15') }}{% endif %}"
+boris_config_test:
+  app_domain: "boris-test.local"
+  instance_name: "boris_test"
+  listen_port: "{{boris_app_port + 11}}"
+  secret_key: "test-secret"
+  db_host: '{{boris_db_host}}'
+  db_name: "{{boris_app_db_name}}"  # Django will add the 'test_' prefix
+  db_user: "{{boris_app_testdb_user}}"
+  db_password: "{{boris_app_testdb_password}}"
+
+boris_config:
+  "{% if boris_include_test_environment %}{{ {'development': boris_config_base, 'test': boris_config_test} }}{% else %}{{ {boris_app_mode: boris_config_base} }}{% endif %}"

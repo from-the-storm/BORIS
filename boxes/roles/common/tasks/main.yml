@@ -1,0 +1,30 @@
+---
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - htop
+    - unattended-upgrades
+    - fail2ban
+    - g++
+
+- name: Remove packages we don't want
+  apt: name={{ item }} state=absent purge=yes
+  with_items:
+    # These are sometimes installed already in the vagrant box:
+    - puppet
+    - puppet-common
+    - chef
+    - ohai
+    # To remove more, run apt-get autoremove manually
+
+- name: Allow SSH through firewall
+  ufw: rule=allow port=ssh proto=tcp
+- name: Enable firewall
+  ufw: state=enabled policy=deny
+
+- name: "Fix annoying 'stdin: is not a tty' warning"
+  lineinfile:
+    dest="/root/.profile"
+    regexp='.*mesg n'
+    line='tty -s && mesg n'
+  # https://github.com/mitchellh/vagrant/issues/1673

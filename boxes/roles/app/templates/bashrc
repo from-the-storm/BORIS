@@ -1,0 +1,15 @@
+# Give this user an unlimited bash history
+export HISTFILESIZE=
+export HISTSIZE=
+
+# Make this user's prompt green
+export PS1='\[\e[1;32m\][\u@\h \W]\$\[\e[0m\] '
+
+# Load environment vars from env file
+set -a
+source {{boris_app_env_file}}
+set +a
+
+cd ~
+
+source {{boris_app_python_venv_dir}}/bin/activate

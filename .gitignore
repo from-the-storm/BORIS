@@ -1,0 +1,7 @@
+__pycache__
+*.log
+.vagrant/
+boxes/*.retry
+boxes/devbox/credentials/*
+*.egg-info/
+backend/staticfiles/

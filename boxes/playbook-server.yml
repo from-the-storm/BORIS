@@ -1,0 +1,31 @@
+---
+# Deploy BORIS to a production server.
+#
+# Prepare the server for this playbook with:
+# sudo apt-get install -y python2.7 python-simplejson
+#
+# Then run this playbook with e.g.
+# ansible-playbook -i "123.123.123.123," --extra-vars=vars_file=../../secrets/boris-live-vars.yml boxes/playbook-server.yml
+- hosts: all
+  become: true
+  remote_user: ubuntu
+  vars:
+    # The app domain name.
+    boris_app_domain: "boris.bitannex.com"
+    # The current mode. Either "development" or "production".
+    boris_app_mode: "production"
+    # The name of this instance (e.g. "devbox", "staging", "prod").
+    boris_instance_name: "live"
+    # The IP address of the postgresql server:
+    boris_db_host: "127.0.0.1"
+    # How many app processes to run
+    boris_app_num_processes: 3
+    # Clone the repo:
+    boris_app_clone_repo: true
+  pre_tasks:
+    - include_vars: "{{vars_file}}"
+    - name: update apt cache
+      apt: update_cache=yes
+  roles:
+    - { role: database }
+    - { role: app }

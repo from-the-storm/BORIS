@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: database-common }  # Role with things required for DB server and/or client. This role needs the client stuff.
+  - { role: webserver }

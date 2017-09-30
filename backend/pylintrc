@@ -1,0 +1,23 @@
+[MASTER]
+ignore=migrations
+no-docstring-rgx=(__.*__)|Meta
+docstring-min-length=4
+
+[FORMAT]
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable=
+    duplicate-code,
+    fixme,
+    invalid-name,
+    locally-disabled,
+    no-member,
+    no-self-use,
+    too-few-public-methods,
+    too-many-branches,
+    too-many-instance-attributes,
+    too-many-statements
+
+[VARIABLES]
+dummy-variables-rgx = _
