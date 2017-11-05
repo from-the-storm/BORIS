@@ -4,20 +4,25 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { default as thunk } from 'redux-thunk';
 
-class App extends React.Component {
+import {userStateReducer, UserState} from '../global/state/user-state';
+import {LoginStatus} from './login-status';
+
+class App extends React.PureComponent {
     public render() {
         return <div id="app" className="boris-app registration">
             Hello from React!
+
+            <LoginStatus />
         </div>;
     }
 }
 
 export interface RootStore {
-    messages: {};
+    userState: UserState;
 }
 export const store = createStore(
     combineReducers<RootStore>({
-        //messages: modalMessagesReducer,
+        userState: userStateReducer,
     }),
     applyMiddleware(thunk),
 );
