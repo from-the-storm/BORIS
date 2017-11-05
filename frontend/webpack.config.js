@@ -1,3 +1,5 @@
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
 module.exports = {
     entry: {
         registration: "./registration/app.tsx",
@@ -21,7 +23,18 @@ module.exports = {
             { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
 
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
+            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
+
+            // We include SCSS files and extract them to a combined output file
+            {
+                test: /\.scss$/,
+                loader: ExtractTextPlugin.extract({
+                    use: [
+                        { loader: 'css-loader', options: { minimize: true } },
+                        { loader: 'sass-loader' },
+                    ],
+                }),
+            },
         ]
     },
 
@@ -33,4 +46,10 @@ module.exports = {
         "react": "React",
         "react-dom": "ReactDOM"
     },
+
+    plugins: [
+        new ExtractTextPlugin('style.css', {
+            allChunks: true,
+        })
+    ]
 };

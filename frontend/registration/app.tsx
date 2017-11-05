@@ -7,6 +7,9 @@ import { default as thunk } from 'redux-thunk';
 import {userStateReducer, UserState} from '../global/state/user-state';
 import {LoginStatus} from './login-status';
 
+// Include our SCSS (via webpack magic)
+import './registration.scss';
+
 class App extends React.PureComponent {
     public render() {
         return <div id="app" className="boris-app registration">
