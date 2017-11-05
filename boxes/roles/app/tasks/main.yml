@@ -52,10 +52,10 @@
 
 - name: Create virtualenv
   pip:
-    requirements: '{{boris_app_dir}}/requirements.txt'
+    requirements: '{{boris_app_dir}}/backend/requirements.txt'
     virtualenv: '{{boris_app_python_venv_dir}}'
     virtualenv_command: /usr/bin/python3.6 -m venv
-    chdir: '{{boris_app_dir}}'
+    chdir: '{{boris_app_dir}}/backend'
   become_user: "{{boris_app_user}}"
 - name: Keep pip up to date
   pip:
