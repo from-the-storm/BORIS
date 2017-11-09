@@ -1,0 +1,15 @@
+// The BORIS UI is a single-page React app.
+doctype html
+html
+    head
+        title BORIS
+
+        link(href="https://fonts.googleapis.com/css?family=Kanit:700|Noto+Sans", rel="stylesheet")
+        link(href=`${resUrl}/style.css`, rel="stylesheet")
+
+body
+    #app-container
+    script(crossorigin, src="https://unpkg.com/react@16/umd/react.development.js")
+    script(crossorigin, src="https://unpkg.com/react-dom@16/umd/react-dom.development.js")
+
+    script(src=`${resUrl}/registration.js`)

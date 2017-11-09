@@ -13,7 +13,7 @@ import './registration.scss';
 class App extends React.PureComponent {
     public render() {
         return <div id="app" className="boris-app registration">
-            Hello from React!
+            <h1>Hello from React!</h1>
 
             <LoginStatus />
         </div>;

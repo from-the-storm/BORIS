@@ -1,0 +1,32 @@
+// An independent error template, with no dependencies.
+doctype html
+html
+    head
+        title BORIS: An Error Occurred
+
+        link(href="https://fonts.googleapis.com/css?family=Kanit:700|Noto+Sans", rel="stylesheet")
+
+        style.
+            body {
+                font-family: 'Noto Sans', sans-serif;
+            }
+            h1, h2, h3, h4, h5 {
+                font-family: 'Kanit', sans-serif;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+            .error-stack {
+                border-left: 2px solid grey;
+                margin-left: 20px;
+                padding-left: 20px;
+            }
+
+body
+    h1 An Error Occurred
+    p.error-message
+        = message
+
+    if errorDetails
+        h2 Error Details
+        pre.error-stack
+            = errorDetails.stack
