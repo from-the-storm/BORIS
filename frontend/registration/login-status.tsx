@@ -1,13 +1,12 @@
 import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
-import {UserState} from '../global/state/user-state';
+import {UserState, RootState} from '../global/state';
 import {loginUser} from '../global/state/user-state-actions';
-import {RootStore} from './app';
 
 interface OwnProps {
 }
-interface Props extends OwnProps, DispatchProp<RootStore> {
+interface Props extends OwnProps, DispatchProp<RootState> {
     userState: UserState;
 }
 
@@ -19,7 +18,7 @@ class _LoginStatus extends React.PureComponent<Props> {
 
     public render() {
         if (this.props.userState.isLoggedIn) {
-            return <p>You are logged in as {`${this.props.userState.name}`}.</p>;
+            return <p>You are logged in as {`${this.props.userState.first_name}`}.</p>;
         }
         return <div>
             <p>You are not logged in.</p>
@@ -32,6 +31,6 @@ class _LoginStatus extends React.PureComponent<Props> {
     }
 }
 
-export const LoginStatus = connect((state: RootStore, ownProps: OwnProps) => ({
+export const LoginStatus = connect((state: RootState, ownProps: OwnProps) => ({
     userState: state.userState,
 }))(_LoginStatus);

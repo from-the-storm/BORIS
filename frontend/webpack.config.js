@@ -2,7 +2,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: {
-        registration: "./registration/app.tsx",
+        main: "./main.tsx",
     },
     output: {
         filename: "[name].js",

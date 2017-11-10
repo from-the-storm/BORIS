@@ -4,28 +4,20 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { default as thunk } from 'redux-thunk';
 
-import {userStateReducer, UserState} from '../global/state/user-state';
-import {LoginStatus} from './login-status';
+import {
+    RootState,
+    userStateReducer,
+    UserState,
+    teamStateReducer,
+    TeamState
+} from './global/state';
+import {App} from './app';
 
-// Include our SCSS (via webpack magic)
-import './registration.scss';
 
-class App extends React.PureComponent {
-    public render() {
-        return <div id="app" className="boris-app registration">
-            <h1>Hello from React!</h1>
-
-            <LoginStatus />
-        </div>;
-    }
-}
-
-export interface RootStore {
-    userState: UserState;
-}
 export const store = createStore(
-    combineReducers<RootStore>({
+    combineReducers<RootState>({
         userState: userStateReducer,
+        teamState: teamStateReducer,
     }),
     applyMiddleware(thunk),
 );

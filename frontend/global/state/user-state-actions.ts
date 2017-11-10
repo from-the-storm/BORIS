@@ -4,7 +4,8 @@ import {Dispatch} from 'redux';
 
 export enum UserStateActions {
     // G_US prefix means Global User State
-    LOGIN_USER = 'G_US_LOGIN_USER',
+    LOGIN = 'G_US_LOGIN',
+    LOGOUT = 'G_US_LOGOUT',
 }
 const Actions = UserStateActions;
 
@@ -16,8 +17,8 @@ const Actions = UserStateActions;
 export function loginUser(userEmail: string) {
     return (dispatch: Dispatch<{}>, getState: () => {}) => {
         dispatch({
-            type: Actions.LOGIN_USER,
-            name: "Braden",
+            type: Actions.LOGIN,
+            first_name: "Braden",
             email: "braden@apocalypsemadeeasy.com",
         });
         return Promise.resolve();
