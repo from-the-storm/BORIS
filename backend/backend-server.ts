@@ -5,6 +5,7 @@ import * as nodemailer from 'nodemailer';
 import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
 import * as nodemailerMockTransport from 'nodemailer-mock-transport';
 import * as passport from 'passport';
+import * as path from 'path';
 import * as whiskers from 'whiskers';
 import {Strategy as LocalStrategy} from 'passport-local';
 import * as WebSocket from 'ws';
@@ -150,7 +151,7 @@ app.use((req, res, next) => {
 // Views:
 
 // Static files:
-app.use(config.resource_url, express.static(__dirname + '/static'))
+app.use(config.resource_url, express.static(path.join(__dirname, '..', 'frontend', 'dist')));
 
 // The React single page app:
 app.get('/', (req, res) => { res.render('react-app') });

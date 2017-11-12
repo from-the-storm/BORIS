@@ -23,7 +23,7 @@ Running a local development environment
 
 ** Running BORIS**
 
-1. From this directory, run `cd backend` then `npm run serve`
+1. From this directory, run `cd backend` then `npm run server`
 2. Go to http://localhost:3333/
 
 **To update the frontend:**
