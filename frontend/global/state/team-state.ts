@@ -13,13 +13,6 @@ export class TeamState extends Record({
     teamName: "NO TEAM",
     isTeamCaptain: false,
     otherTeamMembers: [] as Array<{name: string, id: number, online: boolean, isCaptain: boolean}>,
-    /* If the user is trying to join a team but hasn't fully confirmed that yet: */
-    potentialTeam: null as null|{
-        code: string,
-        name: string,
-        error: 'full'|'invalid'|null,
-        otherTeamMemberNames: Array<{name: string}>
-    },
 }) {
     get hasJoinedTeam(): boolean {
         return this.teamCode !== null;

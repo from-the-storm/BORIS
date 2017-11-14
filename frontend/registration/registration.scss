@@ -1,0 +1,30 @@
+.registration {
+
+    header {
+        background-color: black;
+        width: 100%;
+        height: 100px;
+        color: white;
+
+        display: flex;
+
+        & > div {
+            flex: 1 1 50%;
+
+            &:first-child {
+                border-right: 1px solid #888;
+            }
+
+            > button {
+                width: 100%;
+                height: 100%;
+                text-transform: uppercase;
+                font-size: 25px;
+            }
+        }
+    }
+
+    .content {
+        padding: 20px;
+    }
+}
