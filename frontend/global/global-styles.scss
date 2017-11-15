@@ -1,29 +1,50 @@
-$textfont: 'Noto Sans', sans-serif;
-$fancyfont: 'Kanit', sans-serif;
+@import 'variables-mixins';
 
-
+// Structure
 body {
     font-family: $textfont;
-    margin: 0;
+    font-size: 16px;
 }
+#app-container {
+    max-width: 64em;
+    margin: 0 auto;
+}
+header {
+    text-align: center;
+}
+
+// Typography
 h1, h2, h3, h4, h5 {
     font-family: $fancyfont;
     font-weight: bold;
     text-transform: uppercase;
 }
+.mono {
+    font-family: $consolefont;
+}
+.emphatic {
+    font-family: $fancyfont;
+    font-weight: bold;
+    text-transform: uppercase;
+}
 
+// Navigation
 button {
     font-family: $fancyfont;
-    background-color: black;
+    background-color: $black;
     border: 0 none;
-    color: white;
-    font-size: 25px;
+    color: $white;
+    font-size: 1.5em;
     text-align: center;
     text-transform: uppercase;
 
+    &.small {
+        font-size: 1.1em;
+    }
+
     &:disabled {
-        background-color: #555;
-        color: #bbb;
+        background-color: darken($white, 50%);
+        color: darken($white, 20%);
     }
 }
 
