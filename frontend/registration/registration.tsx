@@ -37,14 +37,14 @@ class _RegistrationComponent extends React.PureComponent<Props> {
             <header>
                 <div className="header-left">
                     {
-                        this.props.mode === Mode.Home && this.props.isLoggedIn ? <button>Start</button> :
+                        this.props.mode === Mode.Home && this.props.isLoggedIn ? <button><span className="start">Start</span></button> :
                         this.props.mode === Mode.Home && !this.props.isLoggedIn ? <button onClick={this.handleRegisterButton}>Register!</button> :
                         <button onClick={this.handleHomeButton}>Home</button>
                     }
                 </div>
                 <div className="header-right">
                     {
-                        this.props.isLoggedIn ? <div>Logged in as NAME.<br/>TEAM CODE: {this.props.teamCode || '----'} <button onClick={this.handleLogoutButton}>Log out</button> </div> :
+                        this.props.isLoggedIn ? <div className="loggedin">Logged in as NAME.<br/><span className="emphatic">TEAM CODE:</span> <span className="mono">{this.props.teamCode || '----'}</span> <button className="small" onClick={this.handleLogoutButton}>Log out</button> </div> :
                         <button onClick={this.handleLoginButton}>Log In!</button>
                     }
                 </div>
