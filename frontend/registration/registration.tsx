@@ -1,3 +1,4 @@
+import {bind} from 'bind-decorator';
 import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
@@ -24,17 +25,12 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 class _RegistrationComponent extends React.PureComponent<Props> {
     constructor(props: Props) {
         super(props);
-        // Bind event handlers:
-        this.handleHomeButton = this.handleHomeButton.bind(this);
-        this.handleLoginButton = this.handleLoginButton.bind(this);
-        this.handleLogoutButton = this.handleLogoutButton.bind(this);
-        this.handleRegisterButton = this.handleRegisterButton.bind(this);
     }
 
-    private handleHomeButton() { this.props.dispatch({type: Actions.SHOW_HOME}); }
-    private handleLoginButton() { this.props.dispatch({type: Actions.SHOW_LOGIN}); }
-    private handleLogoutButton() { this.props.dispatch({type: Actions.SHOW_LOGOUT}); }
-    private handleRegisterButton() { this.props.dispatch({type: Actions.SHOW_REGISTER}); }
+    @bind private handleHomeButton() { this.props.dispatch({type: Actions.SHOW_HOME}); }
+    @bind private handleLoginButton() { this.props.dispatch({type: Actions.SHOW_LOGIN}); }
+    @bind private handleLogoutButton() { this.props.dispatch({type: Actions.SHOW_LOGOUT}); }
+    @bind private handleRegisterButton() { this.props.dispatch({type: Actions.SHOW_REGISTER}); }
 
     public render() {
         return <div className="registration">

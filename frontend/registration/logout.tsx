@@ -1,3 +1,4 @@
+import bind from 'bind-decorator';
 import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
@@ -14,11 +15,9 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 class _LogoutComponent extends React.PureComponent<Props> {
     constructor(props: Props) {
         super(props);
-        // Bind event handlers:
-        this.handleLogoutButton = this.handleLogoutButton.bind(this);
     }
 
-    private handleLogoutButton() {
+    @bind private handleLogoutButton() {
         this.props.dispatch({type: UserStateActions.LOGOUT});
     }
 
