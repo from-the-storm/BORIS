@@ -5,7 +5,7 @@
   "main": "backend-server.ts",
   "scripts": {
     "test": "echo TBD",
-    "server": "ts-node backend-server.ts"
+    "server": "ts-node --nolazy --inspect-brk=9229 backend-server.ts"
   },
   "author": "From the Storm",
   "license": "UNLICENSED",

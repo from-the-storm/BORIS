@@ -7,8 +7,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${file}"
+            "name": "Run Server",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "server"
+            ],
+            "port": 9229,
+            "cwd": "${workspaceFolder}/backend"
         }
     ]
 }

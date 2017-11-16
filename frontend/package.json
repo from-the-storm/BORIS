@@ -4,6 +4,7 @@
   "description": "BORIS UI",
   "scripts": {
     "build": "webpack",
+    "watch": "webpack --watch",
     "lint": "tslint -p .",
     "test": "echo tests not yet implemented",
     "pretest": "npm run lint"
