@@ -11,7 +11,8 @@
             "es2015.promise",
             "dom"
         ],
-        "jsx": "react"
+        "jsx": "react",
+        "experimentalDecorators": true
     },
     "include": [
         "**/*.ts",

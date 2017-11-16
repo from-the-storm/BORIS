@@ -26,3 +26,11 @@ button {
         color: #bbb;
     }
 }
+
+input[type=text], input[type=email] {
+    display: block;
+    width: 100%;
+    border: 0 none;
+    border-bottom: 3px solid #f88;
+    margin-bottom: 10px;
+}
