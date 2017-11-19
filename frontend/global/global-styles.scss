@@ -49,7 +49,14 @@ button {
     }
 }
 
-input[type=text], input[type=email] {
+.button-split {
+    // A class for displaying a "Back" or "Cancel" button on the left and a "Continue" or "Confirm" button on the right
+    display: flex;
+    justify-content: space-between;
+    margin: 1em 0;
+}
+
+input[type=text], input[type=email], input[type=number] {
     display: block;
     width: 100%;
     border: 0 none;
