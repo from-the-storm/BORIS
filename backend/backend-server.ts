@@ -6,6 +6,9 @@ import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
 import * as nodemailerMockTransport from 'nodemailer-mock-transport';
 import * as passport from 'passport';
 import * as path from 'path';
+import * as redis from 'redis';
+import * as session from 'express-session';
+import * as connectRedis from 'connect-redis';
 import * as whiskers from 'whiskers';
 import {Strategy as LocalStrategy} from 'passport-local';
 import * as WebSocket from 'ws';
@@ -42,6 +45,11 @@ const config = (() => {
         resource_url: '/s',
         sparkpost_api_key: null, // Not required for development
         system_emails_from: "BORIS <dev-no-reply@apocalypsemadeeasy.com>",
+        redis_host: 'localhost',
+        redis_port: 3331,
+        redis_password: 'devpassword',
+        redis_prefix: 'boris:',
+        secret_key: 'INSECURE - change me for prod',
     };
     if (process.env.BORIS_CONFIG) {
         Object.assign(config, JSON.parse(process.env.BORIS_CONFIG)[environment]);
@@ -82,6 +90,28 @@ app.use((req, res, next) => {
 // Misc. Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Configure redis and session store:
+const RedisStore = connectRedis(session);
+const redisClient = redis.createClient({
+    host: config.redis_host,
+    port: config.redis_port,
+    password: config.redis_password,
+    prefix: config.redis_prefix,
+});
+app.set('redisClient', redisClient);
+app.use(session({
+    store: new RedisStore({client: redisClient, logErrors: true}),
+    secret: config.secret_key,
+    name: 'boris_sid',
+    cookie: {
+        httpOnly: true,
+        maxAge: 180 * 86400000, // 180 days
+        secure: (environment !== 'test' && environment !== 'development'),
+    },
+    resave: false,
+    saveUninitialized: false,
+}));
 
 // Email sending:
 app.set('sendMail', (function() {

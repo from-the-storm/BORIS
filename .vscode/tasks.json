@@ -19,6 +19,16 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run Database Servers",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": ["up"],
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            }
         }
     ]
 }
