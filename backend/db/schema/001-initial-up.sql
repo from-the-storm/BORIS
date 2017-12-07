@@ -1,0 +1,35 @@
+-- Generic function for preventing updates to any immutable data:
+CREATE OR REPLACE FUNCTION fn_prevent_update() RETURNS trigger AS $$
+    BEGIN
+        RAISE EXCEPTION 'UPDATE is not allowed to that column/table.';
+    END;
+$$ LANGUAGE plpgsql;
+
+-- Users table
+CREATE TABLE users (
+    id bigserial PRIMARY KEY,
+    first_name varchar(150) NOT NULL,
+    email varchar(500) NOT NULL CHECK (email LIKE '%@%'),
+    created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0'),
+    survey_data jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+-- Emails are stored as case-sensititve but must be unique in a case-insensitive constraint
+-- and can be efficiently searched using this case-insensitive index:
+CREATE UNIQUE INDEX users_email_lower_idx ON users (lower(email));
+-- Don't ever allow changes to the 'created' column
+CREATE TRIGGER trg_prevent_update__users_created BEFORE UPDATE OF created ON users FOR EACH ROW EXECUTE PROCEDURE fn_prevent_update();
+
+CREATE FUNCTION user_by_email(text) RETURNS users AS $$
+    SELECT * FROM users WHERE lower(email) = lower($1);
+$$ LANGUAGE SQL;
+
+-- User activity log
+CREATE TABLE activity (
+    id bigserial PRIMARY KEY,
+    user_id bigint NULL REFERENCES users(id) ON DELETE CASCADE,
+    event_type varchar(500) NOT NULL,
+    "timestamp" timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM "timestamp") = '0'),
+    details jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+-- User activity log is immutable
+CREATE TRIGGER trg_prevent_update__activity BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE fn_prevent_update();

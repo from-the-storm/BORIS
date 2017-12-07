@@ -29,6 +29,16 @@
             "options": {
                 "cwd": "${workspaceFolder}/backend"
             }
+        },
+        {
+            "label": "Apply database migrations",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "migrate"],
+            "isBackground": false,
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            }
         }
     ]
 }
