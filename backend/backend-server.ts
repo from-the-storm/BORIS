@@ -5,21 +5,21 @@ import * as nodemailer from 'nodemailer';
 import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
 import * as nodemailerMockTransport from 'nodemailer-mock-transport';
 import * as passport from 'passport';
+import {Strategy as UniqueTokenStrategy} from 'passport-unique-token';
 import * as path from 'path';
 import * as redis from 'redis';
 import * as session from 'express-session';
 import * as connectRedis from 'connect-redis';
 import * as whiskers from 'whiskers';
-import {Strategy as LocalStrategy} from 'passport-local';
 import * as WebSocket from 'ws';
 
 import {environment, config} from './config';
+import {getDB, BorisDatabase} from './db/db';
+import {router as loginRegisterRouter} from './routes/login-register';
 
 // Declare our additions to the Express API:
 declare global {
     namespace Express {
-        // These open interfaces may be extended in an application-specific manner via declaration merging.
-        // See for example method-override.d.ts (https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/method-override/index.d.ts)
         interface Request { 
             user: {
                 username: string,
@@ -89,6 +89,10 @@ app.use(session({
     saveUninitialized: false,
 }));
 
+// Database:
+const whenDbReady = getDB().then(db => { app.set('db', db); return db; });
+app.set('whenDbReady', whenDbReady);
+
 // Email sending:
 app.set('sendMail', (function() {
     let transport;
@@ -122,16 +126,27 @@ app.set('sendMail', (function() {
 // Configure authentication:
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(
+passport.use(new UniqueTokenStrategy(
     {
-        usernameField: 'email',
+        tokenParams: 'code', // Get the token from the 'code' URL field
     },
-    (email, password, done) => {
-        logMessage(`Login attempt for email ${email}`);
-        logMessage(`Login attempt succeeded for ${email}`);
-        return done(null, {username: 'testuser'});
-    }
+	(token, done) => {
+        const db: BorisDatabase = app.get('db');
+        const DAYS = 1000 * 60 * 60 * 24;
+        const validAfter = new Date(+new Date() - 7 * DAYS);
+        db.login_requests.findOne({code: token, 'created >=': validAfter}).then(async reqData => {
+            if (reqData === null) {
+                return done(null, null);
+            } else {
+                const user = await db.users.findOne(reqData.user_id);
+                return done(null, user);
+            }
+        }).catch(err => {
+            return done(err);
+        });
+	}
 ));
+
 passport.serializeUser((user, done) => { done(null, user.id); });
 passport.deserializeUser((id, done) =>{
     const db = app.get('db');
@@ -161,6 +176,9 @@ app.use(config.resource_url, express.static(path.join(__dirname, '..', 'frontend
 
 // The React single page app:
 app.get('/', (req, res) => { res.render('react-app') });
+
+// Login & Registration API:
+app.use('/auth', loginRegisterRouter);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Web sockets

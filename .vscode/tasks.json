@@ -38,7 +38,8 @@
             "isBackground": false,
             "options": {
                 "cwd": "${workspaceFolder}/backend"
-            }
+            },
+            "problemMatcher": []
         }
     ]
 }

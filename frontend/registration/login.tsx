@@ -35,7 +35,7 @@ class _LoginComponent extends React.PureComponent<Props, State> {
     }
 
     @bind private handleLoginButton() {
-        this.props.dispatch(loginUser("braden@apocalypsemadeeasy.com"));
+        this.props.dispatch(loginUser(this.state.emailAddressEntered));
     }
 
     @bind private handleEmailChanged(event: React.ChangeEvent<HTMLInputElement>) {

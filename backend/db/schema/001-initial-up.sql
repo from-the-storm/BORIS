@@ -1,3 +1,6 @@
+-- We need UUID functionality from pgcrypto
+CREATE EXTENSION pgcrypto;
+
 -- Generic function for preventing updates to any immutable data:
 CREATE OR REPLACE FUNCTION fn_prevent_update() RETURNS trigger AS $$
     BEGIN
@@ -22,6 +25,13 @@ CREATE TRIGGER trg_prevent_update__users_created BEFORE UPDATE OF created ON use
 CREATE FUNCTION user_by_email(text) RETURNS users AS $$
     SELECT * FROM users WHERE lower(email) = lower($1);
 $$ LANGUAGE SQL;
+
+-- User login requests
+CREATE TABLE login_requests (
+    user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    code uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0')
+);
 
 -- User activity log
 CREATE TABLE activity (

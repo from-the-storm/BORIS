@@ -4,7 +4,7 @@ import * as pgPromise from 'pg-promise';
 
 import {config} from '../config';
 
-interface User {
+export interface User {
     id: number;
     first_name: string;
     email: string;
@@ -18,7 +18,7 @@ interface User {
     };
 }
 
-interface BorisDatabase extends massive.Database {
+export interface BorisDatabase extends massive.Database {
     users: massive.Table<User>;
     activity: massive.Table<{
         id: number;
@@ -27,7 +27,12 @@ interface BorisDatabase extends massive.Database {
         timestamp: Date;
         details: any;
     }>;
-    user_by_email: Promise<User>;
+    login_requests: massive.Table<{
+        code: string;
+        user_id: number;
+        created: Date;
+    }>;
+    user_by_email(email: string): Promise<User>;
     instance: pgPromise.IDatabase<{}>;
 }
 

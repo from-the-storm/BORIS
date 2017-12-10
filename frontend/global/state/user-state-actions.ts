@@ -16,11 +16,23 @@ const Actions = UserStateActions;
  */
 export function loginUser(userEmail: string) {
     return (dispatch: Dispatch<{}>, getState: () => {}) => {
-        dispatch({
-            type: Actions.LOGIN,
-            first_name: "Braden",
-            email: "braden@apocalypsemadeeasy.com",
+        return fetch('/auth/request-login', {
+            method: 'post',
+            //credentials: 'include',
+            headers: new Headers({"Content-Type": "application/json"}),
+            body: JSON.stringify({
+                email: userEmail,
+            }),
+        }).then(response => {
+            if (response.ok) {
+                dispatch({
+                    type: Actions.LOGIN,
+                    first_name: "Braden",
+                    email: "braden@apocalypsemadeeasy.com",
+                });
+            } else {
+                throw new Error('Failed to request a login email.');
+            }
         });
-        return Promise.resolve();
     };
 }
