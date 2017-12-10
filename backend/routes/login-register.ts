@@ -62,10 +62,19 @@ router.get('/login/:code', (req, res, next) => {
         if (err) { return next(err); }
         if (user) {
             // The login succeeded:
-            return res.redirect('/');
+            req.login(user, (loginErr) => {
+                if (err) { return next(err); }
+                return res.redirect('/');
+            });
         } else {
             // The login failed:
             return res.render('invalid-login-token');
         }
     })(req, res, next);
+});
+
+/** Logout */
+router.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/');
 });

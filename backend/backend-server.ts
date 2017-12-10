@@ -11,27 +11,14 @@ import * as redis from 'redis';
 import * as session from 'express-session';
 import * as connectRedis from 'connect-redis';
 import * as whiskers from 'whiskers';
-import * as WebSocket from 'ws';
 
 import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
+import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
 
 // Declare our additions to the Express API:
-declare global {
-    namespace Express {
-        interface Request { 
-            user: {
-                username: string,
-                first_name: string,
-            };
-        }
-        interface Response { }
-        interface Application {
-            ws: (path: string, handler: (ws: WebSocket, req: Express.Request) => void) => void;
-        }
-    }
-}
+import './express-extended';
 
 const app: express.Application = express();
 expressWebsocket(app);
@@ -179,6 +166,9 @@ app.get('/', (req, res) => { res.render('react-app') });
 
 // Login & Registration API:
 app.use('/auth', loginRegisterRouter);
+
+// Misc. API used by the single page app frontend:
+app.use('/app-api', appAPIRouter);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Web sockets

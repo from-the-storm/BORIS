@@ -20,6 +20,7 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     isLoggedIn: boolean;
     mode: Mode;
     teamCode: string;
+    userName: string;
 }
 
 class _RegistrationComponent extends React.PureComponent<Props> {
@@ -44,7 +45,7 @@ class _RegistrationComponent extends React.PureComponent<Props> {
                 </div>
                 <div className="header-right">
                     {
-                        this.props.isLoggedIn ? <div className="loggedin">Logged in as NAME.<br/><span className="emphatic">TEAM CODE:</span> <span className="mono">{this.props.teamCode || '----'}</span> <button className="small" onClick={this.handleLogoutButton}>Log out</button> </div> :
+                        this.props.isLoggedIn ? <div className="loggedin">Logged in as {this.props.userName}.<br/><span className="emphatic">TEAM CODE:</span> <span className="mono">{this.props.teamCode || '----'}</span> <button className="small" onClick={this.handleLogoutButton}>Log out</button> </div> :
                         <button onClick={this.handleLoginButton}>Log In!</button>
                     }
                 </div>
@@ -67,4 +68,5 @@ export const RegistrationComponent = connect((state: RootState, ownProps: OwnPro
     isLoggedIn: state.userState.isLoggedIn,
     mode: state.registrationState.mode,
     teamCode: state.teamState.teamCode,
+    userName: state.userState.firstName,
 }))(_RegistrationComponent);

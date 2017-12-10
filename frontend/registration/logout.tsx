@@ -3,7 +3,7 @@ import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
 import {RootState} from '../global/state';
-import {UserStateActions} from '../global/state/user-state-actions';
+import {logoutUser} from '../global/state/user-state-actions';
 
 
 interface OwnProps {
@@ -18,7 +18,7 @@ class _LogoutComponent extends React.PureComponent<Props> {
     }
 
     @bind private handleLogoutButton() {
-        this.props.dispatch({type: UserStateActions.LOGOUT});
+        this.props.dispatch(logoutUser());
     }
 
     public render() {
