@@ -17,10 +17,9 @@ Running a local development environment
 
 If you use Visual Studio Code, just open this repository.
 
-1. First, start the database servers. Choose Tasks > Run Task > "Run Database
-   Servers" > Continue without scanning the build output
+1. First, start the database servers. Choose Tasks > Run Task > "Run Database Servers"
 1. If this is the first time running BORIS, apply the migrations: Choose Tasks > Run Task >
-   "Apply database migrations" > Continue without scanning the build output
+   "Apply database migrations".
 1. Hit F5 to run the backend server
 1. Choose Tasks > Run Build Task to build the frontend (and re-build it upon any changes).
 

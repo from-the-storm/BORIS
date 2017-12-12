@@ -28,7 +28,8 @@
             "isBackground": true,
             "options": {
                 "cwd": "${workspaceFolder}/backend"
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "Apply database migrations",
