@@ -32,13 +32,14 @@ class _RegistrationComponent extends React.PureComponent<Props> {
     @bind private handleLoginButton() { this.props.dispatch({type: Actions.SHOW_LOGIN}); }
     @bind private handleLogoutButton() { this.props.dispatch({type: Actions.SHOW_LOGOUT}); }
     @bind private handleRegisterButton() { this.props.dispatch({type: Actions.SHOW_REGISTER}); }
+    @bind private handleStartButton() { this.props.dispatch({type: Actions.SHOW_JOIN_TEAM}); }
 
     public render() {
         return <div className="registration">
             <header>
                 <div className="header-left">
                     {
-                        this.props.mode === Mode.Home && this.props.isLoggedIn ? <button><span className="start">Start</span></button> :
+                        this.props.mode === Mode.Home && this.props.isLoggedIn ? <button onClick={this.handleStartButton}><span className="start">Start</span></button> :
                         this.props.mode === Mode.Home && !this.props.isLoggedIn ? <button onClick={this.handleRegisterButton}>Register!</button> :
                         <button onClick={this.handleHomeButton}>Home</button>
                     }
