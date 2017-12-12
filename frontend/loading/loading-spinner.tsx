@@ -3,7 +3,6 @@ import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
 import {RootState} from '../global/state';
-import {loginUser} from '../global/state/user-state-actions';
 
 // Include our SCSS (via webpack magic)
 import './loading-spinner.scss';
