@@ -19,6 +19,10 @@ interface State {
     occupation: string;
     age: number|'';
     gender: 'm'|'f'|'o'|undefined;
+    // State of the submission:
+    errorMessage: string,
+    waitingForServerResponse: boolean,
+    registrationComplete: boolean,
 }
 
 class _RegisterComponent extends React.PureComponent<Props, State> {
@@ -32,11 +36,20 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
             occupation: '',
             age: '',
             gender: undefined,
+            // State of the submission:
+            errorMessage: '',
+            waitingForServerResponse: false,
+            registrationComplete: false,
         };
     }
 
     public render() {
-        if (!this.state.hasConsented) {
+        if (this.state.registrationComplete) {
+            return <div>
+                <h1>Check your email</h1>
+                <p>Thanks for registering! We've sent you a link by email - just click that link to log in and begin the apocalypse training.</p>
+            </div>
+        } else if (!this.state.hasConsented) {
             return <div>
                 <p>Step 1 of 2</p>
                 <h1>Consent</h1>
@@ -54,7 +67,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                 <form onSubmit={this.handleRegistrationFormSubmit}>
                     <input name="firstName" type="text" required placeholder="First name" aria-label="First name" value={this.state.firstName} onChange={this.handleFormFieldChange} />
                     <input name="email" type="email" required placeholder="Email address" aria-label="Email address" aria-describedby="email-details" value={this.state.email} onChange={this.handleFormFieldChange} />
-                    <p id="email-details">Your email will only be used to verify your account, log you in, and reset your password if forgotten.</p>
+                    <p id="email-details">Your email will only be used to verify your account and log you in.</p>
                     <fieldset>
                         <legend>Do you work in tech?</legend>
                         <div>
@@ -83,11 +96,14 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                             <label htmlFor="gender-o">Other</label>
                         </div>
                     </fieldset>
+                    {this.state.errorMessage ?
+                        <div className="login-error">{this.state.errorMessage}</div>
+                    :null}
                     <div className="button-split">
-                        <button className="small" onClick={this.undoConsent}>&lt; Back</button>
+                        <button className="small" onClick={this.undoConsent} disabled={this.state.waitingForServerResponse}>&lt; Back</button>
                         {/* For the Register button, there's no click handler - it will submit the form, after
                             first triggering the browser's built-in form validation.*/}
-                        <button>Register</button>
+                        <button disabled={this.state.waitingForServerResponse}>Register</button>
                     </div>
                 </form>
             </div>;
@@ -104,7 +120,38 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
     @bind private undoConsent() { this.setState({hasConsented: false}); }
     @bind private handleRegistrationFormSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        this.setState({waitingForServerResponse: true});
+        this.submitRegistrationFormData().catch(err => {
+            this.setState({
+                waitingForServerResponse: false,
+                errorMessage: err.message,
+            });
+        });
         return false;
+    }
+    private async submitRegistrationFormData() {
+        const response = await fetch('/auth/register', {
+            method: 'post',
+            headers: new Headers({"Content-Type": "application/json"}),
+            body: JSON.stringify({
+                hasConsented: this.state.hasConsented,
+                firstName: this.state.firstName,
+                email: this.state.email,
+                workInTech: this.state.workInTech,
+                occupation: this.state.occupation,
+                age: this.state.age,
+                gender: this.state.gender,
+            }),
+        });
+        if (response.ok) {
+            this.setState({
+                waitingForServerResponse: false,
+                registrationComplete: true,
+            });
+        } else {
+            const data = await response.json();
+            throw new Error(`Unable to register you: ${data.error}`);
+        }
     }
 }
 

@@ -14,7 +14,7 @@ declare global {
         }
         interface Response { }
         interface Application {
-            ws: (path: string, handler: (ws: WebSocket, req: Express.Request) => void) => void;
+            ws: (path: string, handler: (ws: WebSocket, req: express.Request) => void) => void;
         }
     }
 }

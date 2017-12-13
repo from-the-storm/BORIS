@@ -20,7 +20,7 @@ import {router as loginRegisterRouter} from './routes/login-register';
 // Declare our additions to the Express API:
 import './express-extended';
 
-const app: express.Application = express();
+const app = express();
 expressWebsocket(app);
 
 // Locals available in any template:
