@@ -5,52 +5,23 @@ import * as nodemailer from 'nodemailer';
 import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
 import * as nodemailerMockTransport from 'nodemailer-mock-transport';
 import * as passport from 'passport';
+import {Strategy as UniqueTokenStrategy} from 'passport-unique-token';
 import * as path from 'path';
+import * as redis from 'redis';
+import * as session from 'express-session';
+import * as connectRedis from 'connect-redis';
 import * as whiskers from 'whiskers';
-import {Strategy as LocalStrategy} from 'passport-local';
-import * as WebSocket from 'ws';
+
+import {environment, config} from './config';
+import {getDB, BorisDatabase} from './db/db';
+import {router as appAPIRouter} from './routes/app-api';
+import {router as loginRegisterRouter} from './routes/login-register';
 
 // Declare our additions to the Express API:
-declare global {
-    namespace Express {
-        // These open interfaces may be extended in an application-specific manner via declaration merging.
-        // See for example method-override.d.ts (https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/method-override/index.d.ts)
-        interface Request { 
-            user: {
-                username: string,
-                first_name: string,
-            };
-        }
-        interface Response { }
-        interface Application {
-            ws: (path: string, handler: (ws: WebSocket, req: Express.Request) => void) => void;
-        }
-    }
-}
+import './express-extended';
 
-const app: express.Application = express();
+const app = express();
 expressWebsocket(app);
-
-// Environment and configuration
-const environment: ('production'|'development'|'test') = (process.env.NODE_ENV as any) || 'development';
-const config = (() => {
-    let config = {
-        // Default configuration:
-        app_domain: 'localhost:3333',
-        app_protocol: 'http' as ('http' | 'https'),
-        listen_port: 3333,
-        resource_url: '/s',
-        sparkpost_api_key: null, // Not required for development
-        system_emails_from: "BORIS <dev-no-reply@apocalypsemadeeasy.com>",
-    };
-    if (process.env.BORIS_CONFIG) {
-        Object.assign(config, JSON.parse(process.env.BORIS_CONFIG)[environment]);
-    }
-    // Add some additional derived values and freeze the config:
-    return Object.freeze(Object.assign(config, {
-        app_url: `${config.app_protocol}://${config.app_domain}`,
-    }));
-})();
 
 // Locals available in any template:
 app.locals.resUrl = config.resource_url;
@@ -82,6 +53,32 @@ app.use((req, res, next) => {
 // Misc. Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Configure redis and session store:
+const RedisStore = connectRedis(session);
+const redisClient = redis.createClient({
+    host: config.redis_host,
+    port: config.redis_port,
+    password: config.redis_password,
+    prefix: config.redis_prefix,
+});
+app.set('redisClient', redisClient);
+app.use(session({
+    store: new RedisStore({client: redisClient, logErrors: true}),
+    secret: config.secret_key,
+    name: 'boris_sid',
+    cookie: {
+        httpOnly: true,
+        maxAge: 180 * 86400000, // 180 days
+        secure: (environment !== 'test' && environment !== 'development'),
+    },
+    resave: false,
+    saveUninitialized: false,
+}));
+
+// Database:
+const whenDbReady = getDB().then(db => { app.set('db', db); return db; });
+app.set('whenDbReady', whenDbReady);
 
 // Email sending:
 app.set('sendMail', (function() {
@@ -116,16 +113,27 @@ app.set('sendMail', (function() {
 // Configure authentication:
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(
+passport.use(new UniqueTokenStrategy(
     {
-        usernameField: 'email',
+        tokenParams: 'code', // Get the token from the 'code' URL field
     },
-    (email, password, done) => {
-        logMessage(`Login attempt for email ${email}`);
-        logMessage(`Login attempt succeeded for ${email}`);
-        return done(null, {username: 'testuser'});
-    }
+	(token, done) => {
+        const db: BorisDatabase = app.get('db');
+        const DAYS = 1000 * 60 * 60 * 24;
+        const validAfter = new Date(+new Date() - 7 * DAYS);
+        db.login_requests.findOne({code: token, 'created >=': validAfter}).then(async reqData => {
+            if (reqData === null) {
+                return done(null, null);
+            } else {
+                const user = await db.users.findOne(reqData.user_id);
+                return done(null, user);
+            }
+        }).catch(err => {
+            return done(err);
+        });
+	}
 ));
+
 passport.serializeUser((user, done) => { done(null, user.id); });
 passport.deserializeUser((id, done) =>{
     const db = app.get('db');
@@ -155,6 +163,12 @@ app.use(config.resource_url, express.static(path.join(__dirname, '..', 'frontend
 
 // The React single page app:
 app.get('/', (req, res) => { res.render('react-app') });
+
+// Login & Registration API:
+app.use('/auth', loginRegisterRouter);
+
+// Misc. API used by the single page app frontend:
+app.use('/app-api', appAPIRouter);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Web sockets

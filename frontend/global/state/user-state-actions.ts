@@ -12,15 +12,19 @@ const Actions = UserStateActions;
 //// Action Creators
 
 /**
- * Login the user with the given email address
+ * Log the user out
  */
-export function loginUser(userEmail: string) {
+export function logoutUser() {
     return (dispatch: Dispatch<{}>, getState: () => {}) => {
-        dispatch({
-            type: Actions.LOGIN,
-            first_name: "Braden",
-            email: "braden@apocalypsemadeeasy.com",
+        return fetch('/auth/logout', {
+            method: 'get',
+            credentials: 'include',
+        }).then(response => {
+            if (response.ok) {
+                dispatch({type: Actions.LOGOUT,});
+            } else {
+                throw new Error('Failed to log out.');
+            }
         });
-        return Promise.resolve();
     };
 }

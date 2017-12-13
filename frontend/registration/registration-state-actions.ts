@@ -8,6 +8,7 @@ export enum Actions {
     SHOW_LOGIN = 'RS_LOGIN',
     SHOW_LOGOUT = 'RS_LOGOUT',
     SHOW_REGISTER = 'RS_REGISTER',
+    SHOW_JOIN_TEAM = 'RS_SHOW_JOIN',
 }
 
 //// Action Creators

@@ -14,7 +14,7 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
-    "@types/react": "~16.0.18",
+    "@types/react": "~16.0.28",
     "@types/react-dom": "~16.0.2",
     "@types/react-redux": "~5.0.10",
     "awesome-typescript-loader": "~3.2.3",

@@ -37,4 +37,12 @@
     .content {
         padding: 1em;
     }
+
+    // Error messages appearing on the login or registration forms:
+    .login-error {
+        border: 1px solid #800;
+        background-color: #eaa;
+        margin: 1em 0;
+        padding: 0.5em;
+    }
 }

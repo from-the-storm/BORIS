@@ -19,6 +19,28 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run Database Servers",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": ["up"],
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Apply database migrations",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "migrate"],
+            "isBackground": false,
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "problemMatcher": []
         }
     ]
 }

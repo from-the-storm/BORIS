@@ -8,8 +8,7 @@ import {UserStateActions as Actions} from './user-state-actions';
 export class UserState extends Record({
     /** Is the user logged in? */
     isLoggedIn: false,
-    first_name: "Jamie",
-    email: "jamie@awalkalypse.test",
+    firstName: "Jamie",
 }) {
     // ...
 }
@@ -29,8 +28,7 @@ export function userStateReducer(state?: UserState, action?: AnyAction): UserSta
         // User has logged in:
         return state.merge({
             isLoggedIn: true,
-            first_name: action.first_name,
-            email: action.email,
+            firstName: action.firstName,
         });
     case Actions.LOGOUT:
         // User has logged out:

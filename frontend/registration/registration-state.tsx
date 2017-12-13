@@ -47,6 +47,7 @@ export function registrationStateReducer(state?: RegistrationState, action?: Any
         return state.set('mode', Mode.Logout);
     case Actions.SHOW_REGISTER:
         return state.set('mode', Mode.Register);
+    case Actions.SHOW_JOIN_TEAM:
     case UserStateActions.LOGIN:
         // User has logged in - pick a team:
         return state.set('mode', Mode.JoinTeam);
