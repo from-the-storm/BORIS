@@ -100,7 +100,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                         <div className="login-error">{this.state.errorMessage}</div>
                     :null}
                     <div className="button-split">
-                        <a className="small" onClick={this.undoConsent} disabled={this.state.waitingForServerResponse}>&lt; Back</a>
+                        <a className="small" onClick={this.undoConsent}>&lt; Back</a>
                         {/* For the Register button, there's no click handler - it will submit the form, after
                             first triggering the browser's built-in form validation.*/}
                         <button disabled={this.state.waitingForServerResponse}>Register</button>
@@ -117,7 +117,11 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
         const value = (event.target.type === 'number' && event.target.value) ? parseInt(event.target.value) : event.target.value;
         this.setState({[name as any]: value});
     }
-    @bind private undoConsent() { this.setState({hasConsented: false}); }
+    @bind private undoConsent() { 
+        if (!this.state.waitingForServerResponse) {
+            this.setState({hasConsented: false}); 
+        }
+    }
     @bind private handleRegistrationFormSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         this.setState({waitingForServerResponse: true});
