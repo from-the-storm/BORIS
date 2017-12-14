@@ -15,7 +15,13 @@
             ],
             "port": 9229,
             "cwd": "${workspaceFolder}/backend",
-            "outputCapture": "std" // Show both console.log() and stdout.write() messages in debug console
+            "outputCapture": "std", // Show both console.log() and stdout.write() messages in debug console
+            "windows": {
+                "env": {
+                    // Fixes to work with Docker Toolbox on Windows:
+                    "BORIS_CONFIG": "{\"development\": {\"db_host\": \"192.168.99.100\"}, \"redis_host\": \"192.168.99.100\"}"
+                }
+            }
         }
     ]
 }
