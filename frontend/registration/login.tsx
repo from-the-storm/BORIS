@@ -37,7 +37,7 @@ export class LoginComponent extends React.PureComponent<Props, State> {
         if (this.state.loginLinkWasSent) {
             return <div>
                 <h1>Login</h1>
-                <p><strong>Login link sent!</strong> Check your email and click the link we sent you in order to login.</p>
+                <p><strong>Login link sent!</strong> Check your email and click the link to login.</p>
             </div>;
         }
         return <div>
