@@ -45,7 +45,7 @@
                 "options": {
                     "env": {
                         // Fixes to work with Docker Toolbox on Windows:
-                        "BORIS_CONFIG": "{\"development\": {\"db_host\": \"192.168.99.100\"}, \"redis_host\": \"192.168.99.100\"}"
+                        "BORIS_CONFIG": "{\"development\": {\"db_host\": \"192.168.99.100\", \"redis_host\": \"192.168.99.100\"}}"
                     }
                 }
             }
