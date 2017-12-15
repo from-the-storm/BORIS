@@ -50,7 +50,10 @@ button {
     text-align: center;
     text-transform: uppercase;
     outline: 0;
-    float: right; // For buttons outside of the button-split context
+
+    &.right {
+        float: right;
+    }
 
     &:disabled {
         background-color: darken($white, 50%);
@@ -66,7 +69,16 @@ a.small { // For de-emphasized actions e.g. "Back" button
     // A class for displaying a "Back" or "Cancel" button on the left and a "Continue" or "Confirm" button on the right
     display: flex;
     justify-content: space-between;
-    margin: 1.5rem 0 0;
+    margin: 1rem 0;
+        &.full {
+            button {
+                width: 100%;
+                min-height: 80px;
+                    &:first-child {
+                        margin-right: 2rem;
+                    }
+            }
+        }
 }
 
 // Forms
@@ -74,14 +86,14 @@ input[type=text], input[type=email], input[type=number] {
     display: block;
     width: 100%;
     border: 0 none;
-    border-bottom: 3px solid #f88;
+    border-bottom: 3px solid;
     margin-bottom: 1.5rem;
     outline: 0;
     transition: border-color 0.4s;
     padding: 0.25rem 0;
-    &:not(:placeholder-shown) {
-        border-color: $black;
-    }
+    line-height: normal; // Fix for placeholder getting cut off in FF
+        &.deselected { border-color: $red; }
+        &.selected { border-color: $black; }
 }
 [type=checkbox], [type=radio] {
     margin-right: 0.5rem;

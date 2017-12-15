@@ -65,8 +65,8 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                 <p>Step 2 of 2</p>
                 <h1>Create a Profile</h1>
                 <form onSubmit={this.handleRegistrationFormSubmit}>
-                    <input name="firstName" type="text" required placeholder="First name" aria-label="First name" value={this.state.firstName} onChange={this.handleFormFieldChange} />
-                    <input name="email" type="email" required placeholder="Email address" aria-label="Email address" aria-describedby="email-details" value={this.state.email} onChange={this.handleFormFieldChange} />
+                    <input name="firstName" type="text" required placeholder="First name" aria-label="First name" value={this.state.firstName} onChange={this.handleFormFieldChange} className={this.state.firstName ? 'selected' : 'deselected'} />
+                    <input name="email" type="email" required placeholder="Email address" aria-label="Email address" aria-describedby="email-details" value={this.state.email} onChange={this.handleFormFieldChange} className={this.state.email ? 'selected' : 'deselected'} />
                     <p id="email-details">Your email will only be used to verify your account and log you in.</p>
                     <fieldset className={this.state.workInTech ? 'selected' : 'deselected'}>
                         <legend>Do you work in tech?</legend>
@@ -79,8 +79,8 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                             <label htmlFor="tech-no">No</label>
                         </div>
                     </fieldset>
-                    <input name="occupation" type="text" placeholder="Occupation" aria-label="Occupation" value={this.state.occupation} onChange={this.handleFormFieldChange} />
-                    <input name="age" type="number" placeholder="Age" min="10" max="120" value={this.state.age} onChange={this.handleFormFieldChange} />
+                    <input name="occupation" type="text" required placeholder="Occupation" aria-label="Occupation" value={this.state.occupation} onChange={this.handleFormFieldChange} className={this.state.occupation ? 'selected' : 'deselected'} />
+                    <input name="age" type="number" required placeholder="Age" min="10" max="120" value={this.state.age} onChange={this.handleFormFieldChange} className={this.state.age ? 'selected' : 'deselected'} />
                     <fieldset className={this.state.gender ? 'selected' : 'deselected'}>
                         <legend>Gender</legend>
                         <div>

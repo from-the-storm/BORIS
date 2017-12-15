@@ -44,7 +44,7 @@ export class LoginComponent extends React.PureComponent<Props, State> {
             <h1>Login</h1>
             <p>Enter the email address you used to register. We'll email you a link to automatically log in.</p>
             <input type="email" disabled={this.state.waitingForServerResponse} placeholder="Your email address" value={this.state.emailAddressEntered} onChange={this.handleEmailChanged} />
-            <button onClick={this.handleLoginButton} disabled={!this.enableLoginButton}>Log in</button>
+            <button className="right" onClick={this.handleLoginButton} disabled={!this.enableLoginButton}>Log in</button>
             {this.state.errorMessage ?
                 <div className="login-error">{this.state.errorMessage}</div>
             :null}

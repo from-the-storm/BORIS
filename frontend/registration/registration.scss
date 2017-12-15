@@ -21,6 +21,11 @@
 
             .loggedin {
                 align-self: center;
+                font-size: 0.9em;
+                    .emphatic {
+                        margin-top: 0.5rem;
+                        display: inline-block;
+                    }
             }
 
             > button {
