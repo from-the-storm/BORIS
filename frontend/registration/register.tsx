@@ -84,15 +84,15 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                     <fieldset className={this.state.gender ? 'selected' : 'deselected'}>
                         <legend>Gender</legend>
                         <div>
-                            <input name="gender" type="radio" id="gender-f" value="f" checked={this.state.gender === 'f'} onChange={this.handleFormFieldChange} />
+                            <input required name="gender" type="radio" id="gender-f" value="f" checked={this.state.gender === 'f'} onChange={this.handleFormFieldChange} />
                             <label htmlFor="gender-f">Female</label>
                         </div>
                         <div>
-                            <input name="gender" type="radio" id="gender-m" value="m" checked={this.state.gender === 'm'} onChange={this.handleFormFieldChange} />
+                            <input required name="gender" type="radio" id="gender-m" value="m" checked={this.state.gender === 'm'} onChange={this.handleFormFieldChange} />
                             <label htmlFor="gender-m">Male</label>
                         </div>
                         <div>
-                            <input name="gender" type="radio" id="gender-o" value="o" checked={this.state.gender === 'o'} onChange={this.handleFormFieldChange} />
+                            <input required name="gender" type="radio" id="gender-o" value="o" checked={this.state.gender === 'o'} onChange={this.handleFormFieldChange} />
                             <label htmlFor="gender-o">Other</label>
                         </div>
                     </fieldset>
