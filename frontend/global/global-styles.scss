@@ -13,12 +13,22 @@ body {
 header {
     text-align: center;
 }
+.content {
+    padding: 1rem;
+        p:first-of-type {
+            margin-top: 0;
+        }
+}
 
 // Typography
+p {
+    line-height: 1.7;
+}
 h1, h2, h3, h4, h5 {
     font-family: $fancyfont;
     font-weight: bold;
     text-transform: uppercase;
+    margin-top: 0;
 }
 .mono {
     font-family: $consolefont;
@@ -35,12 +45,14 @@ button {
     background-color: $black;
     border: 0 none;
     color: $white;
-    font-size: 1.5em;
+    font-size: 1.4rem;
+    padding: 0.5rem 1rem;
     text-align: center;
     text-transform: uppercase;
+    outline: 0;
 
-    &.small {
-        font-size: 1.1em;
+    &.right {
+        float: right;
     }
 
     &:disabled {
@@ -48,18 +60,61 @@ button {
         color: darken($white, 20%);
     }
 }
-
+a.small { // For de-emphasized actions e.g. "Back" button
+    padding: 0.5rem 0;
+    margin-right: 1rem;
+    text-align: center;
+}
 .button-split {
     // A class for displaying a "Back" or "Cancel" button on the left and a "Continue" or "Confirm" button on the right
     display: flex;
     justify-content: space-between;
-    margin: 1em 0;
+    margin: 1rem 0;
+        &.full {
+            button {
+                width: 100%;
+                min-height: 80px;
+                    &:first-child {
+                        margin-right: 2rem;
+                    }
+            }
+        }
 }
 
+// Forms
 input[type=text], input[type=email], input[type=number] {
     display: block;
     width: 100%;
     border: 0 none;
-    border-bottom: 3px solid #f88;
-    margin-bottom: 10px;
+    border-bottom: 3px solid;
+    margin-bottom: 1.5rem;
+    outline: 0;
+    transition: border-color 0.4s;
+    padding: 0.25rem 0;
+    line-height: normal; // Fix for placeholder getting cut off in FF
+        &.deselected { border-color: $red; }
+        &.selected { border-color: $black; }
+}
+[type=checkbox], [type=radio] {
+    margin-right: 0.5rem;
+}
+fieldset {
+    border: 3px solid;
+    transition: border-color 0.4s;
+    margin-bottom: 1.5rem;
+        legend {
+            padding: 0 0.5rem;
+        }
+        div {
+            margin: 0.5rem 0;
+                &:last-of-type {
+                    margin-bottom: 0;
+                }
+                label {
+                    font-size: 0.9em;
+                }
+        }
+        &.deselected { border-color: $red}
+        &.selected { border-color: $black;}
+
 }

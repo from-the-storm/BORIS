@@ -21,6 +21,11 @@
 
             .loggedin {
                 align-self: center;
+                font-size: 0.9em;
+                    .emphatic {
+                        margin-top: 0.5rem;
+                        display: inline-block;
+                    }
             }
 
             > button {
@@ -34,15 +39,17 @@
         }
     }
 
-    .content {
-        padding: 1em;
+    p#email-details {
+        font-size: 0.9em;
+        margin-top: -0.5rem;
     }
 
     // Error messages appearing on the login or registration forms:
     .login-error {
-        border: 1px solid #800;
-        background-color: #eaa;
+        border: 1px solid darken($red, 20%);
+        background-color: $red;
         margin: 1em 0;
         padding: 0.5em;
+        color: $white;
     }
 }

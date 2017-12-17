@@ -13,8 +13,10 @@ class _JoinTeamComponent extends React.PureComponent<Props> {
     public render() {
         return <div>
             <h1>Join Team</h1>
-            <button>Join a Team</button> <br/>
-            <button>Create a Team</button>
+            <div className="button-split full">
+                <button>Join a Team</button>
+                <button>Create a Team</button>
+            </div>
             <h2>Recent teams</h2>
             <p>You have not recently joined any teams</p>
         </div>;

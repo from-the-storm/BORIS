@@ -37,14 +37,14 @@ export class LoginComponent extends React.PureComponent<Props, State> {
         if (this.state.loginLinkWasSent) {
             return <div>
                 <h1>Login</h1>
-                <p><strong>Login link sent!</strong> Check your email and click the link we sent you in order to login.</p>
+                <p><strong>Login link sent!</strong> Check your email and click the link to login.</p>
             </div>;
         }
         return <div>
             <h1>Login</h1>
             <p>Enter the email address you used to register. We'll email you a link to automatically log in.</p>
             <input type="email" disabled={this.state.waitingForServerResponse} placeholder="Your email address" value={this.state.emailAddressEntered} onChange={this.handleEmailChanged} />
-            <button onClick={this.handleLoginButton} disabled={!this.enableLoginButton}>Log in</button>
+            <button className="right" onClick={this.handleLoginButton} disabled={!this.enableLoginButton}>Log in</button>
             {this.state.errorMessage ?
                 <div className="login-error">{this.state.errorMessage}</div>
             :null}

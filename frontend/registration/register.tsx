@@ -56,7 +56,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                 <p>Apocalypse Made Easy! is part of a study...</p>
 
                 <div className="button-split">
-                    <button className="small" onClick={this.handleDoNotConsent}>I do not consent</button>
+                    <a className="small" onClick={this.handleDoNotConsent}>I do not consent</a>
                     <button onClick={this.handleConsent}>I Consent</button>
                 </div>
             </div>;
@@ -65,10 +65,10 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                 <p>Step 2 of 2</p>
                 <h1>Create a Profile</h1>
                 <form onSubmit={this.handleRegistrationFormSubmit}>
-                    <input name="firstName" type="text" required placeholder="First name" aria-label="First name" value={this.state.firstName} onChange={this.handleFormFieldChange} />
-                    <input name="email" type="email" required placeholder="Email address" aria-label="Email address" aria-describedby="email-details" value={this.state.email} onChange={this.handleFormFieldChange} />
+                    <input name="firstName" type="text" required placeholder="First name" aria-label="First name" value={this.state.firstName} onChange={this.handleFormFieldChange} className={this.state.firstName ? 'selected' : 'deselected'} />
+                    <input name="email" type="email" required placeholder="Email address" aria-label="Email address" aria-describedby="email-details" value={this.state.email} onChange={this.handleFormFieldChange} className={this.state.email ? 'selected' : 'deselected'} />
                     <p id="email-details">Your email will only be used to verify your account and log you in.</p>
-                    <fieldset>
+                    <fieldset className={this.state.workInTech ? 'selected' : 'deselected'}>
                         <legend>Do you work in tech?</legend>
                         <div>
                             <input required type="radio" id="tech-yes" name="workInTech" value="yes" checked={this.state.workInTech === 'yes'} onChange={this.handleFormFieldChange} />
@@ -79,20 +79,20 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                             <label htmlFor="tech-no">No</label>
                         </div>
                     </fieldset>
-                    <input name="occupation" type="text" placeholder="Occupation" aria-label="Occupation" value={this.state.occupation} onChange={this.handleFormFieldChange} />
-                    <input name="age" type="number" placeholder="Age" min="10" max="120" value={this.state.age} onChange={this.handleFormFieldChange} />
-                    <fieldset>
+                    <input name="occupation" type="text" required placeholder="Occupation" aria-label="Occupation" value={this.state.occupation} onChange={this.handleFormFieldChange} className={this.state.occupation ? 'selected' : 'deselected'} />
+                    <input name="age" type="number" required placeholder="Age" min="10" max="120" value={this.state.age} onChange={this.handleFormFieldChange} className={this.state.age ? 'selected' : 'deselected'} />
+                    <fieldset className={this.state.gender ? 'selected' : 'deselected'}>
                         <legend>Gender</legend>
                         <div>
-                            <input name="gender" type="radio" id="gender-m" value="m" checked={this.state.gender === 'm'} onChange={this.handleFormFieldChange} />
-                            <label htmlFor="gender-m">Male</label>
-                        </div>
-                        <div>
-                            <input name="gender" type="radio" id="gender-f" value="f" checked={this.state.gender === 'f'} onChange={this.handleFormFieldChange} />
+                            <input required name="gender" type="radio" id="gender-f" value="f" checked={this.state.gender === 'f'} onChange={this.handleFormFieldChange} />
                             <label htmlFor="gender-f">Female</label>
                         </div>
                         <div>
-                            <input name="gender" type="radio" id="gender-o" value="o" checked={this.state.gender === 'o'} onChange={this.handleFormFieldChange} />
+                            <input required name="gender" type="radio" id="gender-m" value="m" checked={this.state.gender === 'm'} onChange={this.handleFormFieldChange} />
+                            <label htmlFor="gender-m">Male</label>
+                        </div>
+                        <div>
+                            <input required name="gender" type="radio" id="gender-o" value="o" checked={this.state.gender === 'o'} onChange={this.handleFormFieldChange} />
                             <label htmlFor="gender-o">Other</label>
                         </div>
                     </fieldset>
@@ -100,7 +100,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                         <div className="login-error">{this.state.errorMessage}</div>
                     :null}
                     <div className="button-split">
-                        <button className="small" onClick={this.undoConsent} disabled={this.state.waitingForServerResponse}>&lt; Back</button>
+                        <a className="small" onClick={this.undoConsent}>&lt; Back</a>
                         {/* For the Register button, there's no click handler - it will submit the form, after
                             first triggering the browser's built-in form validation.*/}
                         <button disabled={this.state.waitingForServerResponse}>Register</button>
@@ -117,7 +117,11 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
         const value = (event.target.type === 'number' && event.target.value) ? parseInt(event.target.value) : event.target.value;
         this.setState({[name as any]: value});
     }
-    @bind private undoConsent() { this.setState({hasConsented: false}); }
+    @bind private undoConsent() { 
+        if (!this.state.waitingForServerResponse) {
+            this.setState({hasConsented: false}); 
+        }
+    }
     @bind private handleRegistrationFormSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         this.setState({waitingForServerResponse: true});
