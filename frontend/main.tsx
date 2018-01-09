@@ -29,13 +29,19 @@ export const store = createStore(
 
 const appHolderElement = document.getElementById('app-container');
 
-ReactDOM.render((
+const rootComponent = ReactDOM.render((
     <Provider store={ store }>
         <LoadingSpinnerComponent>
             <App />
         </LoadingSpinnerComponent>
     </Provider>
 ), appHolderElement);
+
+// For webdriver tests:
+declare global {
+    interface Window { __rootComponent: any; }
+}
+window.__rootComponent =  null; // Gets set after loading initial state, below.
 
 // Load the initial state from the server:
 fetch('/app-api/get-initial-state', {
@@ -51,6 +57,7 @@ fetch('/app-api/get-initial-state', {
             });
         }
         store.dispatch({type: InitStateActions.SUCCEEDED});
+        window.__rootComponent = rootComponent;
     } else {
         store.dispatch({type: InitStateActions.FAILED});
     }
