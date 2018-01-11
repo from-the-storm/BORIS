@@ -27,7 +27,7 @@ expressWebsocket(app);
 app.locals.resUrl = config.resource_url;
 
 // Logging
-const logMessage = (environment === 'development') ? console.log : () => {};
+const logMessage = console.log;
 
 app.set('trust proxy', true);
 app.engine('.txt', whiskers.__express); // Whiskers templates are used for plain text emails

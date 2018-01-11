@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "BORIS Integration Tests",
   "scripts": {
-    "test": "jest"
+    "pretest": "cd ../backend/ && NODE_ENV=test ./node_modules/.bin/ts-node db/reset-test-db.ts",
+    "test": "NODE_ENV=test jest"
   },
   "author": "From the Storm",
   "license": "UNLICENSED",
@@ -27,7 +28,7 @@
     "transform": {
       "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": ".*\\.(ts|tsx|js)$",
+    "testRegex": "test.*\\.(ts|tsx|js)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
