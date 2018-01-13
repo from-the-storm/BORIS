@@ -30,6 +30,13 @@ export function teamStateReducer(state?: TeamState, action?: AnyAction): TeamSta
     }
 
     switch (action.type) {
+    case Actions.JOIN_TEAM:
+        return state.merge({
+            teamCode: action.teamCode,
+            teamName: action.teamName,
+            isTeamCaptain: action.isTeamCaptain,
+            otherTeamMembers: action.otherTeamMembers,
+        });
     case Actions.LEAVE_TEAM:
         // User has left a team (they're still associated with that team, just not "currently" online for that team):
         return state.clear();

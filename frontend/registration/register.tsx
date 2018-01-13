@@ -136,6 +136,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
     private async submitRegistrationFormData() {
         const response = await fetch('/auth/register', {
             method: 'post',
+            credentials: 'include',
             headers: new Headers({"Content-Type": "application/json"}),
             body: JSON.stringify({
                 hasConsented: this.state.hasConsented,

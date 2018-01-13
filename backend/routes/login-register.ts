@@ -156,3 +156,52 @@ router.post('/register', async (req, res) => {
         return;
     }
 });
+
+/**
+ * API for creating a new team.
+ * 
+ * Accepts a JSON body.
+ */
+router.post('/team/create', async (req, res) => {
+    try {
+        if (!req.user) {
+            throw new SafeError(`You need to be logged in to create a team. ${req.user}`);
+        }
+        if (!req.body) {
+            throw new SafeError("Missing JSON body.");
+        }
+        // Parse the data from the form:
+        const teamName = (req.body.teamName || '').trim();
+        if (!teamName) { throw new SafeError("Missing team name."); }
+        const organizationName = (req.body.organizationName || '').trim();
+        if (!organizationName) { throw new SafeError("Missing team name."); }
+        const db: BorisDatabase = req.app.get("db");
+        /*let team: Team;
+        try {
+            team = await db.teams.insert({
+                teamName,
+                organizationName,
+            });
+            await db.teamMembers.insert({
+                team: team.id,
+                user: req.user.id,
+                isOwner: true,
+            });
+        } catch (err) {
+            throw err;
+        }*/
+        const team = {
+            teamName: teamName,
+            teamCode: 'A4B78',
+        }
+        res.json({
+            result: 'ok',
+            teamName: team.teamName,
+            teamCode: team.teamCode,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ error: err instanceof SafeError ? err.message : "Unable to create team due to an internal error" });
+        return;
+    }
+});

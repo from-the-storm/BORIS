@@ -9,6 +9,7 @@ export const enum Mode {
     Register,
     Login,
     JoinTeam,
+    CreateTeam,
     Logout,
 }
 
@@ -51,6 +52,8 @@ export function registrationStateReducer(state?: RegistrationState, action?: Any
     case UserStateActions.LOGIN:
         // User has logged in - pick a team:
         return state.set('mode', Mode.JoinTeam);
+    case Actions.SHOW_CREATE_TEAM:
+        return state.set('mode', Mode.CreateTeam);
     case UserStateActions.LOGOUT:
     // User has logged out:
         return state.set('mode', Mode.Home);

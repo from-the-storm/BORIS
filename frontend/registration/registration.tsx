@@ -6,6 +6,7 @@ import {RootState} from '../global/state';
 import {HomeComponent} from './home';
 import {RegisterComponent} from './register';
 import {JoinTeamComponent} from './join-team';
+import {CreateTeamComponent} from './create-team';
 import {LoginComponent} from './login';
 import {LogoutComponent} from './logout';
 import {Mode} from './registration-state';
@@ -56,6 +57,7 @@ class _RegistrationComponent extends React.PureComponent<Props> {
                     this.props.mode === Mode.Register ? <RegisterComponent/> :
                     this.props.mode === Mode.Login ? <LoginComponent/> :
                     this.props.mode === Mode.JoinTeam ? <JoinTeamComponent/> :
+                    this.props.mode === Mode.CreateTeam ? <CreateTeamComponent/> :
                     this.props.mode === Mode.Home ? <HomeComponent/> :
                     this.props.mode === Mode.Logout ? <LogoutComponent/> :
                     'Error: Unknown mode.'
