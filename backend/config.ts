@@ -20,6 +20,14 @@ export const config = (() => {
         db_password: 'devpassword',
         secret_key: 'INSECURE - change me for prod',
     };
+    // Test configuration:
+    if (environment === 'test') {
+        Object.assign(config, {
+            app_domain: 'localhost:4444',
+            listen_port: 4444,
+            db_name: 'boris_test',
+        });
+    }
     if (process.env.BORIS_CONFIG) {
         Object.assign(config, JSON.parse(process.env.BORIS_CONFIG)[environment]);
     }

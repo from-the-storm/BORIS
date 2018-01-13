@@ -7,7 +7,7 @@ const readFileAsync = promisify(fs.readFile);
 import {environment} from '../config';
 import {getDB} from './db';
 
-async function migrate() {
+export async function migrate() {
     try {
         const db = await getDB();
 
@@ -25,10 +25,17 @@ async function migrate() {
             await db.query(devDataSql, [], {});
             console.log(" -> done");
         }
-        process.exit();
+        db.instance.$pool.end();
     } catch(e) {
         console.error(`Failed: ${e.message}`);
-        process.exit(1);
     }
 }
-migrate();
+
+
+if (require.main === module) { // If running as a script (called directly)
+    migrate().then(() => {
+        process.exit();
+    }, () => {
+        process.exit(1);
+    })
+}
