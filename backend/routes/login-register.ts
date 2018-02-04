@@ -8,6 +8,7 @@ import * as passport from 'passport';
 
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
+import {alphanumericCodeGenerator} from './login-register-utils';
 
 // Declare our additions to the Express API:
 import '../express-extended';
@@ -176,28 +177,41 @@ router.post('/team/create', async (req, res) => {
         const organizationName = (req.body.organizationName || '').trim();
         if (!organizationName) { throw new SafeError("Missing team name."); }
         const db: BorisDatabase = req.app.get("db");
-        /*let team: Team;
-        try {
-            team = await db.teams.insert({
-                teamName,
-                organizationName,
-            });
-            await db.teamMembers.insert({
-                team: team.id,
-                user: req.user.id,
-                isOwner: true,
-            });
-        } catch (err) {
-            throw err;
-        }*/
-        const team = {
-            teamName: teamName,
-            teamCode: 'A4B78',
-        }
+        let newCode = null;
+        let newTeamId: number;
+        const result = await db.instance.tx('create_team', async (task) => {
+            let codeGen = alphanumericCodeGenerator(Math.random() * 0.95, 5); // 0.95 so that if there is a conflict, we can always generate a few more codes without hitting the max limit
+            for (const code of codeGen) {
+                console.log(`Creating team with code ${code}`);
+                try {
+                    const result = await task.one(
+                        'INSERT INTO teams (name, organization, code) VALUES ($1, $2, $3) RETURNING id',
+                        [teamName, organizationName, code]
+                    );
+                    newCode = code;
+                    newTeamId = result.id;
+                    break;
+                } catch (e) {
+                    if (e.constraint === 'teams_code_key') {
+                        // This code was not unique; try again:
+                        continue;
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+            if (newCode === null) {
+                throw new SafeError('Unable to create unique code for the team.');
+            }
+            await task.none(
+                'INSERT INTO team_members (user_id, team_id, is_admin) VALUES ($1, $2, true)',
+                [req.user.id, newTeamId]
+            );
+        });
         res.json({
             result: 'ok',
-            teamName: team.teamName,
-            teamCode: team.teamCode,
+            teamName: teamName,
+            teamCode: newCode,
         });
     } catch (err) {
         console.error(err);

@@ -10,6 +10,7 @@ declare global {
             logout: () => void;
             user: {
                 first_name: string,
+                id: number,
             };
         }
         interface Response { }

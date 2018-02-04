@@ -43,3 +43,18 @@ CREATE TABLE activity (
 );
 -- User activity log is immutable
 CREATE TRIGGER trg_prevent_update__activity BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE fn_prevent_update();
+
+-- Teams table
+CREATE TABLE teams (
+    id bigserial PRIMARY KEY,
+    name varchar(500) NOT NULL,
+    organization varchar(500) NOT NULL,
+    code varchar(10) NOT NULL UNIQUE,
+    created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0')
+);
+
+CREATE TABLE team_members (
+    user_id bigint NULL REFERENCES users(id) ON DELETE CASCADE,
+    team_id bigint NULL REFERENCES teams(id) ON DELETE CASCADE,
+    is_admin BOOLEAN NOT NULL DEFAULT false
+);

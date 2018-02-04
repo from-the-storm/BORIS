@@ -14,6 +14,3 @@ services:
      POSTGRES_PASSWORD: devpassword
      POSTGRES_USER: boris
      POSTGRES_DB: boris
-
-
-// TODO: find a way to create DB, apply migrations, etc. before running test suite
