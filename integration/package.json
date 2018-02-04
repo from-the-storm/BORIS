@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "BORIS Integration Tests",
   "scripts": {
-    "pretest": "cd ../backend/ && NODE_ENV=test ./node_modules/.bin/ts-node db/reset-test-db.ts",
+    "pretest": "cd ../backend/ && NODE_ENV=test ./node_modules/.bin/ts-node db/reset-db.ts",
     "test": "NODE_ENV=test jest"
   },
   "author": "From the Storm",

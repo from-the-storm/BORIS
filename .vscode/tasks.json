@@ -49,6 +49,25 @@
                     }
                 }
             }
+        },
+        {
+            "label": "Reset Dev Database (!)",
+            "type": "shell",
+            "command": "./node_modules/.bin/ts-node",
+            "args": ["db/reset-db.ts"],
+            "isBackground": false,
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "options": {
+                    "env": {
+                        // Fixes to work with Docker Toolbox on Windows:
+                        "BORIS_CONFIG": "{\"development\": {\"db_host\": \"192.168.99.100\"}}"
+                    }
+                }
+            }
         }
     ]
 }

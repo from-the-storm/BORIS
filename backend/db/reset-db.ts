@@ -24,7 +24,7 @@ export async function resetTestDB() {
 }
 
 if (require.main === module) { // If running as a script (called directly)
-    if (environment !== 'test' || config.db_name.indexOf('test') === -1) {
+    if (environment !== 'test' && environment !== 'development') {
         throw new Error("This reset script should only be used on a test database");
     }
     resetTestDB();
