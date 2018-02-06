@@ -26,8 +26,9 @@ export function* alphanumericCodeGenerator(value: number, numCharacters: number)
     const symbols = 'BCDFGHJKLMNPQRSTVWXYZ23456789'; // Exclude vowels to avoid words, exclude commonly confused symbols (O and 0, 1 and I)
     const min = (symbols.length)**(numCharacters-1);
     const max = (symbols.length)**(numCharacters) - 1;
-    let n = Math.floor(min + value*(max-min));
-    for (let i = Math.floor(min + value*(max-min)); i <= max; i++) {
+    let i = Math.floor(min + value*(max-min));
+    for (; i <= (max - 1); i++) {
         yield numberToAlternateBase(i, symbols);
     }
+    return numberToAlternateBase(i, symbols); // Final value must be 'return' not 'yield', to indicate done.
 }
