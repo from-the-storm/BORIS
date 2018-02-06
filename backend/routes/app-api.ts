@@ -1,10 +1,7 @@
 /**
  * Routes for logging in, user registration, etc.
  */
-import {randomBytes} from 'crypto';
 import * as express from 'express';
-import * as isEmail from 'validator/lib/isEmail';
-import * as passport from 'passport';
 
 import '../express-extended';
 import {config} from '../config';

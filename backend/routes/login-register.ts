@@ -11,7 +11,7 @@ import {BorisDatabase, User} from '../db/db';
 import {alphanumericCodeGenerator} from './login-register-utils';
 
 // Declare our additions to the Express API:
-import '../express-extended';
+import { UserType } from '../express-extended';
 
 export const router = express.Router();
 
@@ -71,7 +71,7 @@ router.post('/request-login', async (req: express.Request, res) => {
  * View for validating and using a login-by-email link
  */
 router.get('/login/:code', (req, res, next) => {
-    passport.authenticate('token', (err, user, info) => {
+    passport.authenticate('token', (err: any, user: UserType, info: any) => {
         if (err) { return next(err); }
         if (user) {
             // The login succeeded:
@@ -177,7 +177,7 @@ router.post('/team/create', async (req, res) => {
         const organizationName = (req.body.organizationName || '').trim();
         if (!organizationName) { throw new SafeError("Missing team name."); }
         const db: BorisDatabase = req.app.get("db");
-        let newCode = null;
+        let newCode: string|null = null;
         let newTeamId: number;
         const result = await db.instance.tx('create_team', async (task) => {
             let codeGen = alphanumericCodeGenerator(Math.random() * 0.95, 5); // 0.95 so that if there is a conflict, we can always generate a few more codes without hitting the max limit

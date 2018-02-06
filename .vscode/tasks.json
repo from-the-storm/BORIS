@@ -37,9 +37,6 @@
             "command": "npm",
             "args": ["run", "migrate"],
             "isBackground": false,
-            "options": {
-                "cwd": "${workspaceFolder}/backend"
-            },
             "problemMatcher": [],
             "windows": {
                 "options": {
@@ -54,10 +51,10 @@
             "label": "Reset Dev Database (!)",
             "type": "shell",
             "command": "./node_modules/.bin/ts-node",
-            "args": ["db/reset-db.ts"],
+            "args": ["backend/db/reset-db.ts"],
             "isBackground": false,
             "options": {
-                "cwd": "${workspaceFolder}/backend"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [],
             "windows": {

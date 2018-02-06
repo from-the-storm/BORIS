@@ -19,7 +19,7 @@ describe("BORIS Integration tests", () => {
         // Spawn a new BORIS server for testing:
         const spawnedBorisServer = new Promise((resolve, reject) => {
             borisServer = spawn(
-                '../backend/node_modules/.bin/ts-node',
+                '../node_modules/.bin/ts-node',
                 ['backend-server.ts'],
                 {cwd: __dirname + '/../backend', detached: true}
             );

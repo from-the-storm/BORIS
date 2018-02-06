@@ -14,7 +14,7 @@
                 "server"
             ],
             "port": 9229,
-            "cwd": "${workspaceFolder}/backend",
+            "cwd": "${workspaceFolder}",
             "outputCapture": "std", // Show both console.log() and stdout.write() messages in debug console
             "windows": {
                 "env": {
