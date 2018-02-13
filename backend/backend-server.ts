@@ -17,6 +17,7 @@ import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
+import {router as testHelperRouter} from './routes/test-helper-api';
 
 // Declare our additions to the Express API:
 import {UserType} from './express-extended';
@@ -170,6 +171,10 @@ app.use('/auth', loginRegisterRouter);
 
 // Misc. API used by the single page app frontend:
 app.use('/app-api', appAPIRouter);
+
+if (environment === 'test') {
+    app.use('/test-utils', testHelperRouter);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Web sockets

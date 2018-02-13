@@ -41,6 +41,7 @@
     "@types/express-session": "~1.15.6",
     "@types/jest": "~22.0.0",
     "@types/massive": "~3.0.3",
+    "@types/node-fetch": "^1.6.7",
     "@types/nodemailer": "~4.3.2",
     "@types/pg": "~7.4.1",
     "@types/react": "~16.0.28",
@@ -56,6 +57,7 @@
     "extract-text-webpack-plugin": "~3.0.2",
     "immutable": "4.0.0-rc.9",
     "jest": "~22.0.4",
+    "node-fetch": "^2.0.0",
     "node-sass": "~4.6.0",
     "react": "~16.0.0",
     "react-dom": "~16.0.0",
@@ -80,7 +82,7 @@
     "transform": {
       "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": "test.*\\.(ts|tsx|js)$",
+    "testRegex": ".*\\-test.(ts|tsx|js)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",

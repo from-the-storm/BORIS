@@ -3,8 +3,7 @@ import {Builder, By, until, ThenableWebDriver, WebDriver} from 'selenium-webdriv
 import * as chrome from 'selenium-webdriver/chrome';
 import { spawn, ChildProcess } from 'child_process';
 import { waitForReactToRender, waitForHttpRequests, countElementsMatching, buttonWithText, trackHttpRequests } from './webdriver-utils';
-
-const borisURL = 'http://localhost:4444/';
+import { borisURL, getEmailsSentTo } from './integration-utils';
 
 if (process.env.NODE_ENV !== 'test') {
     throw new Error("The test suite should be run with NODE_ENV=test");
@@ -54,13 +53,14 @@ describe("BORIS Integration tests", () => {
         return header.getText();
     }
 
-    it('Home Page Test', async () => {
+    test('Home Page Test', async () => {
         await driver.get(borisURL);
         expect(await driver.getTitle()).toBe("BORIS");
         expect(await getHeaderText(driver)).toBe("WOULD YOU SURVIVE THE END OF THE WORLD?");
     });
 
-    it('Registration Test', async () => {
+    test('Registration Test', async () => {
+        const email = 'tom@example.com';
         await driver.get(borisURL);
         trackHttpRequests(driver);
         await waitForReactToRender(driver); // Not sure yet if this is necessary.
@@ -77,18 +77,62 @@ describe("BORIS Integration tests", () => {
         expect(await getHeaderText(driver)).toBe("CREATE A PROFILE");
         // Fill out the form:
         expect(await countElementsMatching('input:invalid', driver)).toBe(9); // 6 fields but some are radio buttons
-        await driver.findElement({css: 'input[name=firstName]'}).then(field => field.sendKeys("Tom Testerson"));
-        await driver.findElement({css: 'input[name=email]'}).then(field => field.sendKeys("tom@example.com"));
+        await driver.findElement({css: 'input[name=firstName]'}).then(field => field.sendKeys("Tom"));
+        await driver.findElement({css: 'input[name=email]'}).then(field => field.sendKeys(email));
         await driver.findElement({css: 'input[name=workInTech][value=yes]'}).then(field => field.click()); // "Work in tech: Yes"
         await driver.findElement({css: 'input[name=occupation]'}).then(field => field.sendKeys("Mindlessly testing websites"));
         await driver.findElement({css: 'input[name=age]'}).then(field => field.sendKeys("25"));
         await driver.findElement({css: 'input[name=gender][value=o]'}).then(field => field.click()); // "Gender: Other"
         expect(await countElementsMatching('input:invalid', driver)).toBe(0);
         // Click "Register"
+        const emailCountBeforeRegistering = (await getEmailsSentTo(email)).length;
         await driver.findElement(buttonWithText("REGISTER")).then(btn => btn.click());
         await waitForHttpRequests(driver);
         await waitForReactToRender(driver);
         // User then sees a final message:
         expect(await getHeaderText(driver)).toBe("CHECK YOUR EMAIL");
+        // Check the email that was sent to the user:
+        const emails = await getEmailsSentTo(email);
+        const emailCountAfterRegistering = emails.length;
+        expect(emailCountAfterRegistering - emailCountBeforeRegistering).toBe(1);
+        const registrationEmail = emails[emails.length - 1];
+        expect(registrationEmail.subject).toBe("Login to Apocalypse Made Easy");
+        const loginLink = registrationEmail.text.split('\n')[1];
+        expect(loginLink).toMatch(/^http.*/);
+
+
+        // Login as that new user:
+        await driver.get(loginLink);
+        trackHttpRequests(driver);
+        await waitForReactToRender(driver); // Not sure yet if this is necessary.
+        // Now we should see the "Join Team" page
+        expect(await getHeaderText(driver)).toBe("JOIN TEAM");
+        const createTeamButton = await driver.findElement(buttonWithText("CREATE A TEAM"));
+        await createTeamButton.click();
+        // Fill out the "Create Team" form
+        expect(await getHeaderText(driver)).toBe("CREATE TEAM");
+        expect(await countElementsMatching('input:invalid', driver)).toBe(2);
+        await driver.findElement({css: 'input[name=teamName]'}).then(field => field.sendKeys("Dream Team"));
+        await driver.findElement({css: 'input[name=organizationName]'}).then(field => field.sendKeys("Canada TestCo Inc. LLP Limited"));
+        expect(await countElementsMatching('input:invalid', driver)).toBe(0);
+        await driver.findElement(buttonWithText("CREATE MY TEAM")).then(btn => btn.click());
+        await waitForHttpRequests(driver);
+        // Now we should see the "Choose Scenario" page:
+        expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
+        const loggedInheader = await driver.findElement({css: 'header .loggedin'});
+        let teamCode: string;
+        {
+            const text = (await loggedInheader.getText()).replace('\n', ' ');
+            const regex = /Logged in as Tom. TEAM CODE: ([A-Z0-9]+) .*/;
+            expect(text).toMatch(regex);
+            teamCode = text.match(regex)[1];
+        }
+        expect(teamCode).toHaveLength(5);
+        // Leave the team:
+        await driver.findElement(buttonWithText("LOG OUT")).click();
+        expect(await getHeaderText(driver)).toBe("GOING SO SOON?");
+        await driver.findElement(buttonWithText("CHANGE TEAM")).click();
+        await waitForHttpRequests(driver);
+        expect(await getHeaderText(driver)).toBe("JOIN TEAM");
     });
 });
