@@ -19,6 +19,18 @@ class SafeError extends Error {
     // An error whose message is safe to show to the user
 }
 
+function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Promise<any>) {
+    return async (req: express.Request, res: express.Response) => {
+        try {
+            await fn(req, res);
+        } catch (err) {
+            console.error(err);
+            res.status(400).json({ error: err instanceof SafeError ? err.message : "An internal error occurred handling this API method." });
+            return;
+        }
+    };
+}
+
 async function sendLoginLinkToUser(app: express.Application, email: string) {
     const db: BorisDatabase = app.get("db");
     const sendMail = app.get('sendMail');
@@ -163,60 +175,71 @@ router.post('/register', async (req, res) => {
  * 
  * Accepts a JSON body.
  */
-router.post('/team/create', async (req, res) => {
-    try {
-        if (!req.user) {
-            throw new SafeError(`You need to be logged in to create a team. ${req.user}`);
-        }
-        if (!req.body) {
-            throw new SafeError("Missing JSON body.");
-        }
-        // Parse the data from the form:
-        const teamName = (req.body.teamName || '').trim();
-        if (!teamName) { throw new SafeError("Missing team name."); }
-        const organizationName = (req.body.organizationName || '').trim();
-        if (!organizationName) { throw new SafeError("Missing team name."); }
-        const db: BorisDatabase = req.app.get("db");
-        let newCode: string|null = null;
-        let newTeamId: number;
-        const result = await db.instance.tx('create_team', async (task) => {
-            let codeGen = alphanumericCodeGenerator(Math.random() * 0.95, 5); // 0.95 so that if there is a conflict, we can always generate a few more codes without hitting the max limit
-            for (const code of codeGen) {
-                console.log(`Creating team with code ${code}`);
-                try {
-                    const result = await task.one(
-                        'INSERT INTO teams (name, organization, code) VALUES ($1, $2, $3) RETURNING id',
-                        [teamName, organizationName, code]
-                    );
-                    newCode = code;
-                    newTeamId = result.id;
-                    break;
-                } catch (e) {
-                    if (e.constraint === 'teams_code_key') {
-                        // This code was not unique; try again:
-                        continue;
-                    } else {
-                        throw e;
-                    }
+router.post('/team/create', apiErrorWrapper(async (req, res) => {
+    if (!req.user) {
+        throw new SafeError(`You need to be logged in to create a team. ${req.user}`);
+    }
+    if (!req.body) {
+        throw new SafeError("Missing JSON body.");
+    }
+    // Parse the data from the form:
+    const teamName = (req.body.teamName || '').trim();
+    if (!teamName) { throw new SafeError("Missing team name."); }
+    const organizationName = (req.body.organizationName || '').trim();
+    if (!organizationName) { throw new SafeError("Missing team name."); }
+    const db: BorisDatabase = req.app.get("db");
+    let newCode: string|null = null;
+    let newTeamId: number;
+    const result = await db.instance.tx('create_team', async (task) => {
+        let codeGen = alphanumericCodeGenerator(Math.random() * 0.95, 5); // 0.95 so that if there is a conflict, we can always generate a few more codes without hitting the max limit
+        for (const code of codeGen) {
+            console.log(`Creating team with code ${code}`);
+            try {
+                const result = await task.one(
+                    'INSERT INTO teams (name, organization, code) VALUES ($1, $2, $3) RETURNING id',
+                    [teamName, organizationName, code]
+                );
+                newCode = code;
+                newTeamId = result.id;
+                break;
+            } catch (e) {
+                if (e.constraint === 'teams_code_key') {
+                    // This code was not unique; try again:
+                    continue;
+                } else {
+                    throw e;
                 }
             }
-            if (newCode === null) {
-                throw new SafeError('Unable to create unique code for the team.');
-            }
-            await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [req.user.id]);
-            await task.none(
-                'INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, true, true)',
-                [req.user.id, newTeamId]
-            );
-        });
-        res.json({
-            result: 'ok',
-            teamName: teamName,
-            teamCode: newCode,
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({ error: err instanceof SafeError ? err.message : "Unable to create team due to an internal error" });
-        return;
+        }
+        if (newCode === null) {
+            throw new SafeError('Unable to create unique code for the team.');
+        }
+        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [req.user.id]);
+        await task.none(
+            'INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, true, true)',
+            [req.user.id, newTeamId]
+        );
+    });
+    res.json({
+        result: 'ok',
+        teamName: teamName,
+        teamCode: newCode,
+    });
+}));
+
+/**
+ * API for leaving the user's active team.
+ *
+ * This preserve's the user's association with the team, but it means
+ * that team is no longer the user's "active" team. Each user can only
+ * be "active" on one team at a time but can be linked to many teams.
+ * 
+ */
+router.post('/team/leave', apiErrorWrapper(async (req, res) => {
+    if (!req.user) {
+        throw new SafeError(`You need to be logged in to leave a team. ${req.user}`);
     }
-});
+    const db: BorisDatabase = req.app.get("db");
+    await db.team_members.update({user_id: req.user.id, is_active: true}, {is_active: false});
+    res.json({result: 'ok'});
+}));
