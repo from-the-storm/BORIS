@@ -203,8 +203,9 @@ router.post('/team/create', async (req, res) => {
             if (newCode === null) {
                 throw new SafeError('Unable to create unique code for the team.');
             }
+            await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [req.user.id]);
             await task.none(
-                'INSERT INTO team_members (user_id, team_id, is_admin) VALUES ($1, $2, true)',
+                'INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, true, true)',
                 [req.user.id, newTeamId]
             );
         });

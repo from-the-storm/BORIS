@@ -3,6 +3,7 @@ import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
 import {RootState} from '../global/state';
+import { ChooseScenarioComponent } from './choose-scenario';
 import {HomeComponent} from './home';
 import {RegisterComponent} from './register';
 import {JoinTeamComponent} from './join-team';
@@ -20,7 +21,7 @@ interface OwnProps {
 interface Props extends OwnProps, DispatchProp<RootState> {
     isLoggedIn: boolean;
     mode: Mode;
-    teamCode: string;
+    teamCode: string|null;
     userName: string;
 }
 
@@ -33,7 +34,13 @@ class _RegistrationComponent extends React.PureComponent<Props> {
     @bind private handleLoginButton() { this.props.dispatch({type: Actions.SHOW_LOGIN}); }
     @bind private handleLogoutButton() { this.props.dispatch({type: Actions.SHOW_LOGOUT}); }
     @bind private handleRegisterButton() { this.props.dispatch({type: Actions.SHOW_REGISTER}); }
-    @bind private handleStartButton() { this.props.dispatch({type: Actions.SHOW_JOIN_TEAM}); }
+    @bind private handleStartButton() {
+        if (this.props.teamCode === null) {
+            this.props.dispatch({type: Actions.SHOW_JOIN_TEAM});
+        } else {
+            this.props.dispatch({type: Actions.SHOW_CHOOSE_SCENARIO});
+        }
+    }
 
     public render() {
         return <div className="registration">
@@ -54,11 +61,12 @@ class _RegistrationComponent extends React.PureComponent<Props> {
             </header>
             <div className="content">
                 {
+                    this.props.mode === Mode.Home ? <HomeComponent/> :
                     this.props.mode === Mode.Register ? <RegisterComponent/> :
                     this.props.mode === Mode.Login ? <LoginComponent/> :
                     this.props.mode === Mode.JoinTeam ? <JoinTeamComponent/> :
                     this.props.mode === Mode.CreateTeam ? <CreateTeamComponent/> :
-                    this.props.mode === Mode.Home ? <HomeComponent/> :
+                    this.props.mode === Mode.ChooseScenario ? <ChooseScenarioComponent/> :
                     this.props.mode === Mode.Logout ? <LogoutComponent/> :
                     'Error: Unknown mode.'
                 }

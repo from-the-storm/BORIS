@@ -25,12 +25,27 @@ export interface BorisDatabase extends massive.Database {
         user_id: number;
         event_type: string;
         timestamp: Date;
+        last_active: Date;
         details: any;
     }>;
     login_requests: massive.Table<{
         code: string;
         user_id: number;
         created: Date;
+    }>;
+    teams: massive.Table<{
+        id: number;
+        name: string;
+        organization: string;
+        code: string;
+        created: Date;
+    }>;
+    team_members: massive.Table<{
+        id: number;
+        user_id: number;
+        team_id: number;
+        is_admin: boolean;
+        is_active: boolean;
     }>;
     user_by_email(email: string): Promise<User>;
     instance: pgPromise.IDatabase<{}>;

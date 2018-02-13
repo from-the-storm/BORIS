@@ -10,6 +10,7 @@ export enum Actions {
     SHOW_REGISTER = 'RS_REGISTER',
     SHOW_JOIN_TEAM = 'RS_SHOW_JOIN',
     SHOW_CREATE_TEAM = 'RS_SHOW_CREATE',
+    SHOW_CHOOSE_SCENARIO = 'RS_SHOW_CHOOSE_SCENARIO',
 }
 
 //// Action Creators
