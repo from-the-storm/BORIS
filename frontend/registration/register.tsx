@@ -4,6 +4,8 @@ import { connect, DispatchProp } from 'react-redux';
 
 import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
+import { REGISTER_USER } from '../../backend/routes/api-interfaces';
+import { postToApi } from '../api';
 
 
 interface OwnProps {
@@ -125,20 +127,12 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
     @bind private handleRegistrationFormSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         this.setState({waitingForServerResponse: true});
-        this.submitRegistrationFormData().catch(err => {
-            this.setState({
-                waitingForServerResponse: false,
-                errorMessage: err.message,
-            });
-        });
+        this.submitRegistrationFormData();
         return false;
     }
     private async submitRegistrationFormData() {
-        const response = await fetch('/auth/register', {
-            method: 'post',
-            credentials: 'include',
-            headers: new Headers({"Content-Type": "application/json"}),
-            body: JSON.stringify({
+        try {
+            await postToApi(REGISTER_USER, {
                 hasConsented: this.state.hasConsented,
                 firstName: this.state.firstName,
                 email: this.state.email,
@@ -146,17 +140,18 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                 occupation: this.state.occupation,
                 age: this.state.age,
                 gender: this.state.gender,
-            }),
-        });
-        if (response.ok) {
+            });
+        } catch (error) {
             this.setState({
                 waitingForServerResponse: false,
-                registrationComplete: true,
+                errorMessage: error.message,
             });
-        } else {
-            const data = await response.json();
-            throw new Error(`Unable to register you: ${data.error}`);
+            return;
         }
+        this.setState({
+            waitingForServerResponse: false,
+            registrationComplete: true,
+        });
     }
 }
 

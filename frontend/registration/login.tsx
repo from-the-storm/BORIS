@@ -1,7 +1,7 @@
 import bind from 'bind-decorator';
 import * as React from 'react';
 import { postToApi } from '../api';
-import { RequestLoginRequest, RequestLoginResponse } from '../../backend/routes/api-interfaces';
+import { RequestLoginRequest, REQUEST_LOGIN } from '../../backend/routes/api-interfaces';
 
 
 interface OwnProps {
@@ -59,7 +59,7 @@ export class LoginComponent extends React.PureComponent<Props, State> {
         }
         this.setState({waitingForServerResponse: true});
         try {
-            await postToApi<RequestLoginRequest, RequestLoginResponse>('/auth/request-login', {email: this.state.emailAddressEntered});
+            await postToApi(REQUEST_LOGIN, {email: this.state.emailAddressEntered});
         } catch (error) {
             this.setState({
                 waitingForServerResponse: false,

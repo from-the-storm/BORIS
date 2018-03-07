@@ -9,7 +9,7 @@ import * as passport from 'passport';
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
 import {alphanumericCodeGenerator} from './login-register-utils';
-import { JoinTeamResponse, JoinTeamRequest, RequestLoginResponse, RequestLoginRequest, EmptyApiResponse, CreateTeamRequest } from './api-interfaces';
+import { PostApiMethod, JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from './api-interfaces';
 
 // Declare our additions to the Express API:
 import { UserType } from '../express-extended';
@@ -41,18 +41,35 @@ function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Pr
 }
 
 /** Wrapper around an API call that takes POST body data and requires that the user is logged in. */
-function postApiMethodWithUser<RequestData, ResponseData>(fn: (data: RequestData, user: UserType, app: express.Application) => Promise<ResponseData>) {
-    return apiErrorWrapper(async (req: express.Request, res: express.Response) => {
+function postApiMethodWithUser<RequestType, ResponseType>(def: PostApiMethod<RequestType, ResponseType>, fn: (data: RequestType, user: UserType, app: express.Application) => Promise<ResponseType>) {
+    const path = def.path.replace(/^\/auth/, '');
+    router.post(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
         if (!req.user) {
             throw new SafeError("You are not logged in.");
         }
         if (!req.body) {
             throw new SafeError("Missing JSON body.");
         }
-        const data: RequestData = req.body;
+        const data: RequestType = req.body;
         const result = await fn(data, req.user, req.app);
         res.json(result);
-    });
+    }));
+}
+
+/** Wrapper around an API call that takes POST body data and requires that NO user is logged in. */
+function postApiMethodAnonymousOnly<RequestType, ResponseType>(def: PostApiMethod<RequestType, ResponseType>, fn: (data: RequestType, app: express.Application) => Promise<ResponseType>) {
+    const path = def.path.replace(/^\/auth/, '');
+    router.post(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
+        if (req.user) {
+            throw new SafeError("You are already logged in.");
+        }
+        if (!req.body) {
+            throw new SafeError("Missing JSON body.");
+        }
+        const data: RequestType = req.body;
+        const result = await fn(data, req.app);
+        res.json(result);
+    }));
 }
 
 async function sendLoginLinkToUser(app: express.Application, email: string) {
@@ -78,26 +95,18 @@ async function sendLoginLinkToUser(app: express.Application, email: string) {
  * 
  * Accepts a JSON body.
  */
-router.post('/request-login', apiErrorWrapper(async (req: express.Request, res) => {
-    if (req.user) {
-        throw new SafeError("Another user is already logged in.");
-    }
-    if (!req.body) {
-        throw new SafeError("Missing JSON body.");
-    }
-    const body: RequestLoginRequest = req.body;
+postApiMethodAnonymousOnly(REQUEST_LOGIN, async (data, app) => {
     // Look up the user by email:
-    const email: string = body.email;
+    const email: string = data.email;
     if (typeof email !== 'string') {
         throw new SafeError("No email address given.");
     }
     if (!isEmail(email)) {
         throw new SafeError("Not a valid email address");
     }
-    sendLoginLinkToUser(req.app, email);
-    const result: RequestLoginResponse = {result: 'ok'};
-    res.json(result);
-}));
+    sendLoginLinkToUser(app, email);
+    return {result: 'ok'};
+});
 
 /**
  * View for validating and using a login-by-email link
@@ -161,33 +170,21 @@ function validateUserData(data: any): Partial<User> {
  * 
  * Accepts a JSON body.
  */
-router.post('/register', async (req, res) => {
+postApiMethodAnonymousOnly(REGISTER_USER,  async (data, app) => {
+    // Parse the data from the form:
+    const userData = validateUserData(data);
+    const db: BorisDatabase = app.get("db");
+    let user: User;
     try {
-        if (req.user) {
-            throw new SafeError("Another user is already logged in.");
-        }
-        if (!req.body) {
-            throw new SafeError("Missing JSON body.");
-        }
-        // Parse the data from the form:
-        const userData = validateUserData(req.body);
-        const db: BorisDatabase = req.app.get("db");
-        let user: User;
-        try {
-            user = await db.users.insert(userData);
-        } catch (err) {
-            if (err.constraint === 'users_email_lower_idx') {
-                throw new SafeError("An account with that email address already exists.");
-            }
-            throw err;
-        }
-        await sendLoginLinkToUser(req.app, user.email);
-        res.json({result: 'ok'});
+        user = await db.users.insert(userData);
     } catch (err) {
-        console.error(err);
-        res.status(400).json({ error: err instanceof SafeError ? err.message : "Unable to register you due to an internal error" });
-        return;
+        if (err.constraint === 'users_email_lower_idx') {
+            throw new SafeError("An account with that email address already exists.");
+        }
+        throw err;
     }
+    await sendLoginLinkToUser(app, user.email);
+    return {result: 'ok'};
 });
 
 /**
@@ -195,7 +192,7 @@ router.post('/register', async (req, res) => {
  * 
  * Accepts a JSON body.
  */
-router.post('/team/create', postApiMethodWithUser<CreateTeamRequest, JoinTeamResponse>(async (data, user, app) => {
+postApiMethodWithUser(CREATE_TEAM, async (data, user, app) => {
     // Parse the data from the form:
     const teamName = (data.teamName || '').trim();
     if (!teamName) { throw new SafeError("Missing team name."); }
@@ -240,7 +237,7 @@ router.post('/team/create', postApiMethodWithUser<CreateTeamRequest, JoinTeamRes
         isTeamAdmin: true,
         otherTeamMembers: [],
     };
-}));
+});
 
 
 /**
@@ -248,7 +245,7 @@ router.post('/team/create', postApiMethodWithUser<CreateTeamRequest, JoinTeamRes
  * 
  * Accepts a JSON body.
  */
-router.post('/team/join', postApiMethodWithUser<JoinTeamRequest, JoinTeamResponse>(async (data, user, app) => {
+postApiMethodWithUser(JOIN_TEAM, (async (data, user, app) => {
     // Parse the data from the form:
     const code: string = data.code;
     if (!code) {
@@ -298,8 +295,8 @@ router.post('/team/join', postApiMethodWithUser<JoinTeamRequest, JoinTeamRespons
  * be "active" on one team at a time but can be linked to many teams.
  *
  */
-router.post('/team/leave', postApiMethodWithUser<{}, EmptyApiResponse>(async (data, user, app) => {
+postApiMethodWithUser(LEAVE_TEAM, async (data, user, app) => {
     const db: BorisDatabase = app.get("db");
     await db.team_members.update({user_id: user.id, is_active: true}, {is_active: false});
     return {result: 'ok'};
-}));
+});

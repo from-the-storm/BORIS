@@ -3,15 +3,6 @@ export interface EmptyApiResponse {
     result: 'ok';
 }
 
-
-/** /request-login request POST body parameters */
-export interface RequestLoginRequest {
-    email: string;
-}
-/** /request-login response */
-export type RequestLoginResponse = EmptyApiResponse;
-
-
 export interface OtherTeamMember {
     name: string;
     id: number;
@@ -34,27 +25,69 @@ export interface InitialStateResponse {
     };
 };
 
-/** Create Team API POST body data */
+
+export interface ApiErrorResponse {
+    error: string;
+}
+
+export interface PostApiMethod<RequestType, ResponseType> {
+    path: string;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// login-register methods:
+
+// Request login:
+
+/** REQUEST_LOGIN Request */
+export interface RequestLoginRequest {
+    email: string;
+}
+
+export const REQUEST_LOGIN: PostApiMethod<RequestLoginRequest, EmptyApiResponse> = {path: '/auth/request-login'};
+
+// Register:
+
+export interface RegisterUserRequest {
+    hasConsented: boolean;
+    firstName: string;
+    email: string;
+    workInTech: 'yes'|'no';
+    occupation: string;
+    age: number;
+    gender: 'm'|'f'|'o';
+}
+
+export const REGISTER_USER: PostApiMethod<RegisterUserRequest, EmptyApiResponse> = {path: '/auth/register'};
+
+// Create a team:
+
+/** CREATE_TEAM Request */
 export interface CreateTeamRequest {
     teamName: string;
     organizationName: string;
 }
 
-/** Join Team API POST body data */
-export interface JoinTeamRequest {
-    code: string;
-}
-
-/**
- * Responses from the join and create team APIs
- */
-export interface JoinTeamResponse {
+/** CREATE_TEAM and JOIN_TEAM Response */
+export interface CreateOrJoinTeamResponse {
     teamName: string;
     teamCode: string;
     isTeamAdmin: boolean;
     otherTeamMembers: Array<OtherTeamMember>;
 };
 
-export interface ApiErrorResponse {
-    error: string;
+export const CREATE_TEAM: PostApiMethod<CreateTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/create'};
+
+// Join a team:
+
+/** JOIN_TEAM Request */
+export interface JoinTeamRequest {
+    code: string;
 }
+
+export const JOIN_TEAM: PostApiMethod<JoinTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/join'};
+
+// Leave a team:
+
+export const LEAVE_TEAM: PostApiMethod<{}, EmptyApiResponse> = {path: '/auth/team/leave'};
+
