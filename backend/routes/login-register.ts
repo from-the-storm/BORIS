@@ -9,6 +9,7 @@ import * as passport from 'passport';
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
 import {alphanumericCodeGenerator} from './login-register-utils';
+import { JoinTeamResponse } from './api-interfaces';
 
 // Declare our additions to the Express API:
 import { UserType } from '../express-extended';
@@ -19,6 +20,14 @@ class SafeError extends Error {
     // An error whose message is safe to show to the user
 }
 
+/**
+ * Wrap a REST API handler method, and ensure that if an error occurs, a consistent error
+ * JSON result is returned, and that the error details don't leak sensitive info.
+ * Only errors that are instances of 'SafeError' will be reported; other errors will just
+ * say 'An internal error occurred'.
+ *
+ * @param fn The API handler to wrap
+ */
 function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Promise<any>) {
     return async (req: express.Request, res: express.Response) => {
         try {
@@ -177,7 +186,7 @@ router.post('/register', async (req, res) => {
  */
 router.post('/team/create', apiErrorWrapper(async (req, res) => {
     if (!req.user) {
-        throw new SafeError(`You need to be logged in to create a team. ${req.user}`);
+        throw new SafeError("You need to be logged in to create a team.");
     }
     if (!req.body) {
         throw new SafeError("Missing JSON body.");
@@ -220,11 +229,13 @@ router.post('/team/create', apiErrorWrapper(async (req, res) => {
             [req.user.id, newTeamId]
         );
     });
-    res.json({
-        result: 'ok',
+    const response: JoinTeamResponse = {
         teamName: teamName,
         teamCode: newCode,
-    });
+        isTeamAdmin: true,
+        otherTeamMembers: [],
+    };
+    res.json(response);
 }));
 
 /**

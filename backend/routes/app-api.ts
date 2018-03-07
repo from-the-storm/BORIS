@@ -6,21 +6,9 @@ import * as express from 'express';
 import '../express-extended';
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
+import { InitialStateResponse } from './api-interfaces';
 
 export const router = express.Router();
-
-
-export interface InitialStateResponse {
-    user?: {
-        first_name: string;
-    };
-    team?: {
-        code: string;
-        name: string;
-        isTeamCaptain: boolean;
-        otherTeamMembers: Array<{name: string, id: number, online: boolean, isCaptain: boolean}>;
-    };
-};
 
 /**
  * API endpoint for getting data needed to initialize the app's state:
@@ -38,7 +26,7 @@ router.post('/get-initial-state', async (req, res) => {
             result.team = {
                 code: team.code,
                 name: team.name,
-                isTeamCaptain: activeTeamMembership.is_admin,
+                isTeamAdmin: activeTeamMembership.is_admin,
                 otherTeamMembers: [],
             };
         }

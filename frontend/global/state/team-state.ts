@@ -11,7 +11,7 @@ export class TeamState extends Record({
     /** If the user has successfully joined a team, this is the team code. */
     teamCode: null as string|null,
     teamName: "NO TEAM",
-    isTeamCaptain: false,
+    isTeamAdmin: false,
     otherTeamMembers: [] as Array<{name: string, id: number, online: boolean, isCaptain: boolean}>,
 }) {
     get hasJoinedTeam(): boolean {
@@ -34,7 +34,7 @@ export function teamStateReducer(state?: TeamState, action?: AnyAction): TeamSta
         return state.merge({
             teamCode: action.teamCode,
             teamName: action.teamName,
-            isTeamCaptain: action.isTeamCaptain,
+            isTeamAdmin: action.isTeamAdmin,
             otherTeamMembers: action.otherTeamMembers,
         });
     case Actions.LEAVE_TEAM:

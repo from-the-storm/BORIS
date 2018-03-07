@@ -15,7 +15,7 @@ import {App} from './app';
 import { LoadingSpinnerComponent } from './loading/loading-spinner';
 import { InitStateActions } from './global/state/init-state-actions';
 import { UserStateActions } from './global/state/user-state-actions';
-import { InitialStateResponse } from '../backend/routes/app-api';
+import { InitialStateResponse } from '../backend/routes/api-interfaces';
 import { TeamStateActions } from './global/state/team-state-actions';
 
 
@@ -62,7 +62,7 @@ fetch('/app-api/get-initial-state', {
                     type: TeamStateActions.JOIN_TEAM,
                     teamCode: data.team.code,
                     teamName: data.team.name,
-                    isTeamCaptain: data.team.isTeamCaptain,
+                    isTeamAdmin: data.team.isTeamAdmin,
                     otherTeamMembers: data.team.otherTeamMembers,
                 });
             }
