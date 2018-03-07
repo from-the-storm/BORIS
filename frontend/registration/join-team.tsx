@@ -7,7 +7,7 @@ import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { TeamStateActions } from '../global/state/team-state-actions';
 
-import { JoinTeamResponse } from '../../backend/routes/api-interfaces';
+import { JoinTeamResponse, JoinTeamRequest } from '../../backend/routes/api-interfaces';
 
 
 interface OwnProps {
@@ -88,7 +88,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
     private async submitFormData() {
         let data: JoinTeamResponse;
         try {
-            data = await postToApi<any, JoinTeamResponse>('/auth/team/join', {code: this.state.code});
+            data = await postToApi<JoinTeamRequest, JoinTeamResponse>('/auth/team/join', {code: this.state.code});
         } catch (error) {
             throw new Error(`Unable to join team: ${error.message}`);
         }

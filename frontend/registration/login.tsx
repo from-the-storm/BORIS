@@ -1,5 +1,7 @@
 import bind from 'bind-decorator';
 import * as React from 'react';
+import { postToApi } from '../api';
+import { RequestLoginRequest, RequestLoginResponse } from '../../backend/routes/api-interfaces';
 
 
 interface OwnProps {
@@ -57,31 +59,19 @@ export class LoginComponent extends React.PureComponent<Props, State> {
         }
         this.setState({waitingForServerResponse: true});
         try {
-            const response = await fetch('/auth/request-login', {
-                method: 'post',
-                headers: new Headers({"Content-Type": "application/json"}),
-                body: JSON.stringify({
-                    email: this.state.emailAddressEntered,
-                }),
-            });
-            if (response.ok) {
-                this.setState({
-                    waitingForServerResponse: false,
-                    loginLinkWasSent: true,
-                });
-            } else {
-                const data = await response.json();
-                this.setState({
-                    waitingForServerResponse: false,
-                    errorMessage: `Unable to log you in: ${data.error}`,
-                });
-            }
-        } catch (err) {
+            await postToApi<RequestLoginRequest, RequestLoginResponse>('/auth/request-login', {email: this.state.emailAddressEntered});
+        } catch (error) {
             this.setState({
                 waitingForServerResponse: false,
-                errorMessage: err.message,
+                errorMessage: `Unable to log you in: ${error.message}`,
             });
+            return;
         }
+        this.setState({
+            waitingForServerResponse: false,
+            loginLinkWasSent: true,
+            errorMessage: '',
+        });
     }
 
     @bind private handleEmailChanged(event: React.ChangeEvent<HTMLInputElement>) {

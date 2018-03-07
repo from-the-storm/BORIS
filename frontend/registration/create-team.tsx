@@ -5,6 +5,8 @@ import {connect, DispatchProp} from 'react-redux';
 import {RootState} from '../global/state';
 import { TeamStateActions } from '../global/state/team-state-actions';
 import { Actions } from './registration-state-actions';
+import { JoinTeamResponse, CreateTeamRequest } from '../../backend/routes/api-interfaces';
+import { postToApi } from '../api';
 
 
 interface OwnProps {
@@ -84,30 +86,25 @@ class _CreateTeamComponent extends React.PureComponent<Props, State> {
         return false;
     }
     private async submitFormData() {
-        const response = await fetch('/auth/team/create', {
-            method: 'post',
-            credentials: 'include',
-            headers: new Headers({"Content-Type": "application/json"}),
-            body: JSON.stringify({
+        let response: JoinTeamResponse;
+        try {
+            response = await postToApi<CreateTeamRequest, JoinTeamResponse>('/auth/team/create', {
                 teamName: this.state.teamName,
                 organizationName: this.state.organizationName,
-            }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-            this.setState({
-                waitingForServerResponse: false,
             });
-            this.props.dispatch({
-                type: TeamStateActions.JOIN_TEAM,
-                teamName: data.teamName,
-                teamCode: data.teamCode,
-                isTeamOwner: true,
-                otherTeamMembers: [],
-            });
-        } else {
-            throw new Error(`Unable to register your team: ${data.error}`);
+        } catch (error) {
+            throw new Error(`Unable to register your team: ${error.message}`);
         }
+        this.setState({
+            waitingForServerResponse: false,
+        });
+        this.props.dispatch({
+            type: TeamStateActions.JOIN_TEAM,
+            teamName: response.teamName,
+            teamCode: response.teamCode,
+            isTeamAdmin: response.isTeamAdmin,
+            otherTeamMembers: response.otherTeamMembers,
+        });
     }
 }
 

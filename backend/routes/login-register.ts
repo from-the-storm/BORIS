@@ -9,7 +9,7 @@ import * as passport from 'passport';
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
 import {alphanumericCodeGenerator} from './login-register-utils';
-import { JoinTeamResponse } from './api-interfaces';
+import { JoinTeamResponse, JoinTeamRequest, RequestLoginResponse, RequestLoginRequest, EmptyApiResponse, CreateTeamRequest } from './api-interfaces';
 
 // Declare our additions to the Express API:
 import { UserType } from '../express-extended';
@@ -40,6 +40,21 @@ function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Pr
     };
 }
 
+/** Wrapper around an API call that takes POST body data and requires that the user is logged in. */
+function postApiMethodWithUser<RequestData, ResponseData>(fn: (data: RequestData, user: UserType, app: express.Application) => Promise<ResponseData>) {
+    return apiErrorWrapper(async (req: express.Request, res: express.Response) => {
+        if (!req.user) {
+            throw new SafeError("You are not logged in.");
+        }
+        if (!req.body) {
+            throw new SafeError("Missing JSON body.");
+        }
+        const data: RequestData = req.body;
+        const result = await fn(data, req.user, req.app);
+        res.json(result);
+    });
+}
+
 async function sendLoginLinkToUser(app: express.Application, email: string) {
     const db: BorisDatabase = app.get("db");
     const sendMail = app.get('sendMail');
@@ -63,30 +78,26 @@ async function sendLoginLinkToUser(app: express.Application, email: string) {
  * 
  * Accepts a JSON body.
  */
-router.post('/request-login', async (req: express.Request, res) => {
-    try {
-        if (req.user) {
-            throw new SafeError("Another user is already logged in.");
-        }
-        if (!req.body) {
-            throw new SafeError("Missing JSON body.");
-        }
-        // Look up the user by email:
-        const email: string = req.body.email;
-        if (typeof email !== 'string') {
-            throw new SafeError("No email address given.");
-        }
-        if (!isEmail(email)) {
-            throw new SafeError("Not a valid email address");
-        }
-        sendLoginLinkToUser(req.app, email);
-        res.json({result: 'ok'});
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({ error: err instanceof SafeError ? err.message : "Unable to send email due to an internal error" });
-        return;
+router.post('/request-login', apiErrorWrapper(async (req: express.Request, res) => {
+    if (req.user) {
+        throw new SafeError("Another user is already logged in.");
     }
-});
+    if (!req.body) {
+        throw new SafeError("Missing JSON body.");
+    }
+    const body: RequestLoginRequest = req.body;
+    // Look up the user by email:
+    const email: string = body.email;
+    if (typeof email !== 'string') {
+        throw new SafeError("No email address given.");
+    }
+    if (!isEmail(email)) {
+        throw new SafeError("Not a valid email address");
+    }
+    sendLoginLinkToUser(req.app, email);
+    const result: RequestLoginResponse = {result: 'ok'};
+    res.json(result);
+}));
 
 /**
  * View for validating and using a login-by-email link
@@ -184,19 +195,13 @@ router.post('/register', async (req, res) => {
  * 
  * Accepts a JSON body.
  */
-router.post('/team/create', apiErrorWrapper(async (req, res) => {
-    if (!req.user) {
-        throw new SafeError("You need to be logged in to create a team.");
-    }
-    if (!req.body) {
-        throw new SafeError("Missing JSON body.");
-    }
+router.post('/team/create', postApiMethodWithUser<CreateTeamRequest, JoinTeamResponse>(async (data, user, app) => {
     // Parse the data from the form:
-    const teamName = (req.body.teamName || '').trim();
+    const teamName = (data.teamName || '').trim();
     if (!teamName) { throw new SafeError("Missing team name."); }
-    const organizationName = (req.body.organizationName || '').trim();
+    const organizationName = (data.organizationName || '').trim();
     if (!organizationName) { throw new SafeError("Missing team name."); }
-    const db: BorisDatabase = req.app.get("db");
+    const db: BorisDatabase = app.get("db");
     let newCode: string|null = null;
     let newTeamId: number;
     const result = await db.instance.tx('create_team', async (task) => {
@@ -223,19 +228,18 @@ router.post('/team/create', apiErrorWrapper(async (req, res) => {
         if (newCode === null) {
             throw new SafeError('Unable to create unique code for the team.');
         }
-        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [req.user.id]);
+        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [user.id]);
         await task.none(
             'INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, true, true)',
-            [req.user.id, newTeamId]
+            [user.id, newTeamId]
         );
     });
-    const response: JoinTeamResponse = {
+    return {
         teamName: teamName,
         teamCode: newCode,
         isTeamAdmin: true,
         otherTeamMembers: [],
     };
-    res.json(response);
 }));
 
 
@@ -244,19 +248,13 @@ router.post('/team/create', apiErrorWrapper(async (req, res) => {
  * 
  * Accepts a JSON body.
  */
-router.post('/team/join', apiErrorWrapper(async (req, res) => {
-    if (!req.user) {
-        throw new SafeError("You need to be logged in to create a team.");
-    }
-    if (!req.body) {
-        throw new SafeError("Missing JSON body.");
-    }
+router.post('/team/join', postApiMethodWithUser<JoinTeamRequest, JoinTeamResponse>(async (data, user, app) => {
     // Parse the data from the form:
-    const code: string = req.body.code;
+    const code: string = data.code;
     if (!code) {
         throw new SafeError("Missing team code.");
     }
-    const db: BorisDatabase = req.app.get("db");
+    const db: BorisDatabase = app.get("db");
     // Check if the team is valid
     const team = await db.teams.findOne({code,});
     if (team === null) {
@@ -266,7 +264,7 @@ router.post('/team/join', apiErrorWrapper(async (req, res) => {
     const otherTeamMembers: Array<any> = await db.query(
         `SELECT u.first_name, u.id, tm.is_admin from users AS u, team_members tm
          WHERE u.id = tm.user_id AND tm.team_id = $1 AND tm.is_active = true AND tm.user_id <> $2`,
-        [team.id, req.user.id], {}
+        [team.id, user.id], {}
     );
     if (otherTeamMembers.length > 4) {
         throw new SafeError("Sorry, that team is full. Ask the team admin to remove some other members, or join a different team.");
@@ -274,23 +272,22 @@ router.post('/team/join', apiErrorWrapper(async (req, res) => {
     // Mark the user as active on this team, and add them as a team member if necessary:
     let isTeamAdmin = false;
     const result = await db.instance.tx('join_team', async (task) => {
-        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [req.user.id]);
+        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [user.id]);
         const upsertResult = await task.one(
             `INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, false, true)
              ON CONFLICT (user_id, team_id)
              DO UPDATE SET is_active = true WHERE team_members.user_id = $1 AND team_members.team_id = $2
              RETURNING is_admin`,
-            [req.user.id, team.id]
+            [user.id, team.id]
         );
         isTeamAdmin = upsertResult.is_admin;
     });
-    const response: JoinTeamResponse = {
+    return {
         teamName: team.name,
         teamCode: code,
         isTeamAdmin,
         otherTeamMembers: otherTeamMembers.map((m: any) => ({ name: m.first_name, id: m.id, online: false, isAdmin: m.is_admin })),
     };
-    res.json(response);
 }));
 
 /**
@@ -299,13 +296,10 @@ router.post('/team/join', apiErrorWrapper(async (req, res) => {
  * This preserve's the user's association with the team, but it means
  * that team is no longer the user's "active" team. Each user can only
  * be "active" on one team at a time but can be linked to many teams.
- * 
+ *
  */
-router.post('/team/leave', apiErrorWrapper(async (req, res) => {
-    if (!req.user) {
-        throw new SafeError(`You need to be logged in to leave a team. ${req.user}`);
-    }
-    const db: BorisDatabase = req.app.get("db");
-    await db.team_members.update({user_id: req.user.id, is_active: true}, {is_active: false});
-    res.json({result: 'ok'});
+router.post('/team/leave', postApiMethodWithUser<{}, EmptyApiResponse>(async (data, user, app) => {
+    const db: BorisDatabase = app.get("db");
+    await db.team_members.update({user_id: user.id, is_active: true}, {is_active: false});
+    return {result: 'ok'};
 }));
