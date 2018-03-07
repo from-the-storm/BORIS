@@ -2,7 +2,7 @@ import 'jest';
 import {Builder, By, until, ThenableWebDriver, WebDriver} from 'selenium-webdriver';
 import * as chrome from 'selenium-webdriver/chrome';
 import { spawn, ChildProcess } from 'child_process';
-import { waitForReactToRender, waitForHttpRequests, countElementsMatching, buttonWithText, trackHttpRequests } from './webdriver-utils';
+import { waitForReactToRender, waitForHttpRequests, countElementsMatching, buttonWithText, trackHttpRequests, elementMatchingWithText } from './webdriver-utils';
 import { borisURL, getEmailsSentTo } from './integration-utils';
 
 if (process.env.NODE_ENV !== 'test') {
@@ -119,14 +119,14 @@ describe("BORIS Integration tests", () => {
         await waitForHttpRequests(driver);
         // Now we should see the "Choose Scenario" page:
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
-        const loggedInheader = await driver.findElement({css: 'header .loggedin'});
-        let teamCode: string;
-        {
+        const getTeamCodeFromheader = async () => {
+            const loggedInheader = await driver.findElement({css: 'header .loggedin'});
             const text = (await loggedInheader.getText()).replace('\n', ' ');
             const regex = /Logged in as Tom. TEAM CODE: ([A-Z0-9]+) .*/;
             expect(text).toMatch(regex);
-            teamCode = text.match(regex)[1];
+            return text.match(regex)[1];
         }
+        let teamCode = await getTeamCodeFromheader();
         expect(teamCode).toHaveLength(5);
         // Leave the team:
         await driver.findElement(buttonWithText("LOG OUT")).click();
@@ -134,5 +134,17 @@ describe("BORIS Integration tests", () => {
         await driver.findElement(buttonWithText("CHANGE TEAM")).click();
         await waitForHttpRequests(driver);
         expect(await getHeaderText(driver)).toBe("JOIN TEAM");
+        // Join the team again, using an invalid code:
+        await driver.findElement(buttonWithText("JOIN A TEAM")).click();
+        await driver.findElement({css: 'input[type=text]'}).then(field => field.sendKeys('FOOBAR'));
+        await driver.findElement(buttonWithText("JOIN TEAM")).then(btn => btn.click());
+        await waitForHttpRequests(driver);
+        expect(await driver.findElement({css: '.team-error'}).getText()).toBe("Unable to join team: Invalid team code: FOOBAR");
+        // Now use the right code:
+        await driver.findElement({css: 'input[type=text]'}).then(async field => { await field.clear(); await field.sendKeys(teamCode) });
+        await driver.findElement(buttonWithText("JOIN TEAM")).then(btn => btn.click());
+        await waitForHttpRequests(driver);
+        expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
+        expect(await getTeamCodeFromheader()).toBe(teamCode);
     });
 });

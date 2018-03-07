@@ -238,6 +238,61 @@ router.post('/team/create', apiErrorWrapper(async (req, res) => {
     res.json(response);
 }));
 
+
+/**
+ * API for joining a new team.
+ * 
+ * Accepts a JSON body.
+ */
+router.post('/team/join', apiErrorWrapper(async (req, res) => {
+    if (!req.user) {
+        throw new SafeError("You need to be logged in to create a team.");
+    }
+    if (!req.body) {
+        throw new SafeError("Missing JSON body.");
+    }
+    // Parse the data from the form:
+    const code: string = req.body.code;
+    if (!code) {
+        throw new SafeError("Missing team code.");
+    }
+    const db: BorisDatabase = req.app.get("db");
+    // Check if the team is valid
+    const team = await db.teams.findOne({code,});
+    if (team === null) {
+        throw new SafeError(`Invalid team code: ${code}`);
+    }
+    // Check if the team is full
+    const otherTeamMembers: Array<any> = await db.query(
+        `SELECT u.first_name, u.id, tm.is_admin from users AS u, team_members tm
+         WHERE u.id = tm.user_id AND tm.team_id = $1 AND tm.is_active = true AND tm.user_id <> $2`,
+        [team.id, req.user.id], {}
+    );
+    if (otherTeamMembers.length > 4) {
+        throw new SafeError("Sorry, that team is full. Ask the team admin to remove some other members, or join a different team.");
+    }
+    // Mark the user as active on this team, and add them as a team member if necessary:
+    let isTeamAdmin = false;
+    const result = await db.instance.tx('join_team', async (task) => {
+        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [req.user.id]);
+        const upsertResult = await task.one(
+            `INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, false, true)
+             ON CONFLICT (user_id, team_id)
+             DO UPDATE SET is_active = true WHERE team_members.user_id = $1 AND team_members.team_id = $2
+             RETURNING is_admin`,
+            [req.user.id, team.id]
+        );
+        isTeamAdmin = upsertResult.is_admin;
+    });
+    const response: JoinTeamResponse = {
+        teamName: team.name,
+        teamCode: code,
+        isTeamAdmin,
+        otherTeamMembers: otherTeamMembers.map((m: any) => ({ name: m.first_name, id: m.id, online: false, isAdmin: m.is_admin })),
+    };
+    res.json(response);
+}));
+
 /**
  * API for leaving the user's active team.
  *
