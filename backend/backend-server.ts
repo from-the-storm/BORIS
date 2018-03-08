@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as expressWebsocket from 'express-ws';
 import * as bodyParser from 'body-parser';
 import * as nodemailer from 'nodemailer';
+import { SendMailOptions } from 'nodemailer';
 import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
 import * as nodemailerMockTransport from 'nodemailer-mock-transport';
 import * as passport from 'passport';
@@ -16,9 +17,10 @@ import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
+import {router as testHelperRouter} from './routes/test-helper-api';
 
 // Declare our additions to the Express API:
-import './express-extended';
+import {UserType} from './express-extended';
 
 const app = express();
 expressWebsocket(app);
@@ -98,7 +100,7 @@ app.set('sendMail', (function() {
     const transporter = nodemailer.createTransport(transport);
 
     // Return a sendMail method, that in turn returns a promise:
-    return async (mailData) => {
+    return async (mailData: SendMailOptions) => {
         // The 'from' value is usually the same, so we set it here:
         const mailDataWithDefaults = Object.assign({from: config.system_emails_from}, mailData);
         const info = await transporter.sendMail(mailDataWithDefaults);
@@ -117,7 +119,7 @@ passport.use(new UniqueTokenStrategy(
     {
         tokenParams: 'code', // Get the token from the 'code' URL field
     },
-	(token, done) => {
+	(token: string, done: (error: any, user?: any) => void) => {
         const db: BorisDatabase = app.get('db');
         const DAYS = 1000 * 60 * 60 * 24;
         const validAfter = new Date(+new Date() - 7 * DAYS);
@@ -134,10 +136,10 @@ passport.use(new UniqueTokenStrategy(
 	}
 ));
 
-passport.serializeUser((user, done) => { done(null, user.id); });
-passport.deserializeUser((id, done) =>{
+passport.serializeUser((user: UserType, done: any) => { done(null, user.id); });
+passport.deserializeUser((id: number, done: any) =>{
     const db = app.get('db');
-    db.users.find(id).then(user => { done(null, user); }, err => { done(err, null); });
+    db.users.find(id).then((user: UserType) => { done(null, user); }, (err: any) => { done(err, null); });
 });
 
 // Configure logging:
@@ -169,6 +171,10 @@ app.use('/auth', loginRegisterRouter);
 
 // Misc. API used by the single page app frontend:
 app.use('/app-api', appAPIRouter);
+
+if (environment === 'test') {
+    app.use('/test-utils', testHelperRouter);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Web sockets

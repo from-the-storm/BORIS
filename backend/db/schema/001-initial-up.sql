@@ -14,6 +14,8 @@ CREATE TABLE users (
     first_name varchar(150) NOT NULL,
     email varchar(500) NOT NULL CHECK (email LIKE '%@%'),
     created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0'),
+    -- "last active" value used to tell when users are online:
+    last_active timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM last_active) = '0'),
     survey_data jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 -- Emails are stored as case-sensititve but must be unique in a case-insensitive constraint
@@ -43,3 +45,25 @@ CREATE TABLE activity (
 );
 -- User activity log is immutable
 CREATE TRIGGER trg_prevent_update__activity BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE fn_prevent_update();
+
+-- Teams table
+CREATE TABLE teams (
+    id bigserial PRIMARY KEY,
+    name varchar(500) NOT NULL,
+    organization varchar(500) NOT NULL,
+    code varchar(10) NOT NULL UNIQUE,
+    created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0')
+);
+
+CREATE TABLE team_members (
+    id bigserial PRIMARY KEY,
+    user_id bigint NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    team_id bigint NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    is_admin BOOLEAN NOT NULL DEFAULT false,
+    -- A user can be a member of multiple teams but only "active" (online) on one team at any given time:
+    is_active BOOLEAN NOT NULL DEFAULT false,
+    UNIQUE (user_id, team_id)
+);
+
+-- A user can be a member of multiple teams but only "active" (online) on one team at any given time:
+CREATE UNIQUE INDEX active_team ON team_members (user_id) WHERE is_active = 'true';

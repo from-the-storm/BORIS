@@ -1,2 +1,0 @@
-BORIS_ENV={{ boris_app_mode }}
-BORIS_CONFIG='{{ boris_config | to_json }}'

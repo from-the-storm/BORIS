@@ -8,14 +8,68 @@ import * as passport from 'passport';
 
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
+import {alphanumericCodeGenerator} from './login-register-utils';
+import { PostApiMethod, JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from './api-interfaces';
 
 // Declare our additions to the Express API:
-import '../express-extended';
+import { UserType } from '../express-extended';
 
 export const router = express.Router();
 
 class SafeError extends Error {
     // An error whose message is safe to show to the user
+}
+
+/**
+ * Wrap a REST API handler method, and ensure that if an error occurs, a consistent error
+ * JSON result is returned, and that the error details don't leak sensitive info.
+ * Only errors that are instances of 'SafeError' will be reported; other errors will just
+ * say 'An internal error occurred'.
+ *
+ * @param fn The API handler to wrap
+ */
+function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Promise<any>) {
+    return async (req: express.Request, res: express.Response) => {
+        try {
+            await fn(req, res);
+        } catch (err) {
+            console.error(err);
+            res.status(400).json({ error: err instanceof SafeError ? err.message : "An internal error occurred handling this API method." });
+            return;
+        }
+    };
+}
+
+/** Wrapper around an API call that takes POST body data and requires that the user is logged in. */
+function postApiMethodWithUser<RequestType, ResponseType>(def: PostApiMethod<RequestType, ResponseType>, fn: (data: RequestType, user: UserType, app: express.Application) => Promise<ResponseType>) {
+    const path = def.path.replace(/^\/auth/, '');
+    router.post(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
+        if (!req.user) {
+            throw new SafeError("You are not logged in.");
+        }
+        if (!req.body) {
+            throw new SafeError("Missing JSON body.");
+        }
+        const data: RequestType = req.body;
+        const result = await fn(data, req.user, req.app);
+        res.json(result);
+    }));
+}
+
+/** Wrapper around an API call that takes POST body data and requires that NO user is logged in. */
+function postApiMethodAnonymousOnly<RequestType, ResponseType>(def: PostApiMethod<RequestType, ResponseType>, fn: (data: RequestType, app: express.Application) => Promise<ResponseType>) {
+    const path = def.path.replace(/^\/auth/, '');
+    router.post(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
+        if (req.user) {
+            throw new SafeError("You are already logged in.");
+        }
+        if (!req.body) {
+            throw new SafeError("Missing JSON body.");
+        }
+        const data: RequestType = req.body;
+        const result = await fn(data, req.app);
+        res.json(result);
+    }));
 }
 
 async function sendLoginLinkToUser(app: express.Application, email: string) {
@@ -41,36 +95,24 @@ async function sendLoginLinkToUser(app: express.Application, email: string) {
  * 
  * Accepts a JSON body.
  */
-router.post('/request-login', async (req: express.Request, res) => {
-    try {
-        if (req.user) {
-            throw new SafeError("Another user is already logged in.");
-        }
-        if (!req.body) {
-            throw new SafeError("Missing JSON body.");
-        }
-        // Look up the user by email:
-        const email: string = req.body.email;
-        if (typeof email !== 'string') {
-            throw new SafeError("No email address given.");
-        }
-        if (!isEmail(email)) {
-            throw new SafeError("Not a valid email address");
-        }
-        sendLoginLinkToUser(req.app, email);
-        res.json({result: 'ok'});
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({ error: err instanceof SafeError ? err.message : "Unable to send email due to an internal error" });
-        return;
+postApiMethodAnonymousOnly(REQUEST_LOGIN, async (data, app) => {
+    // Look up the user by email:
+    const email: string = data.email;
+    if (typeof email !== 'string') {
+        throw new SafeError("No email address given.");
     }
+    if (!isEmail(email)) {
+        throw new SafeError("Not a valid email address");
+    }
+    sendLoginLinkToUser(app, email);
+    return {result: 'ok'};
 });
 
 /**
  * View for validating and using a login-by-email link
  */
 router.get('/login/:code', (req, res, next) => {
-    passport.authenticate('token', (err, user, info) => {
+    passport.authenticate('token', (err: any, user: UserType, info: any) => {
         if (err) { return next(err); }
         if (user) {
             // The login succeeded:
@@ -128,31 +170,133 @@ function validateUserData(data: any): Partial<User> {
  * 
  * Accepts a JSON body.
  */
-router.post('/register', async (req, res) => {
+postApiMethodAnonymousOnly(REGISTER_USER,  async (data, app) => {
+    // Parse the data from the form:
+    const userData = validateUserData(data);
+    const db: BorisDatabase = app.get("db");
+    let user: User;
     try {
-        if (req.user) {
-            throw new SafeError("Another user is already logged in.");
-        }
-        if (!req.body) {
-            throw new SafeError("Missing JSON body.");
-        }
-        // Parse the data from the form:
-        const userData = validateUserData(req.body);
-        const db: BorisDatabase = req.app.get("db");
-        let user: User;
-        try {
-            user = await db.users.insert(userData);
-        } catch (err) {
-            if (err.constraint === 'users_email_lower_idx') {
-                throw new SafeError("An account with that email address already exists.");
-            }
-            throw err;
-        }
-        await sendLoginLinkToUser(req.app, user.email);
-        res.json({result: 'ok'});
+        user = await db.users.insert(userData);
     } catch (err) {
-        console.error(err);
-        res.status(400).json({ error: err instanceof SafeError ? err.message : "Unable to register you due to an internal error" });
-        return;
+        if (err.constraint === 'users_email_lower_idx') {
+            throw new SafeError("An account with that email address already exists.");
+        }
+        throw err;
     }
+    await sendLoginLinkToUser(app, user.email);
+    return {result: 'ok'};
+});
+
+/**
+ * API for creating a new team.
+ * 
+ * Accepts a JSON body.
+ */
+postApiMethodWithUser(CREATE_TEAM, async (data, user, app) => {
+    // Parse the data from the form:
+    const teamName = (data.teamName || '').trim();
+    if (!teamName) { throw new SafeError("Missing team name."); }
+    const organizationName = (data.organizationName || '').trim();
+    if (!organizationName) { throw new SafeError("Missing team name."); }
+    const db: BorisDatabase = app.get("db");
+    let newCode: string|null = null;
+    let newTeamId: number;
+    const result = await db.instance.tx('create_team', async (task) => {
+        let codeGen = alphanumericCodeGenerator(Math.random() * 0.95, 5); // 0.95 so that if there is a conflict, we can always generate a few more codes without hitting the max limit
+        for (const code of codeGen) {
+            console.log(`Creating team with code ${code}`);
+            try {
+                const result = await task.one(
+                    'INSERT INTO teams (name, organization, code) VALUES ($1, $2, $3) RETURNING id',
+                    [teamName, organizationName, code]
+                );
+                newCode = code;
+                newTeamId = result.id;
+                break;
+            } catch (e) {
+                if (e.constraint === 'teams_code_key') {
+                    // This code was not unique; try again:
+                    continue;
+                } else {
+                    throw e;
+                }
+            }
+        }
+        if (newCode === null) {
+            throw new SafeError('Unable to create unique code for the team.');
+        }
+        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [user.id]);
+        await task.none(
+            'INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, true, true)',
+            [user.id, newTeamId]
+        );
+    });
+    return {
+        teamName: teamName,
+        teamCode: newCode,
+        isTeamAdmin: true,
+        otherTeamMembers: [],
+    };
+});
+
+
+/**
+ * API for joining a new team.
+ * 
+ * Accepts a JSON body.
+ */
+postApiMethodWithUser(JOIN_TEAM, (async (data, user, app) => {
+    // Parse the data from the form:
+    const code: string = data.code;
+    if (!code) {
+        throw new SafeError("Missing team code.");
+    }
+    const db: BorisDatabase = app.get("db");
+    // Check if the team is valid
+    const team = await db.teams.findOne({code,});
+    if (team === null) {
+        throw new SafeError(`Invalid team code: ${code}`);
+    }
+    // Check if the team is full
+    const otherTeamMembers: Array<any> = await db.query(
+        `SELECT u.first_name, u.id, tm.is_admin from users AS u, team_members tm
+         WHERE u.id = tm.user_id AND tm.team_id = $1 AND tm.is_active = true AND tm.user_id <> $2`,
+        [team.id, user.id], {}
+    );
+    if (otherTeamMembers.length > 4) {
+        throw new SafeError("Sorry, that team is full. Ask the team admin to remove some other members, or join a different team.");
+    }
+    // Mark the user as active on this team, and add them as a team member if necessary:
+    let isTeamAdmin = false;
+    const result = await db.instance.tx('join_team', async (task) => {
+        await task.none('UPDATE team_members SET is_active = false WHERE user_id = $1', [user.id]);
+        const upsertResult = await task.one(
+            `INSERT INTO team_members (user_id, team_id, is_admin, is_active) VALUES ($1, $2, false, true)
+             ON CONFLICT (user_id, team_id)
+             DO UPDATE SET is_active = true WHERE team_members.user_id = $1 AND team_members.team_id = $2
+             RETURNING is_admin`,
+            [user.id, team.id]
+        );
+        isTeamAdmin = upsertResult.is_admin;
+    });
+    return {
+        teamName: team.name,
+        teamCode: code,
+        isTeamAdmin,
+        otherTeamMembers: otherTeamMembers.map((m: any) => ({ name: m.first_name, id: m.id, online: false, isAdmin: m.is_admin })),
+    };
+}));
+
+/**
+ * API for leaving the user's active team.
+ *
+ * This preserve's the user's association with the team, but it means
+ * that team is no longer the user's "active" team. Each user can only
+ * be "active" on one team at a time but can be linked to many teams.
+ *
+ */
+postApiMethodWithUser(LEAVE_TEAM, async (data, user, app) => {
+    const db: BorisDatabase = app.get("db");
+    await db.team_members.update({user_id: user.id, is_active: true}, {is_active: false});
+    return {result: 'ok'};
 });

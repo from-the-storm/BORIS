@@ -37,15 +37,31 @@
             "command": "npm",
             "args": ["run", "migrate"],
             "isBackground": false,
-            "options": {
-                "cwd": "${workspaceFolder}/backend"
-            },
             "problemMatcher": [],
             "windows": {
                 "options": {
                     "env": {
                         // Fixes to work with Docker Toolbox on Windows:
                         "BORIS_CONFIG": "{\"development\": {\"db_host\": \"192.168.99.100\", \"redis_host\": \"192.168.99.100\"}}"
+                    }
+                }
+            }
+        },
+        {
+            "label": "Reset Dev Database (!)",
+            "type": "shell",
+            "command": "./node_modules/.bin/ts-node",
+            "args": ["backend/db/reset-db.ts"],
+            "isBackground": false,
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "options": {
+                    "env": {
+                        // Fixes to work with Docker Toolbox on Windows:
+                        "BORIS_CONFIG": "{\"development\": {\"db_host\": \"192.168.99.100\"}}"
                     }
                 }
             }

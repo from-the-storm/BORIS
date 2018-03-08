@@ -81,9 +81,9 @@ export function countElementsMatching(css: string, driver: WebDriver) {
 
 export function elementMatchingWithText(css: string, text: string) {
     return async (driver: WebDriver) => {
-        const buttons = await driver.findElements({css: 'button'});
-        const matchingButtons = await Promise.all(buttons.map(async (btn: WebElement) => await btn.getText() === text ? btn : null));
-        const result = matchingButtons.filter(btn => btn !== null);
+        const elements = await driver.findElements({css, });
+        const matchingElements = await Promise.all(elements.map(async (el: WebElement) => await el.getText() === text ? el : null));
+        const result = matchingElements.filter(el => el !== null);
         if (result.length == 1) {
             return result;
         } else {
