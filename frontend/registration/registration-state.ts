@@ -10,7 +10,7 @@ export const enum Mode {
     Login,
     JoinTeam,
     CreateTeam,
-    ChooseScenario,
+    ReadyToPlay,
     Logout,
 }
 
@@ -57,7 +57,7 @@ export function registrationStateReducer(state?: RegistrationState, action?: Any
         return state.set('mode', Mode.CreateTeam);
     case Actions.SHOW_CHOOSE_SCENARIO:
     case TeamStateActions.JOIN_TEAM:
-        return state.set('mode', Mode.ChooseScenario);
+        return state.set('mode', Mode.ReadyToPlay);
     case UserStateActions.LOGOUT:
     // User has logged out:
         return state.set('mode', Mode.Home);

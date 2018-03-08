@@ -10,7 +10,8 @@ import {
     userStateReducer,
     teamStateReducer,
 } from './global/state';
-import {RegistrationState, registrationStateReducer} from './registration/registration-state';
+import { registrationStateReducer } from './registration/registration-state';
+import { lobbyStateReducer } from './lobby/lobby-state';
 import {App} from './app';
 import { LoadingSpinnerComponent } from './loading/loading-spinner';
 import { InitStateActions } from './global/state/init-state-actions';
@@ -26,6 +27,7 @@ export const store = createStore(
         userState: userStateReducer,
         teamState: teamStateReducer,
         registrationState: registrationStateReducer,
+        lobbyState: lobbyStateReducer,
     }),
     applyMiddleware(thunk),
 );

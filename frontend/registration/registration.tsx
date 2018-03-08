@@ -3,7 +3,6 @@ import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
 import {RootState} from '../global/state';
-import { ChooseScenarioComponent } from './choose-scenario';
 import {HomeComponent} from './home';
 import {RegisterComponent} from './register';
 import {JoinTeamComponent} from './join-team';
@@ -66,7 +65,6 @@ class _RegistrationComponent extends React.PureComponent<Props> {
                     this.props.mode === Mode.Login ? <LoginComponent/> :
                     this.props.mode === Mode.JoinTeam ? <JoinTeamComponent/> :
                     this.props.mode === Mode.CreateTeam ? <CreateTeamComponent/> :
-                    this.props.mode === Mode.ChooseScenario ? <ChooseScenarioComponent/> :
                     this.props.mode === Mode.Logout ? <LogoutComponent/> :
                     'Error: Unknown mode.'
                 }
