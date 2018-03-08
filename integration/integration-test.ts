@@ -146,5 +146,5 @@ describe("BORIS Integration tests", () => {
         await waitForHttpRequests(driver);
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
         expect(await getTeamCodeFromheader()).toBe(teamCode);
-    });
+    }, 8000);
 });
