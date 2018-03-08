@@ -54,8 +54,6 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
                     <button onClick={this.handleJoinTeam}>Join a Team</button>
                     <button onClick={this.handleCreateTeam}>Create a Team</button>
                 </div>
-                <h2>Recent teams</h2>
-                <p>You have not recently joined any teams.</p>
             </div>;
         }
     }
