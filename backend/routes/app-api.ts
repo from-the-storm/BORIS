@@ -6,21 +6,24 @@ import * as express from 'express';
 import '../express-extended';
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
-import { InitialStateResponse } from './api-interfaces';
+import { InitialStateResponse, GET_INITIAL_STATE } from './api-interfaces';
+import { makeApiHelper, RequireUser } from './api-utils';
 
 export const router = express.Router();
+
+const getApiMethod = makeApiHelper(router, /^\/app-api/, RequireUser.UserOptional);
 
 /**
  * API endpoint for getting data needed to initialize the app's state:
  */
-router.post('/get-initial-state', async (req, res) => {
-    const db: BorisDatabase = req.app.get("db");
+getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
     const result: InitialStateResponse = {};
-    if (req.user) {
+    if (user) {
         result.user = {
-            first_name: req.user.first_name,
+            first_name: user.first_name,
         };
-        const activeTeamMembership = await db.team_members.findOne({user_id: req.user.id, is_active: true});
+        const activeTeamMembership = await db.team_members.findOne({user_id: user.id, is_active: true});
         if (activeTeamMembership !== null) {
             const team = await db.teams.findOne({id: activeTeamMembership.id});
             result.team = {
@@ -31,5 +34,5 @@ router.post('/get-initial-state', async (req, res) => {
             };
         }
     }
-    res.json(result);
+    return result;
 });

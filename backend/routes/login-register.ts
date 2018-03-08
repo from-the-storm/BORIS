@@ -9,68 +9,17 @@ import * as passport from 'passport';
 import {config} from '../config';
 import {BorisDatabase, User} from '../db/db';
 import {alphanumericCodeGenerator} from './login-register-utils';
-import { PostApiMethod, JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from './api-interfaces';
+import { JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from './api-interfaces';
 
 // Declare our additions to the Express API:
 import { UserType } from '../express-extended';
+import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 
 export const router = express.Router();
+const mountPoint = /^\/auth/;
 
-class SafeError extends Error {
-    // An error whose message is safe to show to the user
-}
-
-/**
- * Wrap a REST API handler method, and ensure that if an error occurs, a consistent error
- * JSON result is returned, and that the error details don't leak sensitive info.
- * Only errors that are instances of 'SafeError' will be reported; other errors will just
- * say 'An internal error occurred'.
- *
- * @param fn The API handler to wrap
- */
-function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Promise<any>) {
-    return async (req: express.Request, res: express.Response) => {
-        try {
-            await fn(req, res);
-        } catch (err) {
-            console.error(err);
-            res.status(400).json({ error: err instanceof SafeError ? err.message : "An internal error occurred handling this API method." });
-            return;
-        }
-    };
-}
-
-/** Wrapper around an API call that takes POST body data and requires that the user is logged in. */
-function postApiMethodWithUser<RequestType, ResponseType>(def: PostApiMethod<RequestType, ResponseType>, fn: (data: RequestType, user: UserType, app: express.Application) => Promise<ResponseType>) {
-    const path = def.path.replace(/^\/auth/, '');
-    router.post(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
-        if (!req.user) {
-            throw new SafeError("You are not logged in.");
-        }
-        if (!req.body) {
-            throw new SafeError("Missing JSON body.");
-        }
-        const data: RequestType = req.body;
-        const result = await fn(data, req.user, req.app);
-        res.json(result);
-    }));
-}
-
-/** Wrapper around an API call that takes POST body data and requires that NO user is logged in. */
-function postApiMethodAnonymousOnly<RequestType, ResponseType>(def: PostApiMethod<RequestType, ResponseType>, fn: (data: RequestType, app: express.Application) => Promise<ResponseType>) {
-    const path = def.path.replace(/^\/auth/, '');
-    router.post(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
-        if (req.user) {
-            throw new SafeError("You are already logged in.");
-        }
-        if (!req.body) {
-            throw new SafeError("Missing JSON body.");
-        }
-        const data: RequestType = req.body;
-        const result = await fn(data, req.app);
-        res.json(result);
-    }));
-}
+const postApiMethodAnonymousOnly = makeApiHelper(router, mountPoint, RequireUser.AnonymousOnly);
+const postApiMethodWithUser = makeApiHelper(router, mountPoint, RequireUser.Required);
 
 async function sendLoginLinkToUser(app: express.Application, email: string) {
     const db: BorisDatabase = app.get("db");
@@ -192,7 +141,7 @@ postApiMethodAnonymousOnly(REGISTER_USER,  async (data, app) => {
  * 
  * Accepts a JSON body.
  */
-postApiMethodWithUser(CREATE_TEAM, async (data, user, app) => {
+postApiMethodWithUser(CREATE_TEAM, async (data, app, user) => {
     // Parse the data from the form:
     const teamName = (data.teamName || '').trim();
     if (!teamName) { throw new SafeError("Missing team name."); }
@@ -245,7 +194,7 @@ postApiMethodWithUser(CREATE_TEAM, async (data, user, app) => {
  * 
  * Accepts a JSON body.
  */
-postApiMethodWithUser(JOIN_TEAM, (async (data, user, app) => {
+postApiMethodWithUser(JOIN_TEAM, (async (data, app, user) => {
     // Parse the data from the form:
     const code: string = data.code;
     if (!code) {
@@ -295,7 +244,7 @@ postApiMethodWithUser(JOIN_TEAM, (async (data, user, app) => {
  * be "active" on one team at a time but can be linked to many teams.
  *
  */
-postApiMethodWithUser(LEAVE_TEAM, async (data, user, app) => {
+postApiMethodWithUser(LEAVE_TEAM, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
     await db.team_members.update({user_id: user.id, is_active: true}, {is_active: false});
     return {result: 'ok'};

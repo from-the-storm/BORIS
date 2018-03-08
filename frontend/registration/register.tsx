@@ -5,7 +5,7 @@ import { connect, DispatchProp } from 'react-redux';
 import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { REGISTER_USER } from '../../backend/routes/api-interfaces';
-import { postToApi } from '../api';
+import { callApi } from '../api';
 
 
 interface OwnProps {
@@ -132,7 +132,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
     }
     private async submitRegistrationFormData() {
         try {
-            await postToApi(REGISTER_USER, {
+            await callApi(REGISTER_USER, {
                 hasConsented: this.state.hasConsented,
                 firstName: this.state.firstName,
                 email: this.state.email,

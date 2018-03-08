@@ -2,7 +2,7 @@ import { bind } from 'bind-decorator';
 import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
-import { postToApi } from '../api';
+import { callApi } from '../api';
 import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { TeamStateActions } from '../global/state/team-state-actions';
@@ -86,7 +86,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
     private async submitFormData() {
         let data: CreateOrJoinTeamResponse;
         try {
-            data = await postToApi(JOIN_TEAM, {code: this.state.code});
+            data = await callApi(JOIN_TEAM, {code: this.state.code});
         } catch (error) {
             throw new Error(`Unable to join team: ${error.message}`);
         }

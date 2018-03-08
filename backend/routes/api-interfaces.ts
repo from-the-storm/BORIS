@@ -3,6 +3,10 @@ export interface EmptyApiResponse {
     result: 'ok';
 }
 
+/** Default parameters value of API methods that don't require any request data */
+export interface NoRequestParameters {
+}
+
 export interface OtherTeamMember {
     name: string;
     id: number;
@@ -10,9 +14,19 @@ export interface OtherTeamMember {
     isAdmin: boolean;
 }
 
-/**
- * Response from /get-initial-state
- */
+export interface ApiErrorResponse {
+    error: string;
+}
+
+export interface ApiMethod<RequestType, ResponseType> {
+    path: string;
+    type: 'POST'|'GET';
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// app-api methods:
+
+/** GET_INITIAL_STATE response */
 export interface InitialStateResponse {
     user?: {
         first_name: string;
@@ -25,14 +39,8 @@ export interface InitialStateResponse {
     };
 };
 
+export const GET_INITIAL_STATE: ApiMethod<{}, InitialStateResponse> = {path: '/app-api/get-initial-state', type: 'GET'};
 
-export interface ApiErrorResponse {
-    error: string;
-}
-
-export interface PostApiMethod<RequestType, ResponseType> {
-    path: string;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // login-register methods:
@@ -44,7 +52,7 @@ export interface RequestLoginRequest {
     email: string;
 }
 
-export const REQUEST_LOGIN: PostApiMethod<RequestLoginRequest, EmptyApiResponse> = {path: '/auth/request-login'};
+export const REQUEST_LOGIN: ApiMethod<RequestLoginRequest, EmptyApiResponse> = {path: '/auth/request-login', type: 'POST'};
 
 // Register:
 
@@ -58,7 +66,7 @@ export interface RegisterUserRequest {
     gender: 'm'|'f'|'o';
 }
 
-export const REGISTER_USER: PostApiMethod<RegisterUserRequest, EmptyApiResponse> = {path: '/auth/register'};
+export const REGISTER_USER: ApiMethod<RegisterUserRequest, EmptyApiResponse> = {path: '/auth/register', type: 'POST'};
 
 // Create a team:
 
@@ -76,7 +84,7 @@ export interface CreateOrJoinTeamResponse {
     otherTeamMembers: Array<OtherTeamMember>;
 };
 
-export const CREATE_TEAM: PostApiMethod<CreateTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/create'};
+export const CREATE_TEAM: ApiMethod<CreateTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/create', type: 'POST'};
 
 // Join a team:
 
@@ -85,9 +93,9 @@ export interface JoinTeamRequest {
     code: string;
 }
 
-export const JOIN_TEAM: PostApiMethod<JoinTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/join'};
+export const JOIN_TEAM: ApiMethod<JoinTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/join', type: 'POST'};
 
 // Leave a team:
 
-export const LEAVE_TEAM: PostApiMethod<{}, EmptyApiResponse> = {path: '/auth/team/leave'};
+export const LEAVE_TEAM: ApiMethod<{}, EmptyApiResponse> = {path: '/auth/team/leave', type: 'POST'};
 

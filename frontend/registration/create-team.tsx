@@ -6,7 +6,7 @@ import {RootState} from '../global/state';
 import { TeamStateActions } from '../global/state/team-state-actions';
 import { Actions } from './registration-state-actions';
 import { CREATE_TEAM, CreateOrJoinTeamResponse } from '../../backend/routes/api-interfaces';
-import { postToApi } from '../api';
+import { callApi } from '../api';
 
 
 interface OwnProps {
@@ -88,7 +88,7 @@ class _CreateTeamComponent extends React.PureComponent<Props, State> {
     private async submitFormData() {
         let response: CreateOrJoinTeamResponse;
         try {
-            response = await postToApi(CREATE_TEAM, {
+            response = await callApi(CREATE_TEAM, {
                 teamName: this.state.teamName,
                 organizationName: this.state.organizationName,
             });

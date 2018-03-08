@@ -1,6 +1,6 @@
 import bind from 'bind-decorator';
 import * as React from 'react';
-import { postToApi } from '../api';
+import { callApi } from '../api';
 import { RequestLoginRequest, REQUEST_LOGIN } from '../../backend/routes/api-interfaces';
 
 
@@ -59,7 +59,7 @@ export class LoginComponent extends React.PureComponent<Props, State> {
         }
         this.setState({waitingForServerResponse: true});
         try {
-            await postToApi(REQUEST_LOGIN, {email: this.state.emailAddressEntered});
+            await callApi(REQUEST_LOGIN, {email: this.state.emailAddressEntered});
         } catch (error) {
             this.setState({
                 waitingForServerResponse: false,
