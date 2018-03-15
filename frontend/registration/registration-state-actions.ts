@@ -13,5 +13,23 @@ export enum Actions {
     SHOW_CHOOSE_SCENARIO = 'RS_SHOW_CHOOSE_SCENARIO',
 }
 
+export interface ShowHomeAction { type: Actions.SHOW_HOME; }
+export interface ShowLoginAction { type: Actions.SHOW_LOGIN; }
+export interface ShowLogoutAction { type: Actions.SHOW_LOGOUT; }
+export interface ShowRegisterAction { type: Actions.SHOW_REGISTER; }
+export interface ShowJoinTeamAction { type: Actions.SHOW_JOIN_TEAM; }
+export interface ShowCreateTeamAction { type: Actions.SHOW_CREATE_TEAM; }
+export interface ShowChooseScenarioAction { type: Actions.SHOW_CHOOSE_SCENARIO; }
+
+export type RegistrationStateActionsType = (
+    ShowHomeAction|
+    ShowLoginAction|
+    ShowLogoutAction|
+    ShowRegisterAction|
+    ShowJoinTeamAction|
+    ShowCreateTeamAction|
+    ShowChooseScenarioAction
+);
+
 //// Action Creators
 

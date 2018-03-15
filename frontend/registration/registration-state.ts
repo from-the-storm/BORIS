@@ -1,8 +1,9 @@
 import {Record} from 'immutable';
-import {AnyAction, Dispatch} from 'redux';
+import {Dispatch} from 'redux';
 import {UserStateActions} from '../global/state/user-state-actions';
 import {TeamStateActions} from '../global/state/team-state-actions';
 import {Actions} from './registration-state-actions';
+import { AnyAction } from '../global/actions';
 
 export const enum Mode {
     Home,

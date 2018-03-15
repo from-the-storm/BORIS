@@ -10,6 +10,7 @@ import {Mode} from './lobby-state';
 // Include our SCSS (via webpack magic)
 import './lobby.scss';
 import { Actions as RegistrationActions } from '../registration/registration-state-actions';
+import { AnyAction } from '../global/actions';
 
 interface OwnProps {
 }
@@ -22,7 +23,7 @@ class _LobbyComponent extends React.PureComponent<Props> {
         super(props);
     }
 
-    @bind private handleHomeButton() { this.props.dispatch({type: RegistrationActions.SHOW_HOME}); }
+    @bind private handleHomeButton() { this.props.dispatch<AnyAction>({type: RegistrationActions.SHOW_HOME}); }
 
     public render() {
         return <div className="lobby">

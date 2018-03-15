@@ -19,6 +19,7 @@ import { UserStateActions } from './global/state/user-state-actions';
 import { InitialStateResponse, GET_INITIAL_STATE } from '../backend/routes/api-interfaces';
 import { TeamStateActions } from './global/state/team-state-actions';
 import { callApi } from './api';
+import { AnyAction } from './global/actions';
 
 
 export const store = createStore(
@@ -51,12 +52,12 @@ window.__rootComponent =  null; // Gets set after loading initial state, below.
 // Load the initial state from the server:
 callApi(GET_INITIAL_STATE, {}).then(async data => {
     if (data.user) {
-        store.dispatch({
+        store.dispatch<AnyAction>({
             type: UserStateActions.LOGIN,
             firstName: data.user.first_name,
         });
         if (data.team) {
-            store.dispatch({
+            store.dispatch<AnyAction>({
                 type: TeamStateActions.JOIN_TEAM,
                 teamCode: data.team.code,
                 teamName: data.team.name,
@@ -65,8 +66,8 @@ callApi(GET_INITIAL_STATE, {}).then(async data => {
             });
         }
     }
-    store.dispatch({type: InitStateActions.SUCCEEDED});
+    store.dispatch<AnyAction>({type: InitStateActions.SUCCEEDED});
     window.__rootComponent = rootComponent;
 }, () => {
-    store.dispatch({type: InitStateActions.FAILED});
+    store.dispatch<AnyAction>({type: InitStateActions.FAILED});
 });

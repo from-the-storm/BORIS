@@ -8,6 +8,7 @@ import { Actions } from './registration-state-actions';
 import { TeamStateActions } from '../global/state/team-state-actions';
 
 import { CreateOrJoinTeamResponse, JOIN_TEAM } from '../../backend/routes/api-interfaces';
+import { AnyAction } from '../global/actions';
 
 
 interface OwnProps {
@@ -69,7 +70,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
     }
 
     @bind private handleCreateTeam() {
-        this.props.dispatch({type: Actions.SHOW_CREATE_TEAM});
+        this.props.dispatch<AnyAction>({type: Actions.SHOW_CREATE_TEAM});
     }
 
     @bind private handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -91,7 +92,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
             throw new Error(`Unable to join team: ${error.message}`);
         }
         this.setState({ waitingForServerResponse: false });
-        this.props.dispatch({
+        this.props.dispatch<AnyAction>({
             type: TeamStateActions.JOIN_TEAM,
             teamName: data.teamName,
             teamCode: data.teamCode,

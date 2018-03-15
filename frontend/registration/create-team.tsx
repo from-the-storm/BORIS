@@ -3,10 +3,11 @@ import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
 import {RootState} from '../global/state';
-import { TeamStateActions } from '../global/state/team-state-actions';
+import { TeamStateActions, TeamStateActionsType } from '../global/state/team-state-actions';
 import { Actions } from './registration-state-actions';
 import { CREATE_TEAM, CreateOrJoinTeamResponse } from '../../backend/routes/api-interfaces';
 import { callApi } from '../api';
+import { AnyAction } from '../global/actions';
 
 
 interface OwnProps {
@@ -72,7 +73,7 @@ class _CreateTeamComponent extends React.PureComponent<Props, State> {
         this.setState({[name as any]: value});
     }
     @bind private cancelCreateTeam() {
-        this.props.dispatch({type: Actions.SHOW_JOIN_TEAM});
+        this.props.dispatch<AnyAction>({type: Actions.SHOW_JOIN_TEAM});
     }
     @bind private handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -98,7 +99,7 @@ class _CreateTeamComponent extends React.PureComponent<Props, State> {
         this.setState({
             waitingForServerResponse: false,
         });
-        this.props.dispatch({
+        this.props.dispatch<AnyAction>({
             type: TeamStateActions.JOIN_TEAM,
             teamName: response.teamName,
             teamCode: response.teamCode,

@@ -6,6 +6,7 @@ import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { REGISTER_USER } from '../../backend/routes/api-interfaces';
 import { callApi } from '../api';
+import { AnyAction } from '../global/actions';
 
 
 interface OwnProps {
@@ -112,7 +113,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
         }
     }
 
-    @bind private handleDoNotConsent() { this.props.dispatch({type: Actions.SHOW_HOME}); }
+    @bind private handleDoNotConsent() { this.props.dispatch<AnyAction>({type: Actions.SHOW_HOME}); }
     @bind private handleConsent() { this.setState({hasConsented: true}); }
     @bind private handleFormFieldChange(event: React.ChangeEvent<HTMLInputElement>) {
         const name = event.target.name;
