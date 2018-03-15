@@ -4,7 +4,7 @@ import { connect, DispatchProp } from 'react-redux';
 
 import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
-import { REGISTER_USER } from '../../backend/routes/api-interfaces';
+import { REGISTER_USER } from '../../common/api';
 import { callApi } from '../api';
 import { AnyAction } from '../global/actions';
 

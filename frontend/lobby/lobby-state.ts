@@ -5,7 +5,7 @@ import {TeamStateActions} from '../global/state/team-state-actions';
 import { Actions } from './lobby-state-actions';
 import { AnyAction } from '../global/actions';
 import { LoadingState } from '../loading/loading-state';
-import { Scenario } from '../../backend/db/models';
+import { Scenario } from '../../common/models';
 
 export const enum Mode {
     ChooseScenario,

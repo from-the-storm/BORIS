@@ -1,10 +1,10 @@
 import {Dispatch} from 'redux';
 import { callApi } from '../api';
-import { GET_SCENARIOS } from '../../backend/routes/api-interfaces';
+import { GET_SCENARIOS } from '../../common/api';
 
 //// Interfaces
 
-import { Scenario } from '../../backend/db/models';
+import { Scenario } from '../../common/models';
 
 //// User State Actions
 

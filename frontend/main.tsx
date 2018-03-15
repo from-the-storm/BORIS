@@ -16,7 +16,7 @@ import {App} from './app';
 import { RootLoadingSpinnerComponent } from './loading/root-loading-spinner';
 import { InitStateActions } from './global/state/init-state-actions';
 import { UserStateActions } from './global/state/user-state-actions';
-import { InitialStateResponse, GET_INITIAL_STATE } from '../backend/routes/api-interfaces';
+import { InitialStateResponse, GET_INITIAL_STATE } from '../common/api';
 import { TeamStateActions } from './global/state/team-state-actions';
 import { callApi } from './api';
 import { AnyAction } from './global/actions';

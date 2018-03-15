@@ -1,5 +1,5 @@
 import {Dispatch} from 'redux';
-import { OtherTeamMember } from '../../../backend/routes/api-interfaces';
+import { OtherTeamMember } from '../../../common/models';
 
 //// Team State Actions
 

@@ -1,3 +1,5 @@
+import { BaseScenario } from "../../common/models";
+
 export interface User {
     id: number;
     first_name: string;
@@ -12,14 +14,8 @@ export interface User {
     };
 }
 
-export interface Scenario {
-    id: number;
+export interface DBScenario extends BaseScenario {
     is_active: boolean;
-    name: string;
-    duration_min: number;
-    difficulty: 'easy'|'med'|'hard';
-    start_point_name: string;
     /** Note that X is the latitude and Y is the longitude */
     start_point: {x: number, y: number};
-    description_html: string;
 }

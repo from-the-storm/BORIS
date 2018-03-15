@@ -4,7 +4,7 @@ import {Dispatch} from 'redux';
 import {TeamStateActions as Actions} from './team-state-actions';
 import {UserStateActions} from './user-state-actions';
 import { AnyAction } from '../actions';
-import { OtherTeamMember } from '../../../backend/routes/api-interfaces';
+import { OtherTeamMember } from '../../../common/models';
 
 /**
  * State of the team (has the user joined a team, etc.)

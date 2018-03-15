@@ -5,7 +5,7 @@ import {connect, DispatchProp} from 'react-redux';
 import {RootState} from '../global/state';
 import { TeamStateActions, TeamStateActionsType } from '../global/state/team-state-actions';
 import { Actions } from './registration-state-actions';
-import { CREATE_TEAM, CreateOrJoinTeamResponse } from '../../backend/routes/api-interfaces';
+import { CREATE_TEAM, CreateOrJoinTeamResponse } from '../../common/api';
 import { callApi } from '../api';
 import { AnyAction } from '../global/actions';
 

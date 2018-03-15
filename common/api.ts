@@ -1,4 +1,4 @@
-import { Scenario } from "../db/models";
+import { Scenario, OtherTeamMember } from "./models";
 
 /** Default return value of API methods that don't return any useful data */
 export interface EmptyApiResponse {
@@ -7,13 +7,6 @@ export interface EmptyApiResponse {
 
 /** Default parameters value of API methods that don't require any request data */
 export interface NoRequestParameters {
-}
-
-export interface OtherTeamMember {
-    name: string;
-    id: number;
-    online: boolean;
-    isAdmin: boolean;
 }
 
 export interface ApiErrorResponse {

@@ -6,7 +6,7 @@ import * as express from 'express';
 import '../express-extended';
 import {config} from '../config';
 import {BorisDatabase} from '../db/db';
-import { InitialStateResponse, GET_INITIAL_STATE } from './api-interfaces';
+import { InitialStateResponse, GET_INITIAL_STATE } from '../../common/api';
 import { makeApiHelper, RequireUser } from './api-utils';
 
 export const router = express.Router();

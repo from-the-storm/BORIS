@@ -7,7 +7,7 @@ import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { TeamStateActions } from '../global/state/team-state-actions';
 
-import { CreateOrJoinTeamResponse, JOIN_TEAM } from '../../backend/routes/api-interfaces';
+import { CreateOrJoinTeamResponse, JOIN_TEAM } from '../../common/api';
 import { AnyAction } from '../global/actions';
 
 

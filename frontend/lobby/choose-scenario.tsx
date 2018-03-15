@@ -7,7 +7,7 @@ import { List } from 'immutable';
 import { loadScenarios } from './lobby-state-actions';
 import { LoadingSpinnerComponent } from '../loading/loading-spinner';
 import { LoadingState } from '../loading/loading-state';
-import { Scenario } from '../../backend/db/models';
+import { Scenario } from '../../common/models';
 
 
 interface OwnProps {

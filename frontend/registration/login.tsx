@@ -1,7 +1,7 @@
 import bind from 'bind-decorator';
 import * as React from 'react';
 import { callApi } from '../api';
-import { RequestLoginRequest, REQUEST_LOGIN } from '../../backend/routes/api-interfaces';
+import { REQUEST_LOGIN } from '../../common/api';
 
 
 interface OwnProps {
