@@ -3,20 +3,7 @@ import * as postgres from 'pg';
 import * as pgPromise from 'pg-promise';
 
 import {config} from '../config';
-
-export interface User {
-    id: number;
-    first_name: string;
-    email: string;
-    created: Date;
-    survey_data: {
-        hasConsented: boolean,
-        workInTech: boolean|null,
-        occupation: string,
-        age: number|null,
-        gender: 'm'|'f'|'o'|null,
-    };
-}
+import { User, DBScenario } from './models';
 
 export interface BorisDatabase extends massive.Database {
     users: massive.Table<User>;
@@ -47,6 +34,7 @@ export interface BorisDatabase extends massive.Database {
         is_admin: boolean;
         is_active: boolean;
     }>;
+    scenarios: massive.Table<DBScenario>;
     user_by_email(email: string): Promise<User>;
     instance: pgPromise.IDatabase<{}>;
 }

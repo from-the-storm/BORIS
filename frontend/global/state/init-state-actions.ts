@@ -8,3 +8,12 @@ export enum InitStateActions {
     FAILED = 'G_IS_FAILED',
 }
 const Actions = InitStateActions;
+
+interface InitStateSucceededAction {
+    type: InitStateActions.SUCCEEDED,
+}
+interface InitStateFailedAction {
+    type: InitStateActions.FAILED,
+}
+
+export type InitStateActionsType = InitStateSucceededAction|InitStateFailedAction;

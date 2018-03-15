@@ -1,43 +1,38 @@
 import bind from 'bind-decorator';
 import * as React from 'react';
-import {connect, DispatchProp} from 'react-redux';
-
-import {RootState} from '../global/state';
+import { LoadingState } from './loading-state';
 
 // Include our SCSS (via webpack magic)
 import './loading-spinner.scss';
 
 interface OwnProps {
-}
-interface Props extends OwnProps, DispatchProp<RootState> {
-    isLoading: boolean;
-    loadingFailed: boolean;
+    state: LoadingState;
+    onTryAgain: () => void;
 }
 
-class _LoadingSpinnerComponent extends React.PureComponent<Props> {
+export class LoadingSpinnerComponent extends React.PureComponent<OwnProps> {
 
     public render() {
-        if (this.props.isLoading) {
+        if (this.props.state === LoadingState.READY) {
+            return <React.Fragment>{this.props.children}</React.Fragment>;
+        } else if (this.props.state === LoadingState.LOADING) {
             return <div className="loading-msg">
                 <div className="spinner" aria-label="Loading"></div>
             </div>;
-        } else if (this.props.loadingFailed) {
+        } else if (this.props.state === LoadingState.FAILED) {
             return <div className="loading-msg">
                 <h1>An Error Occurred</h1>
                 <p>Unable to connect to BORIS.</p>
                 <button onClick={this.handleTryAgainButton}>Try again</button>
             </div>;
         } else {
-            return <React.Fragment>{this.props.children}</React.Fragment>;
+            return <div className="loading-msg">
+                <button onClick={this.handleTryAgainButton}>Load</button>
+            </div>
         }
     }
 
     @bind private handleTryAgainButton() {
-        location.reload();
+        this.props.onTryAgain();
     }
 }
-
-export const LoadingSpinnerComponent = connect((state: RootState, ownProps: OwnProps) => ({
-    isLoading: state.initState.initCompleted === undefined,
-    loadingFailed: state.initState.initCompleted === false,
-}))(_LoadingSpinnerComponent);

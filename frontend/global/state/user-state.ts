@@ -1,6 +1,7 @@
 import {Record} from 'immutable';
-import {AnyAction, Dispatch} from 'redux';
+import {Dispatch} from 'redux';
 import {UserStateActions as Actions} from './user-state-actions';
+import { AnyAction } from '../actions';
 
 /**
  * State of the user (is the user logged in, etc.)

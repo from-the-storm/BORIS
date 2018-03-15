@@ -119,6 +119,8 @@ describe("BORIS Integration tests", () => {
         await waitForHttpRequests(driver);
         // Now we should see the "Choose Scenario" page:
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
+        // Go back to the home area:
+        await driver.findElement(buttonWithText("◀")).then(btn => btn.click());
         const getTeamCodeFromheader = async () => {
             const loggedInheader = await driver.findElement({css: 'header .loggedin'});
             const text = (await loggedInheader.getText()).replace('\n', ' ');
@@ -145,6 +147,5 @@ describe("BORIS Integration tests", () => {
         await driver.findElement(buttonWithText("JOIN TEAM")).then(btn => btn.click());
         await waitForHttpRequests(driver);
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
-        expect(await getTeamCodeFromheader()).toBe(teamCode);
     }, 8000);
 });

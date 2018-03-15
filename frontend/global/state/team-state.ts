@@ -1,8 +1,10 @@
 import {Record} from 'immutable';
-import {AnyAction, Dispatch} from 'redux';
+import {Dispatch} from 'redux';
 
 import {TeamStateActions as Actions} from './team-state-actions';
 import {UserStateActions} from './user-state-actions';
+import { AnyAction } from '../actions';
+import { OtherTeamMember } from '../../../common/models';
 
 /**
  * State of the team (has the user joined a team, etc.)
@@ -12,7 +14,7 @@ export class TeamState extends Record({
     teamCode: null as string|null,
     teamName: "NO TEAM",
     isTeamAdmin: false,
-    otherTeamMembers: [] as Array<{name: string, id: number, online: boolean, isCaptain: boolean}>,
+    otherTeamMembers: [] as Array<OtherTeamMember>,
 }) {
     get hasJoinedTeam(): boolean {
         return this.teamCode !== null;

@@ -67,3 +67,16 @@ CREATE TABLE team_members (
 
 -- A user can be a member of multiple teams but only "active" (online) on one team at any given time:
 CREATE UNIQUE INDEX active_team ON team_members (user_id) WHERE is_active = 'true';
+
+-- Scenarios Table
+CREATE TYPE scenario_difficulty AS ENUM ('easy', 'med', 'hard');
+CREATE TABLE scenarios (
+    id bigserial PRIMARY KEY,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    name varchar(500) NOT NULL,
+    duration_min integer NOT NULL DEFAULT 30,
+    difficulty scenario_difficulty NOT NULL DEFAULT 'med',
+    start_point_name varchar(500) NOT NULL DEFAULT 'Start Point',
+    start_point point NOT NULL DEFAULT '(49.297878, -123.088417)',
+    description_html text NOT NULL DEFAULT ''
+);

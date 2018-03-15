@@ -1,8 +1,9 @@
 import {Record} from 'immutable';
-import {AnyAction, Dispatch} from 'redux';
+import {Dispatch} from 'redux';
 import {UserStateActions} from '../global/state/user-state-actions';
 import {TeamStateActions} from '../global/state/team-state-actions';
 import {Actions} from './registration-state-actions';
+import { AnyAction } from '../global/actions';
 
 export const enum Mode {
     Home,
@@ -10,7 +11,7 @@ export const enum Mode {
     Login,
     JoinTeam,
     CreateTeam,
-    ChooseScenario,
+    ReadyToPlay,
     Logout,
 }
 
@@ -57,7 +58,7 @@ export function registrationStateReducer(state?: RegistrationState, action?: Any
         return state.set('mode', Mode.CreateTeam);
     case Actions.SHOW_CHOOSE_SCENARIO:
     case TeamStateActions.JOIN_TEAM:
-        return state.set('mode', Mode.ChooseScenario);
+        return state.set('mode', Mode.ReadyToPlay);
     case UserStateActions.LOGOUT:
     // User has logged out:
         return state.set('mode', Mode.Home);

@@ -1,4 +1,5 @@
 import {Dispatch} from 'redux';
+import { OtherTeamMember } from '../../../common/models';
 
 //// Team State Actions
 
@@ -8,6 +9,19 @@ export enum TeamStateActions {
     JOIN_TEAM = 'G_TS_JOIN_TEAM',
 }
 const Actions = TeamStateActions;
+
+interface LeaveTeamAction {
+    type: TeamStateActions.LEAVE_TEAM;
+}
+interface JoinTeamAction {
+    type: TeamStateActions.JOIN_TEAM;
+    teamCode: string;
+    teamName: string;
+    isTeamAdmin: boolean;
+    otherTeamMembers: Array<OtherTeamMember>;
+}
+
+export type TeamStateActionsType = LeaveTeamAction|JoinTeamAction;
 
 //// Action Creators
 
@@ -24,7 +38,7 @@ export function leaveTeam() {
     return async (dispatch: Dispatch<{}>, getState: () => {}) => {
         const response = await postToApi('/auth/team/leave');
         if (response.ok) {
-            dispatch({type: Actions.LEAVE_TEAM});
+            dispatch<TeamStateActionsType>({type: Actions.LEAVE_TEAM});
             return true;
         } else {
             throw new Error('Failed to leave team.');

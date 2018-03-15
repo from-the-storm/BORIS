@@ -7,10 +7,12 @@ import {TeamState, teamStateReducer} from './state/team-state';
 export {TeamState, teamStateReducer} from './state/team-state';
 
 import {RegistrationState} from '../registration/registration-state';
+import { LobbyState } from '../lobby/lobby-state';
 
 export interface RootState {
     initState: InitState;
     userState: UserState;
     teamState: TeamState;
     registrationState: RegistrationState;
+    lobbyState: LobbyState;
 }

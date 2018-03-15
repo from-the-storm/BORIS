@@ -9,6 +9,16 @@ export enum UserStateActions {
 }
 const Actions = UserStateActions;
 
+interface LoginActionType {
+    type: UserStateActions.LOGIN;
+    firstName: string;
+}
+interface LogoutActionType {
+    type: UserStateActions.LOGOUT;
+}
+
+export type UserStateActionsType = LoginActionType|LogoutActionType;
+
 //// Action Creators
 
 /**
@@ -21,7 +31,7 @@ export function logoutUser() {
             credentials: 'include',
         }).then(response => {
             if (response.ok) {
-                dispatch({type: Actions.LOGOUT,});
+                dispatch<UserStateActionsType>({type: Actions.LOGOUT,});
             } else {
                 throw new Error('Failed to log out.');
             }

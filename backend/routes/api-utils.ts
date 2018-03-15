@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import { ApiMethod } from './api-interfaces';
+import { ApiMethod } from '../../common/api';
 import { UserType } from '../express-extended';
 
 /** An error whose message is safe to show to the user */

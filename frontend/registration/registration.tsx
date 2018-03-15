@@ -3,7 +3,6 @@ import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 
 import {RootState} from '../global/state';
-import { ChooseScenarioComponent } from './choose-scenario';
 import {HomeComponent} from './home';
 import {RegisterComponent} from './register';
 import {JoinTeamComponent} from './join-team';
@@ -15,6 +14,7 @@ import {Actions} from './registration-state-actions';
 
 // Include our SCSS (via webpack magic)
 import './registration.scss';
+import { AnyAction } from '../global/actions';
 
 interface OwnProps {
 }
@@ -30,15 +30,15 @@ class _RegistrationComponent extends React.PureComponent<Props> {
         super(props);
     }
 
-    @bind private handleHomeButton() { this.props.dispatch({type: Actions.SHOW_HOME}); }
-    @bind private handleLoginButton() { this.props.dispatch({type: Actions.SHOW_LOGIN}); }
-    @bind private handleLogoutButton() { this.props.dispatch({type: Actions.SHOW_LOGOUT}); }
-    @bind private handleRegisterButton() { this.props.dispatch({type: Actions.SHOW_REGISTER}); }
+    @bind private handleHomeButton() { this.props.dispatch<AnyAction>({type: Actions.SHOW_HOME}); }
+    @bind private handleLoginButton() { this.props.dispatch<AnyAction>({type: Actions.SHOW_LOGIN}); }
+    @bind private handleLogoutButton() { this.props.dispatch<AnyAction>({type: Actions.SHOW_LOGOUT}); }
+    @bind private handleRegisterButton() { this.props.dispatch<AnyAction>({type: Actions.SHOW_REGISTER}); }
     @bind private handleStartButton() {
         if (this.props.teamCode === null) {
-            this.props.dispatch({type: Actions.SHOW_JOIN_TEAM});
+            this.props.dispatch<AnyAction>({type: Actions.SHOW_JOIN_TEAM});
         } else {
-            this.props.dispatch({type: Actions.SHOW_CHOOSE_SCENARIO});
+            this.props.dispatch<AnyAction>({type: Actions.SHOW_CHOOSE_SCENARIO});
         }
     }
 
@@ -66,7 +66,6 @@ class _RegistrationComponent extends React.PureComponent<Props> {
                     this.props.mode === Mode.Login ? <LoginComponent/> :
                     this.props.mode === Mode.JoinTeam ? <JoinTeamComponent/> :
                     this.props.mode === Mode.CreateTeam ? <CreateTeamComponent/> :
-                    this.props.mode === Mode.ChooseScenario ? <ChooseScenarioComponent/> :
                     this.props.mode === Mode.Logout ? <LogoutComponent/> :
                     'Error: Unknown mode.'
                 }

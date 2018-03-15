@@ -1,4 +1,4 @@
-import { ApiErrorResponse, ApiMethod } from '../backend/routes/api-interfaces';
+import { ApiErrorResponse, ApiMethod } from '../common/api';
 
 /**
  * Call a BORIS API method
