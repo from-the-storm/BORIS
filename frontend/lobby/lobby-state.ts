@@ -17,6 +17,7 @@ export const enum Mode {
 export class LobbyState extends Record({
     scenarios: List<Scenario>(),
     scenariosState: LoadingState.NOT_LOADING,
+    showScenarioDetails: null as number|null,
     mode: Mode.ChooseScenario as Mode,
 }) {
     // ...
@@ -44,6 +45,13 @@ export function lobbyStateReducer(state?: LobbyState, action?: AnyAction): Lobby
             scenarios: List<Scenario>(),
             scenariosState: LoadingState.FAILED,
         })
+    case Actions.SHOW_SCENARIOS_LIST:
+        return state.merge({
+            showScenarioDetails: null,
+            mode: Mode.ChooseScenario,
+        });
+    case Actions.SHOW_SCENARIO_DETAILS:
+        return state.set('showScenarioDetails', action.scenarioId);
     case UserStateActions.LOGOUT:
     case TeamStateActions.LEAVE_TEAM:
         return state.clear();

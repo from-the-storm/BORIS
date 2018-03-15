@@ -13,20 +13,27 @@ export enum Actions {
     SCENARIOS_LOADING = 'LS_LOAD',
     SCENARIOS_LOADED = 'LS_SL',
     SCENARIOS_FAILED_TO_LOAD = 'LS_SFTL',
+    // Show the main list of scenarios
+    SHOW_SCENARIOS_LIST = 'LS_SSL',
+    // Show the details of a specific scenario
+    SHOW_SCENARIO_DETAILS = 'LS_SD',
 }
 
 interface ScenariosLoadingAction { type: Actions.SCENARIOS_LOADING; }
 interface ScenariosFailedToLoadAction { type: Actions.SCENARIOS_FAILED_TO_LOAD; }
-
 interface ScenariosLoadedAction {
     type: Actions.SCENARIOS_LOADED;
     scenarios: Scenario[];
 }
+interface ShowScenariosListAction { type: Actions.SHOW_SCENARIOS_LIST; }
+interface ShowScenarioDetailsAction { type: Actions.SHOW_SCENARIO_DETAILS; scenarioId: number; }
 
 export type LobbyStateActionsType = (
     ScenariosLoadingAction|
     ScenariosLoadedAction|
-    ScenariosFailedToLoadAction
+    ScenariosFailedToLoadAction|
+    ShowScenariosListAction|
+    ShowScenarioDetailsAction
 );
 
 //// Action Creators
