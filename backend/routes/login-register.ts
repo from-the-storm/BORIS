@@ -7,7 +7,8 @@ import * as isEmail from 'validator/lib/isEmail';
 import * as passport from 'passport';
 
 import {config} from '../config';
-import {BorisDatabase, User} from '../db/db';
+import {BorisDatabase} from '../db/db';
+import {User} from '../db/models';
 import {alphanumericCodeGenerator} from './login-register-utils';
 import { JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from './api-interfaces';
 

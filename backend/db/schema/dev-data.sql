@@ -11,3 +11,10 @@ INSERT INTO users (first_name, email, survey_data) VALUES (
         "gender": "m"
     }'::jsonb
 );
+
+INSERT INTO scenarios (id, name, duration_min, difficulty, start_point_name, start_point, description_html) VALUES 
+    (1, 'Earthquake Preparedness', 30, 'easy', 'SE False Creek', '(49.273373, -123.102657)', '<p>This route (approximately 700m) starts in front of Science World and follows the Seawall to the plaza area in front of Craft Beer Market.</p>'),
+    (2, 'Water', 90, 'hard', 'NW Marine Drive, UBC', '(49.273373, -123.102657)', '<p>This is an <strong>HTML</strong> description.</p>'),
+    (3, 'Group Dynamics', 40, 'med', 'Main Mall, UBC', '(49.273373, -123.102657)', '<p>This training module is designed to introduce you to a few potentially useful ways to work together towards a goal. A goal like not perishing in the cataclysm.</p><p>Start on Main Mall, in front of Koerner Library. <a href="#">View on map</a>.</p><p>Terrain is mostly flat, with one section...</p>'),
+    (4, 'Living Off The Land', 70, 'med', 'Stanley Park', '(49.273373, -123.102657)', '<p>This is an <strong>HTML</strong> description.</p>')
+;

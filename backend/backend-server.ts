@@ -17,6 +17,7 @@ import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
+import {router as lobbyRouter} from './routes/lobby-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
 
 // Declare our additions to the Express API:
@@ -169,8 +170,11 @@ app.get('/', (req, res) => { res.render('react-app') });
 // Login & Registration API:
 app.use('/auth', loginRegisterRouter);
 
+// Lobby API ("Choose Scenario" etc.)
+app.use('/api/lobby', lobbyRouter);
+
 // Misc. API used by the single page app frontend:
-app.use('/app-api', appAPIRouter);
+app.use('/api/app', appAPIRouter);
 
 if (environment === 'test') {
     app.use('/test-utils', testHelperRouter);

@@ -1,3 +1,5 @@
+import { Scenario } from "../db/models";
+
 /** Default return value of API methods that don't return any useful data */
 export interface EmptyApiResponse {
     result: 'ok';
@@ -39,7 +41,7 @@ export interface InitialStateResponse {
     };
 };
 
-export const GET_INITIAL_STATE: ApiMethod<{}, InitialStateResponse> = {path: '/app-api/get-initial-state', type: 'GET'};
+export const GET_INITIAL_STATE: ApiMethod<{}, InitialStateResponse> = {path: '/api/app/get-initial-state', type: 'GET'};
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,5 +99,14 @@ export const JOIN_TEAM: ApiMethod<JoinTeamRequest, CreateOrJoinTeamResponse> = {
 
 // Leave a team:
 
-export const LEAVE_TEAM: ApiMethod<{}, EmptyApiResponse> = {path: '/auth/team/leave', type: 'POST'};
+export const LEAVE_TEAM: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/auth/team/leave', type: 'POST'};
 
+
+///////////////////////////////////////////////////////////////////////////////
+// lobby-api methods:
+
+export interface ScenariosResponse {
+    scenarios: Scenario[],
+}
+
+export const GET_SCENARIOS: ApiMethod<NoRequestParameters, ScenariosResponse> = {path: '/api/lobby/scenarios', type: 'GET'};

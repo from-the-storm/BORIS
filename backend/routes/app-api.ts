@@ -5,13 +5,13 @@ import * as express from 'express';
 
 import '../express-extended';
 import {config} from '../config';
-import {BorisDatabase, User} from '../db/db';
+import {BorisDatabase} from '../db/db';
 import { InitialStateResponse, GET_INITIAL_STATE } from './api-interfaces';
 import { makeApiHelper, RequireUser } from './api-utils';
 
 export const router = express.Router();
 
-const getApiMethod = makeApiHelper(router, /^\/app-api/, RequireUser.UserOptional);
+const getApiMethod = makeApiHelper(router, /^\/api\/app/, RequireUser.UserOptional);
 
 /**
  * API endpoint for getting data needed to initialize the app's state:
