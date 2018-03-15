@@ -13,7 +13,7 @@ import {
 import { registrationStateReducer } from './registration/registration-state';
 import { lobbyStateReducer } from './lobby/lobby-state';
 import {App} from './app';
-import { LoadingSpinnerComponent } from './loading/loading-spinner';
+import { RootLoadingSpinnerComponent } from './loading/root-loading-spinner';
 import { InitStateActions } from './global/state/init-state-actions';
 import { UserStateActions } from './global/state/user-state-actions';
 import { InitialStateResponse, GET_INITIAL_STATE } from '../backend/routes/api-interfaces';
@@ -37,9 +37,9 @@ const appHolderElement = document.getElementById('app-container');
 
 const rootComponent = ReactDOM.render((
     <Provider store={ store }>
-        <LoadingSpinnerComponent>
+        <RootLoadingSpinnerComponent>
             <App />
-        </LoadingSpinnerComponent>
+        </RootLoadingSpinnerComponent>
     </Provider>
 ), appHolderElement);
 
