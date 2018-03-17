@@ -6,13 +6,114 @@
         background-color: $black;
         width: 100%;
         height: 40px;
+        text-align: left;
+            button {
+                font-size: 1em;
+                line-height: 20px;
+                height: 40px;
+            }
     }
 
-    .scenario-choice {
-        border: 1px solid grey;
-        float: left;
-        width: 50%;
-        box-sizing: border-box;
-        padding: 5px;
+    .scenario-grid {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+            .scenario-choice {
+                position: relative;
+                flex-basis: 50%;
+                box-sizing: border-box;
+                padding: 0.5rem;
+                background-color: $grey;
+                border-bottom: 8px solid $white;
+                overflow: hidden;
+                background-repeat: no-repeat;
+                background-position: 100% 0;
+                border-left: 4px solid $white;
+                    &:nth-child(odd) {
+                        border-right: 4px solid $white;
+                        border-left: 0;
+                    }
+                    button {
+                        font-size: 1em;
+                        padding: 0.5rem;
+                        border: 2px solid $black;
+                            &.inverted {
+                                margin: 0 0.3rem 0.3rem 0;
+                            }
+                    }
+            }
     }
+
+    p {
+        .mono {
+            background: $green;
+            padding: 0 0.25rem;
+        }
+    }
+
+    .scenario-info {
+        h4 {
+            padding: 0.5rem 0.25rem;
+        }
+        padding: 0 0 1.5rem;
+            span {
+                display: inline-block;
+                background: $white;
+                padding: 0.3rem 0.5rem;
+                margin: 0 0.2rem 0.2rem 0;
+                font-family: $fancyfont;
+                text-transform: uppercase;
+                font-size: 0.85em;
+                    &.easy {
+                        color: $green;
+                    }
+                    &.med {
+                        color: $purple;
+                    }
+                    &.hard {
+                        color: $red;
+                    }
+                    &:last-of-type {
+                        font-family: $textfont;
+                        text-transform: none;
+                        line-height: 1.5;
+                    }
+            }
+            &.details {
+                span {
+                    font-size: 1em;
+                    background-color: darken($white, 10%);
+                }
+            }
+    }
+
+    .scenario-title {
+        margin: -1rem -1rem 1.5rem;
+        padding: 3rem 1rem 0.5rem;
+        background-color: lighten($black, 20%);
+        background-repeat: no-repeat;
+        background-position: 100% 0;
+            h1 {
+                color: $white;
+                display: inline-block;
+            }
+    }
+
+    .scenario-description {
+        margin-top: 1.5rem;
+    }
+        
+    .id-1 {
+        background-image: url('https://raw.githubusercontent.com/from-the-storm/ApocalypseMadeEasyWebsite/master/assets/img/icons/bg-quake.png')
+    }
+    .id-2 {
+        background-image: url('https://raw.githubusercontent.com/from-the-storm/ApocalypseMadeEasyWebsite/master/assets/img/icons/bg-water.png')
+    }
+    .id-3 {
+        background-image: url('https://raw.githubusercontent.com/from-the-storm/ApocalypseMadeEasyWebsite/master/assets/img/icons/bg-dynamics.png')
+    }
+    .id-4 {
+        background-image: url('https://raw.githubusercontent.com/from-the-storm/ApocalypseMadeEasyWebsite/master/assets/img/icons/bg-home.png')
+    }
+
 }

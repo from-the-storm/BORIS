@@ -29,9 +29,11 @@ h1, h2, h3, h4, h5 {
     font-weight: bold;
     text-transform: uppercase;
     margin-top: 0;
+    margin: 0.3em 0;
 }
 .mono {
     font-family: $consolefont;
+    font-weight: bold;
 }
 .emphatic {
     font-family: $fancyfont;
@@ -59,6 +61,15 @@ button {
         background-color: darken($white, 50%);
         color: darken($white, 20%);
     }
+
+    &.inverted {
+        background: none;
+        color: $black;
+    }
+}
+a {
+    color: $black;
+    font-weight: bold;
 }
 a.small { // For de-emphasized actions e.g. "Back" button
     padding: 0.5rem 0;
