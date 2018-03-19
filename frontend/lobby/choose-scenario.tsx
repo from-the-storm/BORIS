@@ -60,8 +60,10 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                                 <h4>{s.name}</h4>
                                 <span>Start at {s.start_point_name}</span>
                             </div>
-                            <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }}>Info?</button>
-                            <button>Start!</button>
+                            <div className="scenario-buttons">
+                                <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }}>Info?</button>
+                                <button>Start!</button>
+                            </div>
                         </div>
                     )}
                 </LoadingSpinnerComponent>
