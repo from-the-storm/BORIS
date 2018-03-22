@@ -1,5 +1,7 @@
 import {Dispatch} from 'redux';
 import { OtherTeamMember } from '../../../common/models';
+import { callApi } from '../../api';
+import { LEAVE_TEAM } from '../../../common/api';
 
 //// Team State Actions
 
@@ -25,23 +27,9 @@ export type TeamStateActionsType = LeaveTeamAction|JoinTeamAction;
 
 //// Action Creators
 
-function postToApi(path: string, body?: any) {
-    return fetch(path, {
-        method: 'post',
-        credentials: 'include',
-        headers: new Headers({"Content-Type": "application/json"}),
-        body: body === undefined ? undefined : JSON.stringify(body),
-    });
-}
-
 export function leaveTeam() {
     return async (dispatch: Dispatch<{}>, getState: () => {}) => {
-        const response = await postToApi('/auth/team/leave');
-        if (response.ok) {
-            dispatch<TeamStateActionsType>({type: Actions.LEAVE_TEAM});
-            return true;
-        } else {
-            throw new Error('Failed to leave team.');
-        }
+        await callApi(LEAVE_TEAM, {});
+        dispatch<TeamStateActionsType>({type: Actions.LEAVE_TEAM});
     };
 }
