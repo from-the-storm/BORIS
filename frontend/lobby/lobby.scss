@@ -36,6 +36,7 @@
                     }
                     .scenario-buttons {
                         align-self: flex-end;
+                        flex-basis: 100%;
                     }
                     button {
                         font-size: 1em;
@@ -59,7 +60,7 @@
         h4 {
             padding: 0.5rem 0.25rem;
         }
-        padding: 0 0 1.5rem;
+        padding: 0 0 1.25rem;
             span {
                 display: inline-block;
                 background: $white;
