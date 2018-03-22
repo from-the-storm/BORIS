@@ -34,29 +34,40 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
         const selectedScenario = this.props.selectedScenarioId !== null ? this.props.scenarios.find(s => s.id === this.props.selectedScenarioId) : null;
         if (selectedScenario !== null) {
             return <div>
-                <h1>{selectedScenario.name}</h1>
-                Duration: {selectedScenario.duration_min} min<br/>
-                Difficulty: {selectedScenario.difficulty}<br/>
-                Start at: {selectedScenario.start_point_name}<br/>
-                <br/>
+                <div className={'scenario-title id-' + selectedScenario.id}>
+                    <h1><span>{selectedScenario.name}</span></h1>
+                </div>
+                <div className="scenario-info details">
+                    <span className={selectedScenario.difficulty}>{selectedScenario.difficulty}</span>
+                    <span>{selectedScenario.duration_min} mins</span><br />
+                    <span>Start at <a title="View on map" href="#">{selectedScenario.start_point_name}</a></span>
+                </div>
+                <button>Start!</button>
                 <div className="scenario-description" dangerouslySetInnerHTML={{__html: selectedScenario.description_html}}></div>
             </div>
         }
 
         return <div>
             <h1>Choose Scenario</h1>
-            <p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. Your team should include 2 to 5 people. Then bring yourselves (and your phones) to a scenario start point.</p>
-            <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
-                {this.props.scenarios.map(s =>
-                    <div key={s.id} className="scenario-choice">
-                        <strong>{s.name}</strong><br/>
-                        Duration: {s.duration_min} min<br/>
-                        Difficulty: {s.difficulty}<br/>
-                        Start at: {s.start_point_name}<br/>
-                        <button onClick={() => { this.showScenarioDetails(s.id); }}>Info</button>
-                    </div>
-                )}
-            </LoadingSpinnerComponent>
+            <p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>
+            <div className="scenario-grid">
+                <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
+                    {this.props.scenarios.map(s =>
+                        <div key={s.id} className={'scenario-choice id-' + s.id}>
+                            <div className="scenario-info">
+                                <span className={s.difficulty}>{s.difficulty}</span><br />
+                                <span>{s.duration_min} mins</span>
+                                <h4>{s.name}</h4>
+                                <span>Start at {s.start_point_name}</span>
+                            </div>
+                            <div className="scenario-buttons">
+                                <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }}>Info?</button>
+                                <button>Start!</button>
+                            </div>
+                        </div>
+                    )}
+                </LoadingSpinnerComponent>
+            </div>
         </div>;
     }
 
