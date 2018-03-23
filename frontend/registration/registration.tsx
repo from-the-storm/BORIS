@@ -54,7 +54,7 @@ class _RegistrationComponent extends React.PureComponent<Props> {
                 </div>
                 <div className="header-right">
                     {
-                        this.props.isLoggedIn ? <div className="loggedin">Logged in as {this.props.userName}.<br/><span className="emphatic">TEAM CODE:</span> <span className="mono">{this.props.teamCode || '----'}</span> <button className="small" onClick={this.handleLogoutButton}>Log out</button> </div> :
+                        this.props.isLoggedIn ? <div className="loggedin"><span className="emphatic">TEAM CODE:</span> <span className="mono">{this.props.teamCode || '-----'}</span> <button className="small" onClick={this.handleLogoutButton}>Log out</button> </div> :
                         <button onClick={this.handleLoginButton}>Log In!</button>
                     }
                 </div>

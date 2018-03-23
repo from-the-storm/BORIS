@@ -38,7 +38,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
                 <h1>Join Team</h1>
                 <p>Enter the team code:</p>
                 <form onSubmit={this.handleFormSubmit}>
-                    <input type="text" required maxLength={10} placeholder="e.g. A1B2C3" onChange={this.handleCodeChanged} value={this.state.code} className={this.state.code ? 'selected' : 'deselected'} />
+                    <input type="text" required maxLength={10} placeholder="e.g. ABCDE" onChange={this.handleCodeChanged} value={this.state.code} className={this.state.code ? 'selected' : 'deselected'} />
                     {this.state.errorMessage ?
                         <div className="team-error">{this.state.errorMessage}</div>
                     :null}
@@ -50,7 +50,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
             </div>;
         } else {
             return <div>
-                <h1>Join Team</h1>
+                <h1>Join/Create Team</h1>
                 <div className="button-split full">
                     <button onClick={this.handleJoinTeam}>Join a Team</button>
                     <button onClick={this.handleCreateTeam}>Create a Team</button>

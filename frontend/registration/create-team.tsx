@@ -48,8 +48,8 @@ class _CreateTeamComponent extends React.PureComponent<Props, State> {
                 <h1>Create Team</h1>
                 <form onSubmit={this.handleFormSubmit}>
                     <input name="teamName" type="text" required placeholder="Team name" aria-label="Team name" value={this.state.teamName} onChange={this.handleFormFieldChange} className={this.state.teamName ? 'selected' : 'deselected'} />
-                    <input name="organizationName" type="text" required placeholder="Organization Name" aria-label="Organization Name" aria-describedby="org-details" value={this.state.organizationName} onChange={this.handleFormFieldChange} className={this.state.organizationName ? 'selected' : 'deselected'} />
-                    <p id="org-details">What organization, company, or group are you associated with, if any?</p>
+                    <input name="organizationName" type="text" placeholder="Organization Name" aria-label="Organization Name" aria-describedby="org-details" value={this.state.organizationName} onChange={this.handleFormFieldChange} className="selected" />
+                    <p id="org-details">What organization, company, or group are you associated with (if any)?</p>
                     {this.state.errorMessage ?
                         <div className="team-error">{this.state.errorMessage}</div>
                     :null}

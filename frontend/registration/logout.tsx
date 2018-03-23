@@ -29,8 +29,10 @@ class _LogoutComponent extends React.PureComponent<Props> {
     public render() {
         return <div>
             <h1>Going so soon?</h1>
-            <button disabled={!this.props.hasJoinedTeam} onClick={this.handleLeaveTeamButton}>Change team</button><br/>
-            <button onClick={this.handleLogoutButton}>Log out</button>
+            <div className="button-split full">
+                <button disabled={!this.props.hasJoinedTeam} onClick={this.handleLeaveTeamButton}>Change team</button>
+                <button onClick={this.handleLogoutButton}>Log out</button>
+            </div>
         </div>;
     }
 }

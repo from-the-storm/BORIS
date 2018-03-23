@@ -41,7 +41,13 @@
 
     p#email-details, p#org-details {
         font-size: 0.9em;
-        margin-top: -0.5rem;
+        margin-top: -1rem;
+    }
+
+    p.steps {
+        font-family: $fancyfont;
+        text-transform: uppercase;
+        margin-bottom: 0;
     }
 
     // Error messages appearing on the login or registration forms:
