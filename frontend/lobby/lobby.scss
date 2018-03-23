@@ -98,9 +98,11 @@
         background-color: lighten($black, 20%);
         background-repeat: no-repeat;
         background-position: 100% 0;
+        background-size: auto 100%;
             h1 {
                 color: $white;
                 display: inline-block;
+                margin-right: 40%;
             }
     }
 
@@ -109,16 +111,16 @@
     }
         
     .id-1 {
-        background-image: url('./images/bg-quake.png')
+        background-image: url('./images/bg-quake.svg')
     }
     .id-2 {
-        background-image: url('./images/bg-water.png')
+        background-image: url('./images/bg-water.svg')
     }
     .id-3 {
-        background-image: url('./images/bg-dynamics.png')
+        background-image: url('./images/bg-dynamics.svg')
     }
     .id-4 {
-        background-image: url('./images/bg-home.png')
+        background-image: url('./images/bg-home.svg')
     }
 
 }
