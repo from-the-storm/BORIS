@@ -67,7 +67,7 @@ describe("BORIS Integration tests", () => {
         const registerButton = await driver.findElement(buttonWithText("REGISTER!"));
         await registerButton.click();
         // See the consent page:
-        expect(await getHeaderText(driver)).toBe("CONSENT");
+        expect(await getHeaderText(driver)).toBe("CONSENT #1");
         // Click the consent button:
         await driver.findElement(buttonWithText("I CONSENT")).then(btn => btn.click());
         // See the registration form:
@@ -76,7 +76,7 @@ describe("BORIS Integration tests", () => {
         await driver.findElement(buttonWithText("REGISTER")).then(btn => btn.click());
         expect(await getHeaderText(driver)).toBe("CREATE A PROFILE");
         // Fill out the form:
-        expect(await countElementsMatching('input:invalid', driver)).toBe(9); // 6 fields but some are radio buttons
+        expect(await countElementsMatching('input:invalid', driver)).toBe(10); // 6 fields but some are radio buttons
         await driver.findElement({css: 'input[name=firstName]'}).then(field => field.sendKeys("Tom"));
         await driver.findElement({css: 'input[name=email]'}).then(field => field.sendKeys(email));
         await driver.findElement({css: 'input[name=workInTech][value=yes]'}).then(field => field.click()); // "Work in tech: Yes"
@@ -106,12 +106,12 @@ describe("BORIS Integration tests", () => {
         trackHttpRequests(driver);
         await waitForReactToRender(driver); // Not sure yet if this is necessary.
         // Now we should see the "Join Team" page
-        expect(await getHeaderText(driver)).toBe("JOIN TEAM");
+        expect(await getHeaderText(driver)).toBe("JOIN/CREATE TEAM");
         const createTeamButton = await driver.findElement(buttonWithText("CREATE A TEAM"));
         await createTeamButton.click();
         // Fill out the "Create Team" form
         expect(await getHeaderText(driver)).toBe("CREATE TEAM");
-        expect(await countElementsMatching('input:invalid', driver)).toBe(2);
+        expect(await countElementsMatching('input:invalid', driver)).toBe(1);
         await driver.findElement({css: 'input[name=teamName]'}).then(field => field.sendKeys("Dream Team"));
         await driver.findElement({css: 'input[name=organizationName]'}).then(field => field.sendKeys("Canada TestCo Inc. LLP Limited"));
         expect(await countElementsMatching('input:invalid', driver)).toBe(0);
@@ -124,7 +124,7 @@ describe("BORIS Integration tests", () => {
         const getTeamCodeFromheader = async () => {
             const loggedInheader = await driver.findElement({css: 'header .loggedin'});
             const text = (await loggedInheader.getText()).replace('\n', ' ');
-            const regex = /Logged in as Tom. TEAM CODE: ([A-Z0-9]+) .*/;
+            const regex = /TEAM CODE: ([A-Z0-9]+) .*/;
             expect(text).toMatch(regex);
             return text.match(regex)[1];
         }
@@ -135,7 +135,7 @@ describe("BORIS Integration tests", () => {
         expect(await getHeaderText(driver)).toBe("GOING SO SOON?");
         await driver.findElement(buttonWithText("CHANGE TEAM")).click();
         await waitForHttpRequests(driver);
-        expect(await getHeaderText(driver)).toBe("JOIN TEAM");
+        expect(await getHeaderText(driver)).toBe("JOIN/CREATE TEAM");
         // Join the team again, using an invalid code:
         await driver.findElement(buttonWithText("JOIN A TEAM")).click();
         await driver.findElement({css: 'input[type=text]'}).then(field => field.sendKeys('FOOBAR'));
