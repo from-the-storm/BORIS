@@ -6,6 +6,7 @@ import * as express from 'express';
 import * as isEmail from 'validator/lib/isEmail';
 import * as passport from 'passport';
 
+import { Gender, isValidGender } from '../../common/models';
 import {config} from '../config';
 import {BorisDatabase} from '../db/db';
 import {User} from '../db/models';
@@ -101,7 +102,7 @@ function validateUserData(data: any): Partial<User> {
     check(data.workInTech === 'yes' || data.workInTech === 'no', "Missing answer to \"Do you work in tech?\"");
     check(data.occupation && typeof data.occupation === 'string' && data.occupation.length < 500, "Missing/invalid occupation.");
     check(typeof data.age === 'number' && data.age > 10 && data.age < 120, "Missing/invalid age.");
-    check(['m', 'f', 'o'].indexOf(data.gender) !== -1, "Missing/invalid gender");
+    check(isValidGender(data.gender), "Missing/invalid gender");
     return {
         first_name: data.firstName,
         email: data.email,

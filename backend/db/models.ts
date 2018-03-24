@@ -1,4 +1,4 @@
-import { BaseScenario } from "../../common/models";
+import { BaseScenario, Gender } from "../../common/models";
 
 export interface User {
     id: number;
@@ -10,7 +10,7 @@ export interface User {
         workInTech: boolean|null,
         occupation: string,
         age: number|null,
-        gender: 'm'|'f'|'o'|null,
+        gender: Gender|null,
     };
 }
 

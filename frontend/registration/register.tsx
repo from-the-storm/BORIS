@@ -2,6 +2,7 @@ import bind from 'bind-decorator';
 import * as React from 'react';
 import { connect, DispatchProp } from 'react-redux';
 
+import { Gender } from '../../common/models';
 import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { REGISTER_USER } from '../../common/api';
@@ -21,7 +22,7 @@ interface State {
     workInTech: 'yes'|'no'|undefined;
     occupation: string;
     age: number|'';
-    gender: 'm'|'f'|'o'|undefined;
+    gender: Gender|undefined;
     // State of the submission:
     errorMessage: string,
     waitingForServerResponse: boolean,
@@ -54,10 +55,15 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
             </div>
         } else if (!this.state.hasConsented) {
             return <div>
-                <p>Step 1 of 2</p>
-                <h1>Consent</h1>
-                <p>Apocalypse Made Easy! is part of a study...</p>
+                <p className="steps">Step 1 of 2</p>
+                <h1>Consent #1</h1>
+                <p>Apocalypse Made Easy! is part of a study led by Dr. John Oliffe (email: john.oliffe@ubc.ca; phone: 604 822 7638), along with Andrew Munroe at the University of British Columbia, Melbourne-based First Person Consulting, and the Propel Centre for Population Health Impact at the University of Waterloo. As a Social Innovators Challenge Project funded by the Movember Foundation, its focus is on social connectedness.</p>
+                
+                <p>In order to study social connectedness and improve the program, the way you interact with Apocalypse Made Easy!, along with limited demographic data you supply while registering a profile, is recorded and stored. This data will be anonymized and stored on secure servers in Canada, and only accessible to the research team.</p>
 
+                <p>Each scenario that you choose to complete will take between 30 and 90 minutes. While using the program you are not required to do anything you are uncomfortable with.</p>
+
+                <p>If you have any concerns or complaints about your rights as a research participant and/or your experiences while participating in this study, contact the Research Participant Complaint Line in the University British Columbia’s Office of Research Ethics at 1-604-822-8598 or if long distance e-mail RSIL@ors.ubc.ca or call toll free 1-877-822-8598.</p>
                 <div className="button-split">
                     <a className="small" onClick={this.handleDoNotConsent}>I do not consent</a>
                     <button onClick={this.handleConsent}>I Consent</button>
@@ -65,7 +71,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
             </div>;
         } else {
             return <div>
-                <p>Step 2 of 2</p>
+                <p className="steps">Step 2 of 2</p>
                 <h1>Create a Profile</h1>
                 <form onSubmit={this.handleRegistrationFormSubmit}>
                     <input name="firstName" type="text" required placeholder="First name" aria-label="First name" value={this.state.firstName} onChange={this.handleFormFieldChange} className={this.state.firstName ? 'selected' : 'deselected'} />
@@ -97,6 +103,10 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                         <div>
                             <input required name="gender" type="radio" id="gender-o" value="o" checked={this.state.gender === 'o'} onChange={this.handleFormFieldChange} />
                             <label htmlFor="gender-o">Other</label>
+                        </div>
+                        <div>
+                            <input required name="gender" type="radio" id="gender-n" value="n" checked={this.state.gender === 'n'} onChange={this.handleFormFieldChange} />
+                            <label htmlFor="gender-n">Prefer not to answer</label>
                         </div>
                     </fieldset>
                     {this.state.errorMessage ?

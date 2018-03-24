@@ -29,7 +29,7 @@ h1, h2, h3, h4, h5 {
     font-weight: bold;
     text-transform: uppercase;
     margin-top: 0;
-    margin: 0.3em 0;
+    margin: 0.5rem 0;
 }
 .mono {
     font-family: $consolefont;
@@ -92,12 +92,17 @@ a.small { // For de-emphasized actions e.g. "Back" button
         }
 }
 
+// Elements
+img {
+    max-width: 100%;
+}
+
 // Forms
 input[type=text], input[type=email], input[type=number] {
     display: block;
     width: 100%;
     border: 0 none;
-    border-bottom: 3px solid;
+    border-bottom: 2px solid;
     margin-bottom: 1.5rem;
     outline: 0;
     transition: border-color 0.4s;
@@ -105,12 +110,14 @@ input[type=text], input[type=email], input[type=number] {
     line-height: normal; // Fix for placeholder getting cut off in FF
         &.deselected { border-color: $red; }
         &.selected { border-color: $black; }
+        &:invalid { box-shadow: none; }
 }
 [type=checkbox], [type=radio] {
     margin-right: 0.5rem;
+    box-shadow: none;
 }
 fieldset {
-    border: 3px solid;
+    border: 2px solid;
     transition: border-color 0.4s;
     margin-bottom: 1.5rem;
         legend {

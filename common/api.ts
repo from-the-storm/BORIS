@@ -1,4 +1,4 @@
-import { Scenario, OtherTeamMember } from "./models";
+import { Scenario, OtherTeamMember, Gender } from "./models";
 
 /** Default return value of API methods that don't return any useful data */
 export interface EmptyApiResponse {
@@ -58,7 +58,7 @@ export interface RegisterUserRequest {
     workInTech: 'yes'|'no';
     occupation: string;
     age: number;
-    gender: 'm'|'f'|'o';
+    gender: Gender;
 }
 
 export const REGISTER_USER: ApiMethod<RegisterUserRequest, EmptyApiResponse> = {path: '/auth/register', type: 'POST'};

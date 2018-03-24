@@ -2,6 +2,14 @@
  * Data models used by both the backend and frontend.
  */
 
+export enum Gender {
+    Male = 'm',
+    Female = 'f',
+    Other = 'o',
+    NoAnswer = 'n',
+}
+export const isValidGender = (value: string) => !!(Object.keys(Gender).find(k => Gender[k as any] === value));
+
 export interface BaseScenario {
     id: number;
     name: string;
