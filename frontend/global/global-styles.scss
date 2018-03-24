@@ -60,7 +60,6 @@ button {
     &:disabled {
         background-color: darken($white, 50%);
         color: darken($white, 20%);
-        cursor: default;
     }
 
     &.inverted {
@@ -76,9 +75,6 @@ a.small { // For de-emphasized actions e.g. "Back" button
     padding: 0.5rem 0;
     margin-right: 1rem;
     text-align: center;
-}
-a, button {
-    cursor: pointer;
 }
 .button-split {
     // A class for displaying a "Back" or "Cancel" button on the left and a "Continue" or "Confirm" button on the right

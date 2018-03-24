@@ -59,7 +59,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                 <h1>Consent #1</h1>
                 <p>Apocalypse Made Easy! is part of a study led by Dr. John Oliffe (email: john.oliffe@ubc.ca; phone: 604 822 7638), along with Andrew Munroe at the University of British Columbia, Melbourne-based First Person Consulting, and the Propel Centre for Population Health Impact at the University of Waterloo. As a Social Innovators Challenge Project funded by the Movember Foundation, its focus is on social connectedness.</p>
                 
-                <p>In order to study social connectedness and improve the program, the way you interact with Apocalypse Made Easy!, along with limited demographic data you supply while registering a profile, is recorded and stored. This data will be anonymized and stored on secure servers in Toronto, Ontario, and only accessible to the research team.</p>
+                <p>In order to study social connectedness and improve the program, the way you interact with Apocalypse Made Easy!, along with limited demographic data you supply while registering a profile, is recorded and stored. This data will be anonymized and stored on secure servers in Canada, and only accessible to the research team.</p>
 
                 <p>Each scenario that you choose to complete will take between 30 and 90 minutes. While using the program you are not required to do anything you are uncomfortable with.</p>
 
