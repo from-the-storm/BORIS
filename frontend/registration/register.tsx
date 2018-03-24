@@ -2,6 +2,7 @@ import bind from 'bind-decorator';
 import * as React from 'react';
 import { connect, DispatchProp } from 'react-redux';
 
+import { Gender } from '../../common/models';
 import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { REGISTER_USER } from '../../common/api';
@@ -21,7 +22,7 @@ interface State {
     workInTech: 'yes'|'no'|undefined;
     occupation: string;
     age: number|'';
-    gender: 'm'|'f'|'o'|'n'|undefined;
+    gender: Gender|undefined;
     // State of the submission:
     errorMessage: string,
     waitingForServerResponse: boolean,
