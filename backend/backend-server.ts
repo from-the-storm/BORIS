@@ -1,6 +1,8 @@
 import * as express from 'express';
 import * as expressWebsocket from 'express-ws';
 import * as bodyParser from 'body-parser';
+import JsonRpcPeer from 'json-rpc-peer';
+import {MethodNotFound, JsonRpcError, JsonRpcMessage} from 'json-rpc-protocol';
 import * as nodemailer from 'nodemailer';
 import { SendMailOptions } from 'nodemailer';
 import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
@@ -189,7 +191,7 @@ const sharedWebSocketClientState = {
     nextConnectionIndex: 0,
 }
 
-app.ws('/ws-api', (ws, req) => {
+app.ws('/rpc', (ws, req) => {
     if (!req.user) {
         ws.send("Unauthorized");
         logMessage("Unauthorized websocket connection attempt.")
@@ -203,11 +205,22 @@ app.ws('/ws-api', (ws, req) => {
         index: sharedWebSocketClientState.nextConnectionIndex++,  // A unique number to represent this connection
         sharedState: sharedWebSocketClientState,
         pingTimer: setInterval(() => ws.ping(), 50),  // Used to avoid socket disconnecting after 60s
+        peer: JsonRpcPeer,
     };
     sharedWebSocketClientState.allConnections.add(connectionState);
 
-    ws.on('message', (message) => {
-        ws.send("Reading you 5 by 5.", err => { if (err !== undefined) { logMessage(`Error while sending ws reply: ${err}`); } });
+    const peer = connectionState.peer = new JsonRpcPeer(async (message: JsonRpcMessage) => {
+        logMessage(`RPC ${message.method} (${connectionState.index})`, message.params);
+    });
+
+    peer.on('data', (message: any) => { ws.send(message); })
+    ws.on('message', async (message) => {
+        const response = await peer.exec(message);
+        ws.send(response, err => {
+            if (err !== undefined) {
+                logMessage(`Error while sending ws reply: ${err}`);
+            }
+        });
     });
     ws.on('close', () => {
         sharedWebSocketClientState.allConnections.delete(connectionState);
@@ -216,7 +229,7 @@ app.ws('/ws-api', (ws, req) => {
         logMessage(`${connectionState.user.first_name} has disconnected from the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
     });
     logMessage(`${connectionState.user.first_name} has connected to the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
-    ws.send('connection_ready'); // Clients can/should wait for this before sending data (which will be more reliable than sending immediately after an 'open' event)
+    peer.notify('connection_ready'); // Clients can/should wait for this before sending data (which will be more reliable than sending immediately after an 'open' event)
 });
 
 ////////////////////////////////////////////////////////////////////////////////
