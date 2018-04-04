@@ -5,13 +5,14 @@ import {connect, DispatchProp} from 'react-redux';
 import {RootState} from '../global/state';
 import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
+import { Prompt } from '../prompt/prompt';
+import { abandonGame } from '../global/state/game-state-actions';
+import { BorisInit } from './boris-init';
 
 import * as teams from './images/teams-icon.svg';
 
 // Include our SCSS (via webpack magic)
 import './game.scss';
-import { Prompt } from '../prompt/prompt';
-import { abandonGame } from '../global/state/game-state-actions';
 
 interface OwnProps {
 }
@@ -20,16 +21,18 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 }
 interface State {
     showQuitPrompt: boolean;
+    hasSeenSplash: boolean;
 }
 
 class _GameComponent extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
-        this.state = {showQuitPrompt: false};
+        this.state = {showQuitPrompt: false, hasSeenSplash: false};
     }
 
     public render() {
         return <RpcConnectionStatusIndicator>
+            {!this.state.hasSeenSplash && <BorisInit onDone={this.onSplashDone} />}
             <div className="game">
                 <header>
                     BORIS
@@ -62,6 +65,9 @@ class _GameComponent extends React.PureComponent<Props, State> {
     @bind private handleConfirmQuit() {
         this.setState({showQuitPrompt: false});
         this.props.dispatch(abandonGame());
+    }
+    @bind private onSplashDone() {
+        this.setState({hasSeenSplash: true});
     }
 }
 
