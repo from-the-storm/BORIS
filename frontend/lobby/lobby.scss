@@ -1,5 +1,48 @@
 @import '../global/variables-mixins';
 
+.splash {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: $black;
+    display: flex;
+    align-items: center;
+        > div {
+            display: flex;
+            flex-flow: wrap;
+            color: $white;
+            padding: 2rem 1rem;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            -webkit-animation: 1s 0.5s reverse forwards fade;
+            animation: 1s 0.5s reverse forwards fade;
+                img {
+                    margin-bottom: 3rem;
+                    max-width: 50%;
+                }
+                h3, p {
+                    width: 100%;
+                }
+        }
+        &.hidden {
+            -webkit-animation: 1.5s forwards fade;
+            animation: 1.5s forwards fade;
+        }
+}
+
+@-webkit-keyframes fade {
+    from { opacity: 1; }
+	to {   opacity: 0; }
+}
+
+@keyframes fade {
+    from { opacity: 1; }
+	to {   opacity: 0; }
+}
+
 .lobby {
 
     header {
