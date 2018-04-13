@@ -39,6 +39,7 @@ export function rpcClientMiddleware(store: MiddlewareAPI<RootState>) {
     window.addEventListener('offline', () => {
         console.log("This device is offline - cannot communicate with BORIS while offline.");
         store.dispatch<AnyAction>({type: Actions.WSCS_UNAVAILABLE, reason: RpcClientConnectionStatus.Offline});
+        client.close();
     }, false);
 
     client.on('open', () => {
