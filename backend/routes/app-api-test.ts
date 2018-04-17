@@ -26,5 +26,11 @@ describe("App API tests", () => {
             expect(result.team).toBeUndefined();
             expect(result.user).toBeUndefined();
         });
+        it("Returns user info when a user is logged in", async () => {
+            const userInfo = await client.registerAndLogin();
+            const result = await client.callApi(GET_INITIAL_STATE, {});
+            expect(result.team).toBeUndefined();
+            expect(result.user).toEqual({first_name: "Jamie"});
+        });
     });
 });

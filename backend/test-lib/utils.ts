@@ -1,8 +1,9 @@
 import { CookieJar, RequestAPI } from 'request';
 import * as request from 'request-promise-native';
-import { ApiErrorResponse, ApiMethod } from '../../common/api';
+import { ApiErrorResponse, ApiMethod, REGISTER_USER, RegisterUserRequest, REQUEST_LOGIN } from '../../common/api';
 import { app, startServer, stopServer } from '../backend-app';
 import { Server } from 'http';
+import { Gender } from '../../common/models';
 
 let lastTestServerPort = 4445;
 
@@ -58,5 +59,30 @@ export class TestClient {
             body = JSON.parse(response.body);
         }
         return body;
+    }
+
+    async registerUser() {
+        const userData: RegisterUserRequest = {
+            hasConsented: true,
+            firstName: "Jamie",
+            email: Math.random().toString(36).slice(-7) + '@test.none',
+            workInTech: 'yes',
+            occupation: "Tester",
+            age: 30,
+            gender: Gender.Male,
+        };
+        await this.callApi(REGISTER_USER, userData);
+        return userData;
+    }
+    async registerAndLogin() {
+        const userData = await this.registerUser();
+        await this.callApi(REQUEST_LOGIN, {email: userData.email});
+
+        const transport: any = app.get('mailTransport');
+        const mailWithLink = transport.sentMail.filter((mail: any) => mail.data.to === userData.email)[0];
+        const mailText: string = mailWithLink.data.text;
+        const code = mailText.match(/login\/(.*)$/)[1]
+        await this.httpClient.get(`/auth/login/${code}`);
+        return userData;
     }
 }
