@@ -4,15 +4,19 @@ import { ApiErrorResponse, ApiMethod } from '../../common/api';
 import { app, startServer, stopServer } from '../backend-app';
 import { Server } from 'http';
 
+let lastTestServerPort = 4445;
+
 export class TestServer {
     readonly app: typeof app;
+    readonly port: number;
     server: Server;
     private readyPromise: Promise<{}>;
 
     constructor() {
         this.app = app;
+        this.port = lastTestServerPort++;
         this.readyPromise = new Promise((resolve) => { 
-            startServer().then((server) => {
+            startServer({port: this.port}).then((server) => {
                 this.server = server;
                 resolve();
             });
@@ -33,10 +37,10 @@ export class TestClient {
     readonly httpClient: typeof request;
     readonly cookieJar: CookieJar;
 
-    constructor() {
+    constructor(server: TestServer) {
         this.cookieJar = request.jar();
         this.httpClient = request.defaults({
-            baseUrl: 'http://localhost:4444/',
+            baseUrl: `http://localhost:${server.port}/`,
             jar: this.cookieJar,
             resolveWithFullResponse: true,
         });

@@ -249,16 +249,12 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 let server: Server;
 
-async function startServer({quiet = false}: {quiet?: boolean} = {}): Promise<Server> {
-    const whenDbReady = getDB().then(db => {
-        app.set('db', db);
-        return db;
-    });
-    app.set('whenDbReady', whenDbReady);
+async function startServer({quiet = false, port = config.listen_port}: {quiet?: boolean, port?: number} = {}): Promise<Server> {
+    app.set('db', await getDB());
     await new Promise((resolve) => {
-        server = app.listen(config.listen_port, () => {
+        server = app.listen(port, () => {
             if (!quiet) {
-                console.log(`BORIS server is running on port ${config.listen_port} (${environment} mode).`);
+                console.log(`BORIS server is running on port ${port} (${environment} mode).`);
             }
             resolve();
         });
@@ -270,7 +266,7 @@ async function startServer({quiet = false}: {quiet?: boolean} = {}): Promise<Ser
  * keep the Node.js process running (redis, postgres connections...)
  */
 async function stopServer() {
-    const db = await app.get('whenDbReady');
+    const db = app.get('db');
     await new Promise((resolve) => {
         server.close(resolve);
     });

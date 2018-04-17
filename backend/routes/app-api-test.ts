@@ -16,7 +16,7 @@ describe("App API tests", () => {
             await server.ready();
         });
         beforeEach(async () => {
-            client = new TestClient();
+            client = new TestClient(server);
         });
         afterAll(async () => {
             await server.close();
