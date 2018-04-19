@@ -55,7 +55,7 @@ postApiMethodAnonymousOnly(REQUEST_LOGIN, async (data, app) => {
     if (!isEmail(email)) {
         throw new SafeError("Not a valid email address");
     }
-    sendLoginLinkToUser(app, email);
+    await sendLoginLinkToUser(app, email);
     return {result: 'ok'};
 });
 
@@ -148,7 +148,6 @@ postApiMethodWithUser(CREATE_TEAM, async (data, app, user) => {
     const teamName = (data.teamName || '').trim();
     if (!teamName) { throw new SafeError("Missing team name."); }
     const organizationName = (data.organizationName || '').trim();
-    if (!organizationName) { throw new SafeError("Missing team name."); }
     const db: BorisDatabase = app.get("db");
     let newCode: string|null = null;
     let newTeamId: number;
