@@ -148,7 +148,6 @@ postApiMethodWithUser(CREATE_TEAM, async (data, app, user) => {
     const teamName = (data.teamName || '').trim();
     if (!teamName) { throw new SafeError("Missing team name."); }
     const organizationName = (data.organizationName || '').trim();
-    if (!organizationName) { throw new SafeError("Missing team name."); }
     const db: BorisDatabase = app.get("db");
     let newCode: string|null = null;
     let newTeamId: number;
