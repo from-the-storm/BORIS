@@ -117,6 +117,10 @@ describe("BORIS Integration tests", () => {
         expect(await countElementsMatching('input:invalid', driver)).toBe(0);
         await driver.findElement(buttonWithText("CREATE MY TEAM")).then(btn => btn.click());
         await waitForHttpRequests(driver);
+        // Now we should see the splash screen:
+        await new Promise((resolve) => { setTimeout(resolve, 2000); });
+        await driver.findElement(elementMatchingWithText('p', "is a Social Innovators Challenge project funded by the Movember Foundation."));
+        await new Promise((resolve) => { setTimeout(resolve, 7000); });
         // Now we should see the "Choose Scenario" page:
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
         // Go back to the home area:
@@ -147,5 +151,5 @@ describe("BORIS Integration tests", () => {
         await driver.findElement(buttonWithText("JOIN TEAM")).then(btn => btn.click());
         await waitForHttpRequests(driver);
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
-    }, 8000);
+    }, 18000);
 });
