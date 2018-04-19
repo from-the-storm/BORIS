@@ -55,7 +55,7 @@ postApiMethodAnonymousOnly(REQUEST_LOGIN, async (data, app) => {
     if (!isEmail(email)) {
         throw new SafeError("Not a valid email address");
     }
-    sendLoginLinkToUser(app, email);
+    await sendLoginLinkToUser(app, email);
     return {result: 'ok'};
 });
 
