@@ -5,7 +5,8 @@ import { connect, DispatchProp } from 'react-redux';
 import { RootState } from '../global/state';
 import { List } from 'immutable';
 import { loadScenarios, Actions } from './lobby-state-actions';
-import { Splash } from './splash';
+// import { Splash } from './splash';
+import { BorisInit } from './boris-init';
 import { LoadingSpinnerComponent } from '../loading/loading-spinner';
 import { LoadingState } from '../loading/loading-state';
 import { Scenario } from '../../common/models';
@@ -58,7 +59,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
         }
 
         return <div>
-            {!this.state.hasSeenSplash && <Splash onDone={this.splashDone} />}
+            {!this.state.hasSeenSplash && <BorisInit onDone={this.splashDone} />}
             <h1>Choose Scenario</h1>
             <p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>
             <div className="scenario-grid">

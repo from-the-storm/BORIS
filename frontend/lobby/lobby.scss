@@ -1,7 +1,7 @@
 @import '../global/variables-mixins';
 
 .splash {
-    position: absolute;
+    position: fixed;
     height: 100%;
     width: 100%;
     top: 0;
@@ -31,6 +31,24 @@
             -webkit-animation: 1.5s forwards fade;
             animation: 1.5s forwards fade;
         }
+        &.boris {
+            > div {
+                text-align: left;
+                justify-content: flex-start;
+                padding: 2rem 3rem;
+            }
+            .boris-container {
+                height: 80px;
+                width: 80px;
+                background-image: url('./images/boris-init-atlas.png');
+                background-repeat: no-repeat;
+                -webkit-animation: 0.6s steps(9) 5 spinning, 0.7s 3s steps(8) forwards initialized;
+                animation: 0.6s steps(9) 5 spinning, 0.7s 3s steps(8) forwards initialized;
+            }
+            h3 {
+                font-size: 2.2em;
+            }
+        }
 }
 
 @-webkit-keyframes fade {
@@ -41,6 +59,26 @@
 @keyframes fade {
     from { opacity: 1; }
 	to {   opacity: 0; }
+}
+
+@-webkit-keyframes spinning {
+	from { background-position: 0; }
+	to { background-position: -720px; }
+}
+
+@keyframes spinning {
+	from { background-position: 0; }
+	to { background-position: -720px; }
+}
+
+@-webkit-keyframes initialized {
+	from { background-position: -720px; }
+	to { background-position: -1360px; }
+}
+
+@keyframes initialized {
+	from { background-position: -720px; }
+	to { background-position: -1360px; }
 }
 
 .lobby {
@@ -145,7 +183,6 @@
             h1 {
                 color: $white;
                 display: inline-block;
-                margin-right: 40%;
             }
     }
 
