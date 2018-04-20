@@ -21,6 +21,7 @@ import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
 import {router as lobbyRouter} from './routes/lobby-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
+import { setUserOnline, setUserOffline } from './redis/online-users';
 
 // Declare our additions to the Express API:
 import {UserType} from './express-extended';
@@ -62,7 +63,7 @@ app.use(bodyParser.json());
 
 // Configure redis and session store:
 const RedisStore = connectRedis(session);
-const redisClient = redis.createClient({
+export const redisClient = redis.createClient({
     host: config.redis_host,
     port: config.redis_port,
     password: config.redis_password,
@@ -201,9 +202,15 @@ app.ws('/rpc', (ws, req) => {
         user: req.user,
         index: sharedWebSocketClientState.nextConnectionIndex++,  // A unique number to represent this connection
         sharedState: sharedWebSocketClientState,
-        pingTimer: setInterval(() => ws.ping(), 50),  // Used to avoid socket disconnecting after 60s
+        pingTimer: setInterval(() => ws.ping(), 50000),  // Used to avoid socket disconnecting after 60s
         peer: JsonRpcPeer,
     };
+    // Mark the user as being online now,
+    // And update the "last seen" time every 50s when we ping them:
+    setUserOnline(req.user.id);
+    ws.on('pong', () => { setUserOnline(req.user.id); });
+    // This sharedWebSocketClientState is local to this node.js process so may not be aware of ALL connections,
+    // which is the responsibility of the redis USERS_ONLINE tracker.
     sharedWebSocketClientState.allConnections.add(connectionState);
 
     const peer = connectionState.peer = new JsonRpcPeer(async (message: JsonRpcMessage) => {
@@ -223,6 +230,7 @@ app.ws('/rpc', (ws, req) => {
         sharedWebSocketClientState.allConnections.delete(connectionState);
         clearInterval(connectionState.pingTimer);
         connectionState.pingTimer = null;
+        setUserOffline(connectionState.user.id);
         logMessage(`${connectionState.user.first_name} has disconnected from the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
     });
     logMessage(`${connectionState.user.first_name} has connected to the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
