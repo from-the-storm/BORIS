@@ -1,26 +1,31 @@
 import { CookieJar, RequestAPI } from 'request';
 import * as request from 'request-promise-native';
+import * as WebSocket from 'ws';
+import Client from 'jsonrpc-websocket-client';
+
 import { ApiErrorResponse, ApiMethod, REGISTER_USER, RegisterUserRequest, REQUEST_LOGIN } from '../../common/api';
 import { app, startServer, stopServer } from '../backend-app';
 import { Server } from 'http';
 import { Gender } from '../../common/models';
 
-let lastTestServerPort = 4445;
-
 export class TestServer {
     readonly app: typeof app;
-    readonly port: number;
+    port: number;
     server: Server;
     private readyPromise: Promise<{}>;
 
     constructor() {
         this.app = app;
-        this.port = lastTestServerPort++;
-        this.readyPromise = new Promise((resolve) => { 
-            startServer({port: this.port}).then((server) => {
-                this.server = server;
-                resolve();
-            });
+        this.port = 4445;
+        this.readyPromise = new Promise((resolve) => {
+            const tryNextPort = () => {
+                this.port++;
+                if (this.port > 4500) {
+                    return;
+                }
+                startServer({port: this.port}).then(resolve, tryNextPort);
+            }
+            tryNextPort();
         });
     }
     ready(): Promise<{}> { return this.readyPromise; }
@@ -37,6 +42,7 @@ export class TestServer {
 export class TestClient {
     readonly httpClient: typeof request;
     readonly cookieJar: CookieJar;
+    readonly server: TestServer;
 
     constructor(server: TestServer) {
         this.cookieJar = request.jar();
@@ -45,6 +51,7 @@ export class TestClient {
             jar: this.cookieJar,
             resolveWithFullResponse: true,
         });
+        this.server = server;
     }
 
     async callApi<RequestType, ResponseType>(method: ApiMethod<RequestType, ResponseType>, data: RequestType): Promise<ResponseType> {
@@ -84,5 +91,22 @@ export class TestClient {
         const code = mailText.match(/login\/(.*)$/)[1]
         await this.httpClient.get(`/auth/login/${code}`);
         return userData;
+    }
+    /** Open an RPC Client connection to the server. You must close this afterward with client.close() */
+    async openWebsocket(): Promise<any> {
+        const cookieString = this.cookieJar.getCookieString(`http://localhost:${this.server.port}/`);
+        const rpcClient = new Client({
+            url: `ws://localhost:${this.server.port}/rpc`,
+            headers: { 'Cookie': cookieString, },
+        });
+        return new Promise((resolve, reject) => {
+            rpcClient.once('notification', (notification: any) => {
+                if (notification.method === 'connection_ready') {
+                    resolve(rpcClient);
+                }
+            });
+            rpcClient.once('error', () => { reject(); });
+            rpcClient.open();
+        });
     }
 }

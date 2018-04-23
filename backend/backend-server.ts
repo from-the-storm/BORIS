@@ -3,4 +3,6 @@ import { startServer } from './backend-app';
 ////////////////////////////////////////////////////////////////////////////////
 // Startup
 
-const server = startServer();
+startServer().catch(err => {
+    throw err;
+});

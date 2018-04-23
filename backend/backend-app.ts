@@ -28,7 +28,7 @@ import {UserType} from './express-extended';
 import { Server } from 'http';
 
 const app = express();
-expressWebsocket(app);
+const {getWss} = expressWebsocket(app);
 
 // Locals available in any template:
 app.locals.resUrl = config.resource_url;
@@ -262,13 +262,23 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 let server: Server;
 
 async function startServer({quiet = false, port = config.listen_port}: {quiet?: boolean, port?: number} = {}): Promise<Server> {
-    app.set('db', await getDB());
-    await new Promise((resolve) => {
+    if (app.get('initializedDb') === undefined) {
+        app.set('initializedDb', true);
+        app.set('db', await getDB());
+    }
+    await new Promise((resolve, reject) => {
         server = app.listen(port, () => {
+        }).once('error', (err: any) => {
+            reject(err); // Port in use or other error
+        }).once('listening', () => {
             if (!quiet) {
                 console.log(`BORIS server is running on port ${port} (${environment} mode).`);
             }
             resolve();
+        });
+        // Unfortunately the express-ws monkeypatching causes any "port in use" error to usually come up separately:
+        getWss().once('error', (err: Error) => {
+            reject(err); // Port in use or other error
         });
     });
     return server;
