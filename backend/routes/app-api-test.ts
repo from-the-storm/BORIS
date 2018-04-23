@@ -3,11 +3,6 @@ import { TestClient, TestServer } from '../test-lib/utils';
 import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM } from '../../common/api';
 
 describe("App API tests", () => {
-    describe("getOtherTeamMembers", async () => {
-        it("isn't yet tested", () => {
-            // TODO
-        });
-    });
     describe("getInitialState", async () => {
         let client: TestClient;
         let server: TestServer;
@@ -64,10 +59,29 @@ describe("App API tests", () => {
                 {
                     name: "Jamie",
                     id: user2id,
-                    online: false, // TODO: implement
+                    online: false,
                     isAdmin: false,
                 }
             );
+        });
+        it("Returns the online status of other users", async () => {
+            // Create one user and create a team:
+            const userInfo = await client.registerAndLogin();
+            const teamInfo = await client.callApi(CREATE_TEAM, { teamName: "Test Team", organizationName: ""});
+            // Create a second user and join the team:
+            const client2 = new TestClient(server);
+            await client2.registerAndLogin();
+            await client2.callApi(JOIN_TEAM, {code: teamInfo.teamCode});
+            // Now, the original user gets the initial state, and it will say the second user is not yet online:
+            const result = await client.callApi(GET_INITIAL_STATE, {});
+            expect(result.team.otherTeamMembers).toHaveLength(1);
+            expect(result.team.otherTeamMembers[0].online).toEqual(false);
+            // Now the second user comes online:
+            const rpcClient = await client2.openWebsocket();
+            const result2 = await client.callApi(GET_INITIAL_STATE, {});
+            expect(result2.team.otherTeamMembers).toHaveLength(1);
+            expect(result2.team.otherTeamMembers[0].online).toEqual(true);
+            await rpcClient.close();
         });
     });
 });

@@ -9,6 +9,7 @@ import {BorisDatabase} from '../db/db';
 import { InitialStateResponse, GET_INITIAL_STATE } from '../../common/api';
 import { makeApiHelper, RequireUser } from './api-utils';
 import { OtherTeamMember } from '../../common/models';
+import { isUserOnline } from '../redis/online-users';
 
 export const router = express.Router();
 
@@ -30,7 +31,7 @@ async function getOtherTeamMembers(db: BorisDatabase, forUserId: number): Promis
         result.push({
             name: row.first_name,
             id: row.user_id,
-            online: false,
+            online: await isUserOnline(row.user_id),
             isAdmin: row.is_admin,
         });
     }
