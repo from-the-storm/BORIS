@@ -202,7 +202,11 @@ app.ws('/rpc', (ws, req) => {
         user: req.user,
         index: sharedWebSocketClientState.nextConnectionIndex++,  // A unique number to represent this connection
         sharedState: sharedWebSocketClientState,
-        pingTimer: setInterval(() => ws.ping(), 50000),  // Used to avoid socket disconnecting after 60s
+        pingTimer: setInterval(() => {
+            try {
+                ws.ping();
+            } catch {}
+        }, 50000),  // Used to avoid socket disconnecting after 60s
         peer: JsonRpcPeer,
     };
     // Mark the user as being online now,
