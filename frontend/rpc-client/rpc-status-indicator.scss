@@ -3,7 +3,7 @@
     max-height: 100vh;
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
 
     & > div:first-child {
         max-height: 100%;
@@ -13,7 +13,7 @@
     }
     & > .rpc-status-indicator {
         flex: 0 0 auto;
-        background-color: black;
+        background-color: rgb(133, 0, 0);
         color: white;
         padding: 5px;
     }
