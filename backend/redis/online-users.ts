@@ -23,8 +23,8 @@ export async function setUserOnline(userId: number) {
 export async function setUserOffline(userId: number) {
     await wrapRedis(cb => redisClient.ZREM(USERS_ONLINE, userId.toString(), cb));
     // And clean up expired users, if any:
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    await wrapRedis(cb => redisClient.ZREMRANGEBYSCORE(USERS_ONLINE, "-inf", nowSeconds, cb));
+    const oneMinuteAgo = Math.floor(Date.now() / 1000) - 60;
+    await wrapRedis(cb => redisClient.ZREMRANGEBYSCORE(USERS_ONLINE, "-inf", oneMinuteAgo, cb));
 }
 
 export async function isUserOnline(userId: number) {
