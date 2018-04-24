@@ -31,3 +31,42 @@ declare module 'validator/lib/isEmail' {
     const isEmail: (email: string) => boolean;
     export = isEmail;
 }
+declare module 'json-rpc-protocol' {
+    interface JsonRpcBaseMessage {
+        jsonrpc: '1.0'|'2.0';
+    }
+    interface JsonRpcBaseValidMessage extends JsonRpcBaseMessage {
+        method: string;
+        params?: any[]|{};
+    }
+    export interface JsonRpcNotification extends JsonRpcBaseValidMessage {
+        type: 'notification';
+    }
+    export interface JsonRpcRequest extends JsonRpcBaseValidMessage {
+        type: 'request';
+        id: number|string;
+    }
+    export interface JsonRpcResponse extends JsonRpcBaseValidMessage {
+        type: 'error';
+        id: number|string;
+    }
+    export interface JsonRpcErrorMessage extends JsonRpcBaseMessage {
+        type: 'error';
+        error: {
+            code: number;
+            message: string;
+        };
+        id: null;
+    }
+    export type JsonRpcMessage = (JsonRpcNotification|JsonRpcRequest|JsonRpcResponse);
+    export interface JsonRpcError {
+        message: string;
+        code: number;
+        data: any;
+    }
+    export interface InvalidJson extends JsonRpcError {}
+    export interface InvalidRequest extends JsonRpcError {}
+    export interface MethodNotFound extends JsonRpcError {}
+    export interface InvalidParameters extends JsonRpcError {}
+}
+declare module 'json-rpc-peer';

@@ -8,6 +8,7 @@ import {Mode} from './lobby-state';
 import {Actions} from './lobby-state-actions';
 import { Actions as RegistrationActions } from '../registration/registration-state-actions';
 import { AnyAction } from '../global/actions';
+import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
 
 // Include our SCSS (via webpack magic)
 import './lobby.scss';
@@ -33,17 +34,19 @@ class _LobbyComponent extends React.PureComponent<Props> {
     }
 
     public render() {
-        return <div className="lobby">
-            <header>
-                <button onClick={this.handleBackButton}>◀</button>
-            </header>
-            <div className="content">
-                {
-                    this.props.mode === Mode.ChooseScenario ? <ChooseScenarioComponent/> :
-                    'Error: Unknown mode.'
-                }
+        return <RpcConnectionStatusIndicator>
+            <div className="lobby">
+                <header>
+                    <button onClick={this.handleBackButton}>◀</button>
+                </header>
+                <div className="content">
+                    {
+                        this.props.mode === Mode.ChooseScenario ? <ChooseScenarioComponent/> :
+                        'Error: Unknown mode.'
+                    }
+                </div>
             </div>
-        </div>;
+        </RpcConnectionStatusIndicator>;
     }
 }
 

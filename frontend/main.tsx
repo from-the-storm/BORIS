@@ -12,6 +12,7 @@ import {
 } from './global/state';
 import { registrationStateReducer } from './registration/registration-state';
 import { lobbyStateReducer } from './lobby/lobby-state';
+import { rpcClientStateReducer } from './rpc-client/rpc-client-state';
 import {App} from './app';
 import { RootLoadingSpinnerComponent } from './loading/root-loading-spinner';
 import { InitStateActions } from './global/state/init-state-actions';
@@ -20,6 +21,8 @@ import { InitialStateResponse, GET_INITIAL_STATE } from '../common/api';
 import { TeamStateActions } from './global/state/team-state-actions';
 import { callApi } from './api';
 import { AnyAction } from './global/actions';
+import { rpcClientMiddleware } from './rpc-client/manager';
+import { Middleware } from 'redux';
 
 
 export const store = createStore(
@@ -29,8 +32,9 @@ export const store = createStore(
         teamState: teamStateReducer,
         registrationState: registrationStateReducer,
         lobbyState: lobbyStateReducer,
+        rpcClientState: rpcClientStateReducer,
     }),
-    applyMiddleware(thunk),
+    applyMiddleware(thunk, rpcClientMiddleware as Middleware),
 );
 
 const appHolderElement = document.getElementById('app-container');
