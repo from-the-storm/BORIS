@@ -35,10 +35,15 @@ h1, h2, h3, h4, h5 {
     font-family: $consolefont;
     font-weight: bold;
 }
-.emphatic {
+.emphatic, .badge {
     font-family: $fancyfont;
     font-weight: bold;
     text-transform: uppercase;
+}
+.badge {
+    background: $grey;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
 }
 
 // Navigation

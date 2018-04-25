@@ -11,6 +11,8 @@ import { Actions as RegistrationActions } from '../registration/registration-sta
 import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
 
+import * as teams from './images/teams-icon.svg';
+
 // Include our SCSS (via webpack magic)
 import './lobby.scss';
 
@@ -45,7 +47,7 @@ class _LobbyComponent extends React.PureComponent<Props> {
             <div className="lobby">
                 <header>
                     <button onClick={this.handleBackButton}>◀</button>
-                    <button onClick={this.handleTeamButton}>T</button>
+                    <button className="right" onClick={this.handleTeamButton}><img height="22" width="22" src={teams} alt="Teams" /></button>
                 </header>
                 <div className="content">
                     {

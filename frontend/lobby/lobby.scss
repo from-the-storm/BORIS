@@ -1,7 +1,7 @@
 @import '../global/variables-mixins';
 
 .splash {
-    position: absolute;
+    position: fixed;
     height: 100%;
     width: 100%;
     top: 0;
@@ -35,16 +35,6 @@
         }
 }
 
-@-webkit-keyframes fade {
-    from { opacity: 1; }
-	to {   opacity: 0; }
-}
-
-@keyframes fade {
-    from { opacity: 1; }
-	to {   opacity: 0; }
-}
-
 .lobby {
 
     header {
@@ -56,6 +46,12 @@
                 font-size: 1em;
                 line-height: 20px;
                 height: 40px;
+                    &.right {
+                        text-align: right;
+                            img {
+                                vertical-align: middle;
+                            }
+                    }
             }
     }
 
@@ -168,8 +164,94 @@
         background-image: url('./images/bg-home.svg')
     }
 
-    // Team details page:
-    .online-indicator {
-        color: lightgreen;
+    .teams {
+
+        h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        nav.tabs {
+            margin: -1rem -1rem 1rem -1rem;
+            display: flex;
+            button {
+                background: darken($grey, 10%);
+                color: lighten($black, 25%);
+                padding: 1rem 1.25rem;
+                flex: 1;
+                    &.active {
+                        background: none;
+                        color: $black;
+                    }
+            }
+        }
+
+        .saltines-count {
+            p {
+                font-size: 0.9em;
+                line-height: normal;
+                margin: 0;
+                span {
+                    font-family: $fancyfont;
+                    font-size: 2em;
+                    display: inline-block;
+                    margin: 0 0.5rem;
+                }
+            }
+        }
+
+        .rankings-snapshot {
+            margin: 0.5rem 0 2rem;
+                button {
+                    width: 100%;
+                    text-align: left;
+                    font-size: 1.8em;
+                    margin-top: 0.5rem;
+                    padding: 0.5rem;
+                        span {
+                            margin-left: 0.75rem;
+                            font-size: 0.55em;
+                        }
+                }
+        }
+
+        ul.team {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 0.5rem;
+                li {
+                    margin-bottom: 0.75rem;
+                        button {
+                            font-family: $fancyfont;
+                            font-size: 0.9em;
+                            padding: 0.25rem 0.5rem;
+                            margin-right: 0.5rem;
+                        }
+                }
+        }
+
+        .online-indicator {
+            background: $green;
+            border-radius: 50%;
+            display: inline-block;
+            height: 1em;
+            width: 1em;
+            -webkit-animation: 1s cubic-bezier(.5, 0, 1, 1) infinite alternate fade;
+            animation: 1s cubic-bezier(.5, 0, 1, 1) infinite alternate fade;
+            margin: 0 0.5rem;
+            vertical-align: middle;
+        }
+
     }
+
+}
+
+@-webkit-keyframes fade {
+    from { opacity: 1; }
+	to {   opacity: 0; }
+}
+
+@keyframes fade {
+    from { opacity: 1; }
+	to {   opacity: 0; }
 }
