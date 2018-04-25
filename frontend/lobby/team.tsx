@@ -15,7 +15,7 @@ import * as saltine from './images/saltine.svg';
 class OnlineIndicator extends React.PureComponent<{when: boolean}> {
     public render() {
         if (this.props.when) {
-            return <span className="online-indicator"></span>
+            return <span className="online-indicator"><span className="visually-hidden">online</span></span>
         }
         return null;
     }
