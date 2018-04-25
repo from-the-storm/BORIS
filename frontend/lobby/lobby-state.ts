@@ -9,6 +9,7 @@ import { Scenario } from '../../common/models';
 
 export const enum Mode {
     ChooseScenario,
+    TeamDetails,
 }
 
 /**
@@ -52,6 +53,8 @@ export function lobbyStateReducer(state?: LobbyState, action?: AnyAction): Lobby
         });
     case Actions.SHOW_SCENARIO_DETAILS:
         return state.set('showScenarioDetails', action.scenarioId);
+    case Actions.SHOW_TEAM_DETAILS:
+        return state.set('mode', Mode.TeamDetails);
     case UserStateActions.LOGOUT:
     case TeamStateActions.LEAVE_TEAM:
         return state.clear();

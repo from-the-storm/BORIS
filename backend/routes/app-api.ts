@@ -8,10 +8,35 @@ import {config} from '../config';
 import {BorisDatabase} from '../db/db';
 import { InitialStateResponse, GET_INITIAL_STATE } from '../../common/api';
 import { makeApiHelper, RequireUser } from './api-utils';
+import { OtherTeamMember } from '../../common/models';
+import { isUserOnline } from '../redis/online-users';
 
 export const router = express.Router();
 
 const getApiMethod = makeApiHelper(router, /^\/api\/app/, RequireUser.UserOptional);
+
+
+/**
+ * Helper method for getting a list of other team members
+ */
+async function getOtherTeamMembers(db: BorisDatabase, forUserId: number): Promise<OtherTeamMember[]> {
+    const queryResult = await db.query(
+        `SELECT * FROM team_members tm, users u
+         WHERE tm.team_id = (SELECT team_id FROM team_members WHERE user_id = $1 AND is_active = 'true')
+         AND is_active = 'true' AND tm.user_id != $1 AND u.id = tm.user_id`,
+        [forUserId], {}
+    );
+    const result: OtherTeamMember[] = [];
+    for (let row of queryResult) {
+        result.push({
+            name: row.first_name,
+            id: row.user_id,
+            online: await isUserOnline(row.user_id),
+            isAdmin: row.is_admin,
+        });
+    }
+    return result;
+}
 
 /**
  * API endpoint for getting data needed to initialize the app's state:
@@ -30,7 +55,7 @@ getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
                 code: team.code,
                 name: team.name,
                 isTeamAdmin: activeTeamMembership.is_admin,
-                otherTeamMembers: [],
+                otherTeamMembers: await getOtherTeamMembers(db, user.id),
             };
         }
     }

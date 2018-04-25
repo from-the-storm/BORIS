@@ -17,6 +17,8 @@ export enum Actions {
     SHOW_SCENARIOS_LIST = 'LS_SSL',
     // Show the details of a specific scenario
     SHOW_SCENARIO_DETAILS = 'LS_SD',
+    // Show the Team status page:
+    SHOW_TEAM_DETAILS = 'LS_TEAM',
 }
 
 interface ScenariosLoadingAction { type: Actions.SCENARIOS_LOADING; }
@@ -27,13 +29,15 @@ interface ScenariosLoadedAction {
 }
 interface ShowScenariosListAction { type: Actions.SHOW_SCENARIOS_LIST; }
 interface ShowScenarioDetailsAction { type: Actions.SHOW_SCENARIO_DETAILS; scenarioId: number; }
+interface ShowTeamDetailsAction { type: Actions.SHOW_TEAM_DETAILS; }
 
 export type LobbyStateActionsType = (
     ScenariosLoadingAction|
     ScenariosLoadedAction|
     ScenariosFailedToLoadAction|
     ShowScenariosListAction|
-    ShowScenarioDetailsAction
+    ShowScenarioDetailsAction|
+    ShowTeamDetailsAction
 );
 
 //// Action Creators

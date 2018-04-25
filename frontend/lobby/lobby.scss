@@ -22,6 +22,8 @@
                 img {
                     margin-bottom: 3rem;
                     max-width: 50%;
+                    width: 100%;
+                    height: 100%;
                 }
                 h3, p {
                     width: 100%;
@@ -166,4 +168,8 @@
         background-image: url('./images/bg-home.svg')
     }
 
+    // Team details page:
+    .online-indicator {
+        color: lightgreen;
+    }
 }
