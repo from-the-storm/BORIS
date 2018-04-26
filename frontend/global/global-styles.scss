@@ -23,6 +23,10 @@ header {
 // Typography
 p {
     line-height: 1.7;
+        &.callout {
+            background: $grey;
+            padding: 0.5rem 0.75rem;
+        }
 }
 h1, h2, h3, h4, h5 {
     font-family: $fancyfont;
@@ -41,8 +45,7 @@ h1, h2, h3, h4, h5 {
     text-transform: uppercase;
 }
 .badge {
-    background: $grey;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem;
     font-size: 0.75rem;
 }
 

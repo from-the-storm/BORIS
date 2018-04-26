@@ -43,7 +43,7 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 }
 interface State {
     teamView: boolean,
-    hasSeenSplash: boolean
+    editingTeam: boolean,
 }
 
 class _TeamComponent extends React.PureComponent<Props, State> {
@@ -51,13 +51,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
         super(props);
         this.state = ({
             teamView: true,
-            hasSeenSplash: false,
-        })
-    }
-
-    @bind splashDone() {
-        this.setState({
-            hasSeenSplash: true,
+            editingTeam: false,
         })
     }
 
@@ -81,14 +75,21 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <button onClick={this.switchTab}><sup>#</sup>2<span>in Vancouver</span></button>
                         <button onClick={this.switchTab}><sup>#</sup>78<span>in Canada</span></button>
                     </div>
-                    <h3>Your team</h3>
+                    <h3>Your team{this.props.isTeamAdmin &&<button onClick={this.editTeam}>{this.state.editingTeam ? 'Save Changes' : 'Edit Team'}</button>}</h3>
                     <ul className="team">
-                        <li>{this.props.isTeamAdmin && <button onClick={this.switchTeamAdmin}>X</button>}{this.props.myName} (That's you!) <OnlineIndicator when={this.props.isOnline}/> <AdminIndicator when={this.props.isTeamAdmin}/> </li>
+                        <li>{this.props.myName} (That's you!) <OnlineIndicator when={this.props.isOnline}/> <AdminIndicator when={this.props.isTeamAdmin}/> </li>
                         {this.props.otherTeamMembers.map(member =>
-                            <li key={member.id}>{member.name} <OnlineIndicator when={member.online}/> <AdminIndicator when={member.isAdmin}/>{this.props.isTeamAdmin && <button value={member.name} onClick={this.removeTeamMember}>X</button>} </li>
+                            <li key={member.id}>{this.state.editingTeam &&
+                                <span>
+                                    <button role="Remove team member" value={member.name} onClick={this.removeTeamMember}>X</button>
+                                    <button value={member.name} onClick={this.makeAdmin}>Make Admin</button>
+                                </span>
+                            }{member.name} <OnlineIndicator when={member.online}/> <AdminIndicator when={member.isAdmin}/></li>
                         )}
-                        {this.props.otherTeamMembers.length < 4 && <li><button onClick={this.addTeamMemberPrompt}>Add Team Member</button></li>}
                     </ul>
+                    {this.props.otherTeamMembers.length < 4 && 
+                        <p className="callout">Share your team code <span className="mono">{this.props.teamCode}</span> to recruit more team members. Your team has room for 5 players in total.</p>
+                    }
                 </div>
             }
             { !teamView &&
@@ -105,17 +106,23 @@ class _TeamComponent extends React.PureComponent<Props, State> {
         tab ? this.setState({ teamView: true }) : this.setState({ teamView: false })
     }
 
-    @bind private addTeamMemberPrompt(event: React.MouseEvent<HTMLButtonElement>) {
-        confirm('To add someone to your team, give them your team code: ' + this.props.teamCode + '. Your team can have a maximum of 5 people.')
+    @bind private editTeam(event: React.MouseEvent<HTMLButtonElement>) {
+        if (this.props.isTeamAdmin) {
+            this.setState(prevState => ({
+                // If the player is an admin, toggle the editingTeam state
+                editingTeam: !prevState.editingTeam
+            }))
+        }
     }
 
     private removeTeamMember(event: React.MouseEvent<HTMLButtonElement>) {
         const name = event.currentTarget.value
-        confirm('Do you want to give ' + name + 'the unceremonious boot?')
+        confirm('Do you want to give ' + name + ' the unceremonious boot?')
     }
 
-    private switchTeamAdmin(event: React.MouseEvent<HTMLButtonElement>) {
-        confirm('Do you want to remove yourself as the team leader?')
+    private makeAdmin(event: React.MouseEvent<HTMLButtonElement>) {
+        const name = event.currentTarget.value
+        confirm('Do you want to make ' + name + ' an admin? (Your team can have as many admins as you want.)')
     }
 }
 
