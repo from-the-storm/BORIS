@@ -24,14 +24,14 @@ describe("App API tests", () => {
         it("Returns user info when a user is logged in", async () => {
             const userInfo = await client.registerAndLogin();
             const result = await client.callApi(GET_INITIAL_STATE, {});
-            expect(result.user).toEqual({first_name: "Jamie"});
+            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
             expect(result.team).toBeUndefined();
         });
         it("Returns user info when a user is logged and on a team", async () => {
             const userInfo = await client.registerAndLogin();
             await client.callApi(CREATE_TEAM, { teamName: "Test Team", organizationName: ""});
             const result = await client.callApi(GET_INITIAL_STATE, {});
-            expect(result.user).toEqual({first_name: "Jamie"});
+            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
             expect(result.team.name).toEqual("Test Team");
             expect(result.team.code).toHaveLength(5);
             expect(result.team.isTeamAdmin).toBe(true);
@@ -44,21 +44,19 @@ describe("App API tests", () => {
             expect(teamInfo.teamCode).toHaveLength(5);
             // Create a second user and join the team
             const client2 = new TestClient(server);
-            await client2.registerAndLogin();
+            const user2info = await client2.registerAndLogin();
             await client2.callApi(JOIN_TEAM, {code: teamInfo.teamCode});
             // Now, the original user gets the initial state:
             const result = await client.callApi(GET_INITIAL_STATE, {});
-            expect(result.user).toEqual({first_name: "Jamie"});
+            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
             expect(result.team.name).toEqual("Test Team");
             expect(result.team.code).toHaveLength(5);
             expect(result.team.isTeamAdmin).toBe(true);
             expect(result.team.otherTeamMembers).toHaveLength(1);
-            const user2id = result.team.otherTeamMembers[0].id;
-            expect(typeof user2id).toEqual("number");
             expect(result.team.otherTeamMembers[0]).toEqual(
                 {
                     name: "Jamie",
-                    id: user2id,
+                    id: user2info.id,
                     online: false,
                     isAdmin: false,
                 }

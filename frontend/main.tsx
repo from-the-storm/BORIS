@@ -59,6 +59,7 @@ callApi(GET_INITIAL_STATE, {}).then(async data => {
         store.dispatch<AnyAction>({
             type: UserStateActions.LOGIN,
             firstName: data.user.first_name,
+            id: data.user.id,
         });
         if (data.team) {
             store.dispatch<AnyAction>({

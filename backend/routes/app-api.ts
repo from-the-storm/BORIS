@@ -47,6 +47,7 @@ getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
     if (user) {
         result.user = {
             first_name: user.first_name,
+            id: user.id,
         };
         const activeTeamMembership = await db.team_members.findOne({user_id: user.id, is_active: true});
         if (activeTeamMembership !== null) {

@@ -8,6 +8,10 @@ import { app, startServer, stopServer } from '../backend-app';
 import { Server } from 'http';
 import { Gender } from '../../common/models';
 
+interface TestUserData extends RegisterUserRequest {
+    id: number;
+}
+
 export class TestServer {
     readonly app: typeof app;
     port: number;
@@ -68,8 +72,8 @@ export class TestClient {
         return body;
     }
 
-    async registerUser() {
-        const userData: RegisterUserRequest = {
+    async registerUser(): Promise<TestUserData> {
+        const request: RegisterUserRequest = {
             hasConsented: true,
             firstName: "Jamie",
             email: Math.random().toString(36).slice(-7) + '@test.none',
@@ -78,8 +82,9 @@ export class TestClient {
             age: 30,
             gender: Gender.Male,
         };
-        await this.callApi(REGISTER_USER, userData);
-        return userData;
+        await this.callApi(REGISTER_USER, request);
+        const userId = (await app.get('db').users.findOne({email: request.email})).id;
+        return {...request, id: userId};
     }
     async registerAndLogin() {
         const userData = await this.registerUser();
