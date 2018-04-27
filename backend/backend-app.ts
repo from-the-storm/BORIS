@@ -1,8 +1,6 @@
 import * as express from 'express';
 import * as expressWebsocket from 'express-ws';
 import * as bodyParser from 'body-parser';
-import JsonRpcPeer from 'json-rpc-peer';
-import {MethodNotFound, JsonRpcError, JsonRpcMessage} from 'json-rpc-protocol';
 import * as nodemailer from 'nodemailer';
 import { SendMailOptions } from 'nodemailer';
 import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
@@ -14,6 +12,7 @@ import * as redis from 'redis';
 import * as session from 'express-session';
 import * as connectRedis from 'connect-redis';
 import * as whiskers from 'whiskers';
+import { Server } from 'http';
 
 import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
@@ -21,11 +20,11 @@ import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
 import {router as lobbyRouter} from './routes/lobby-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
-import { setUserOnline, setUserOffline } from './redis/online-users';
+import { subscribeToRedis } from './websocket/pub-sub';
+import { rpcHandler } from './websocket/connections';
 
 // Declare our additions to the Express API:
 import {UserType} from './express-extended';
-import { Server } from 'http';
 
 const app = express();
 const {getWss} = expressWebsocket(app);
@@ -70,6 +69,7 @@ export const redisClient = redis.createClient({
     prefix: config.redis_prefix,
 });
 app.set('redisClient', redisClient);
+app.set('pubsubClient', redisClient.duplicate()); // A dedicated connection is required for redis pub/sub subscriber functionality
 app.use(session({
     store: new RedisStore({client: redisClient, logErrors: true}),
     secret: config.secret_key,
@@ -183,63 +183,12 @@ if (environment === 'test') {
 ////////////////////////////////////////////////////////////////////////////////
 // Web sockets
 
-const sharedWebSocketClientState = {
-    app: app,
-    allConnections: new Set(),
-    nextConnectionIndex: 0,
-}
+app.ws('/rpc', rpcHandler);
 
-app.ws('/rpc', (ws, req) => {
-    if (!req.user) {
-        ws.send("Unauthorized");
-        logMessage("Unauthorized websocket connection attempt.")
-        ws.close();
-        return;
-    }
-    const connectionState = {
-        // A mutable state variable used to track information about this specific connection.
-        // i.e. this data is specific to this node process and this browser tab of this user.
-        user: req.user,
-        index: sharedWebSocketClientState.nextConnectionIndex++,  // A unique number to represent this connection
-        sharedState: sharedWebSocketClientState,
-        pingTimer: setInterval(() => {
-            try {
-                ws.ping();
-            } catch {}
-        }, 50000),  // Used to avoid socket disconnecting after 60s
-        peer: JsonRpcPeer,
-    };
-    // Mark the user as being online now,
-    // And update the "last seen" time every 50s when we ping them:
-    setUserOnline(req.user.id);
-    ws.on('pong', () => { setUserOnline(req.user.id); });
-    // This sharedWebSocketClientState is local to this node.js process so may not be aware of ALL connections,
-    // which is the responsibility of the redis USERS_ONLINE tracker.
-    sharedWebSocketClientState.allConnections.add(connectionState);
+////////////////////////////////////////////////////////////////////////////////
+// Redis pub/sub notifications (used to know when to send notifications to websocket clients)
 
-    const peer = connectionState.peer = new JsonRpcPeer(async (message: JsonRpcMessage) => {
-        logMessage(`RPC ${message.method} (${connectionState.index})`, message.params);
-    });
-
-    peer.on('data', (message: any) => { ws.send(message); })
-    ws.on('message', async (message) => {
-        const response = await peer.exec(message);
-        ws.send(response, err => {
-            if (err !== undefined) {
-                logMessage(`Error while sending ws reply: ${err}`);
-            }
-        });
-    });
-    ws.on('close', () => {
-        sharedWebSocketClientState.allConnections.delete(connectionState);
-        clearInterval(connectionState.pingTimer);
-        connectionState.pingTimer = null;
-        setUserOffline(connectionState.user.id);
-        logMessage(`${connectionState.user.first_name} has disconnected from the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
-    });
-    logMessage(`${connectionState.user.first_name} has connected to the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
-    peer.notify('connection_ready'); // Clients can/should wait for this before sending data (which will be more reliable than sending immediately after an 'open' event)
-});
+subscribeToRedis(app);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Error handling:
@@ -294,6 +243,7 @@ async function stopServer() {
     });
     await db.instance.$pool.end();
     redisClient.unref();
+    app.get('pubsubClient').unref();
 }
 
 export {app, config, startServer, stopServer};

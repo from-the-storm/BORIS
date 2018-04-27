@@ -9,7 +9,7 @@ import {BorisDatabase} from '../db/db';
 import { InitialStateResponse, GET_INITIAL_STATE } from '../../common/api';
 import { makeApiHelper, RequireUser } from './api-utils';
 import { OtherTeamMember } from '../../common/models';
-import { isUserOnline } from '../redis/online-users';
+import { isUserOnline } from '../websocket/online-users';
 
 export const router = express.Router();
 
