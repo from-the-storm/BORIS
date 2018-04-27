@@ -23,6 +23,10 @@ header {
 // Typography
 p {
     line-height: 1.7;
+        &.callout {
+            background: $grey;
+            padding: 0.5rem 0.75rem;
+        }
 }
 h1, h2, h3, h4, h5 {
     font-family: $fancyfont;
@@ -35,10 +39,14 @@ h1, h2, h3, h4, h5 {
     font-family: $consolefont;
     font-weight: bold;
 }
-.emphatic {
+.emphatic, .badge {
     font-family: $fancyfont;
     font-weight: bold;
     text-transform: uppercase;
+}
+.badge {
+    padding: 0.25rem;
+    font-size: 0.75rem;
 }
 
 // Navigation
@@ -135,4 +143,16 @@ fieldset {
         &.deselected { border-color: $red}
         &.selected { border-color: $black;}
 
+}
+
+// Accessibility
+.visually-hidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
 }

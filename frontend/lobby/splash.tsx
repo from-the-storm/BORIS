@@ -25,9 +25,9 @@ export class Splash extends React.PureComponent<Props, State> {
             this.setState({
                 showing: false,
             });
-            setTimeout(this.props.onDone, 1500)
+            setTimeout(this.props.onDone, 100)
         },
-        5000)
+        500)
     }
 
     render() {
