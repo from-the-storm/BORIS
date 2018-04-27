@@ -11,21 +11,27 @@ import { RpcClientConnectionStatus } from '../rpc-client/rpc-client-actions';
 import * as saltine from './images/saltine.svg';
 
 
-
-class OnlineIndicator extends React.PureComponent<{when: boolean}> {
+/** A row in the list of team members. */
+class TeamMemberRow extends React.PureComponent<{details: OtherTeamMember, isMe: boolean, editable: boolean}> {
     public render() {
-        if (this.props.when) {
-            return <span className="online-indicator"><span className="visually-hidden">online</span></span>
-        }
-        return null;
+        return <li>
+            {this.props.details.name} {this.props.isMe && "(That's you!)"}
+            {this.props.details.online && <span className="online-indicator"><span className="visually-hidden">online</span></span>}
+            {this.props.details.isAdmin && <span className="admin-indicator badge">admin</span>}
+            {this.props.editable &&
+                <span>
+                    <button aria-label="Remove team member" onClick={this.handleRemove}>X</button>
+                    <button onClick={this.handleMakeAdmin}>Make Admin</button>
+                </span>
+            }
+        </li>;
     }
-}
-class AdminIndicator extends React.PureComponent<{when: boolean}> {
-    public render() {
-        if (this.props.when) {
-            return <span className="admin-indicator badge">admin</span>
-        }
-        return null;
+    @bind private handleRemove() {
+        confirm('Do you want to give ' + this.props.details.name + ' the unceremonious boot?');
+    }
+
+    @bind private handleMakeAdmin() {
+        confirm('Do you want to make ' + this.props.details.name + ' an admin? (Your team can have as many admins as you want.)');
     }
 }
 
@@ -75,16 +81,11 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <button onClick={this.switchTab}><sup>#</sup>2<span>in Vancouver</span></button>
                         <button onClick={this.switchTab}><sup>#</sup>78<span>in Canada</span></button>
                     </div>
-                    <h3>Your team{this.props.isTeamAdmin &&<button onClick={this.editTeam}>{this.state.editingTeam ? 'Save Changes' : 'Edit Team'}</button>}</h3>
+                    <h3>Your team {this.props.isTeamAdmin && <button onClick={this.editTeam}>{this.state.editingTeam ? 'Done Editing' : 'Edit Team'}</button>}</h3>
                     <ul className="team">
-                        <li>{this.props.myName} (That's you!) <OnlineIndicator when={this.props.isOnline}/> <AdminIndicator when={this.props.isTeamAdmin}/> </li>
+                        <TeamMemberRow isMe={true} details={{name: this.props.myName, id: 0, online: this.props.isOnline, isAdmin: this.props.isTeamAdmin}} editable={false} />
                         {this.props.otherTeamMembers.map(member =>
-                            <li key={member.id}>{this.state.editingTeam &&
-                                <span>
-                                    <button role="Remove team member" value={member.name} onClick={this.removeTeamMember}>X</button>
-                                    <button value={member.name} onClick={this.makeAdmin}>Make Admin</button>
-                                </span>
-                            }{member.name} <OnlineIndicator when={member.online}/> <AdminIndicator when={member.isAdmin}/></li>
+                            <TeamMemberRow key={member.id} details={member} editable={this.state.editingTeam} isMe={false} />
                         )}
                     </ul>
                     {this.props.otherTeamMembers.length < 4 && 
@@ -113,16 +114,6 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                 editingTeam: !prevState.editingTeam
             }))
         }
-    }
-
-    private removeTeamMember(event: React.MouseEvent<HTMLButtonElement>) {
-        const name = event.currentTarget.value
-        confirm('Do you want to give ' + name + ' the unceremonious boot?')
-    }
-
-    private makeAdmin(event: React.MouseEvent<HTMLButtonElement>) {
-        const name = event.currentTarget.value
-        confirm('Do you want to make ' + name + ' an admin? (Your team can have as many admins as you want.)')
     }
 }
 
