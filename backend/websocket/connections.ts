@@ -8,12 +8,9 @@ import {JsonRpcMessage} from 'json-rpc-protocol';
 
 import { UserType } from "../express-extended";
 import { setUserOnline, setUserOffline } from './online-users';
+import { notifyTeamStatusChangedForUser } from './team-changed';
+import { NotificationType } from '../../common/notifications';
 
-export enum NotificationType {
-    TEAM_CHANGED = 'TEAM_CHANGED',
-    GAME_EVENT = 'GAME_EVENT',
-}
- 
 interface ConnectionState {
     // A mutable state variable used to track information about this specific connection.
     // i.e. this data is specific to this node process and this browser tab of this user.
@@ -36,6 +33,7 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
         ws.close();
         return;
     }
+    const app = req.app;
     const connectionState: ConnectionState = {
         user: req.user,
         index: sharedWebSocketClientState.nextConnectionIndex++,
@@ -49,7 +47,9 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
     };
     // Mark the user as being online now,
     // And update the "last seen" time every 50s when we ping them:
-    setUserOnline(req.user.id);
+    setUserOnline(req.user.id).then(() => {
+        notifyTeamStatusChangedForUser(app, req.user.id);
+    });
     ws.on('pong', () => { setUserOnline(req.user.id); });
     // This sharedWebSocketClientState is local to this node.js process so may not be aware of ALL connections,
     // which is the responsibility of the redis USERS_ONLINE tracker.
@@ -72,7 +72,9 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
         sharedWebSocketClientState.allConnections.delete(connectionState);
         clearInterval(connectionState.pingTimer);
         connectionState.pingTimer = null;
-        setUserOffline(connectionState.user.id);
+        setUserOffline(connectionState.user.id).then(() => {
+            notifyTeamStatusChangedForUser(app, req.user.id);
+        });
         console.log(`${connectionState.user.first_name} has disconnected from the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
     });
     console.log(`${connectionState.user.first_name} has connected to the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);

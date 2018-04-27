@@ -39,6 +39,11 @@ export function teamStateReducer(state?: TeamState, action?: AnyAction): TeamSta
             isTeamAdmin: action.isTeamAdmin,
             otherTeamMembers: action.otherTeamMembers,
         });
+    case Actions.TEAM_MEMBERS_CHANGED:
+        return state.merge({
+            isTeamAdmin: action.isTeamAdmin,
+            otherTeamMembers: action.otherTeamMembers,
+        });
     case Actions.LEAVE_TEAM:
         // User has left a team (they're still associated with that team, just not "currently" online for that team):
         return state.clear();

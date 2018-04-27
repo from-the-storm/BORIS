@@ -4,6 +4,8 @@ import { RootState } from "../global/state";
 import { AnyAction } from "../global/actions";
 import { UserStateActions } from "../global/state/user-state-actions";
 import { RpcClientConnectionStatus, Actions } from "./rpc-client-actions";
+import { handleNotification } from "./notifications";
+import { Store } from "react-redux";
 
 const client = new Client((location.protocol === 'http:' ? 'ws:' : 'wss:') + `//${location.host}/rpc`);
 
@@ -60,8 +62,10 @@ export function rpcClientMiddleware(store: MiddlewareAPI<RootState>) {
         if (notification.method === 'connection_ready' && store.getState().rpcClientState.wantConnection) {
             store.dispatch<AnyAction>({type: Actions.WSCS_AVAILABLE});
             console.log("CONNECTION READY");
+        } else {
+            handleNotification(store as Store<RootState>, notification.method, notification.params);
         }
-        console.log('notification received', notification)
+        console.log('notification received', notification);
     })
     
     return (next: any) => (action: AnyAction) => {

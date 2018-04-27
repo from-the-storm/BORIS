@@ -3,7 +3,8 @@ import * as redis from 'redis';
 
 import {config} from '../config';
 import {BorisDatabase} from '../db/db';
-import { NotificationType, notifyConnectedUsers } from './connections';
+import { notifyConnectedUsers } from './connections';
+import { NotificationType } from '../../common/notifications';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Redis pub/sub notifications (used to know when to send notifications to websocket clients)

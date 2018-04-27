@@ -7,8 +7,9 @@ import { LEAVE_TEAM } from '../../../common/api';
 
 export enum TeamStateActions {
     // G_TS prefix means Global Team State
-    LEAVE_TEAM = 'G_TS_LEAVE_TEAM',
-    JOIN_TEAM = 'G_TS_JOIN_TEAM',
+    LEAVE_TEAM = 'G_TS_LEAVE_TEAM', // The user is no longer on a team
+    TEAM_MEMBERS_CHANGED = 'G_TS_TEAM_CHANGED', // The members on this team, or the user's admin status, has changed.
+    JOIN_TEAM = 'G_TS_JOIN_TEAM', // The user is now on a team
 }
 const Actions = TeamStateActions;
 
@@ -22,8 +23,13 @@ interface JoinTeamAction {
     isTeamAdmin: boolean;
     otherTeamMembers: Array<OtherTeamMember>;
 }
+interface TeamMembersChangedAction {
+    type: TeamStateActions.TEAM_MEMBERS_CHANGED;
+    isTeamAdmin: boolean;
+    otherTeamMembers: Array<OtherTeamMember>;
+}
 
-export type TeamStateActionsType = LeaveTeamAction|JoinTeamAction;
+export type TeamStateActionsType = LeaveTeamAction|JoinTeamAction|TeamMembersChangedAction;
 
 //// Action Creators
 
