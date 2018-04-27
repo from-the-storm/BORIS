@@ -16,6 +16,7 @@ import { JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from
 // Declare our additions to the Express API:
 import { UserType } from '../express-extended';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
+import { notifyTeamStatusChanged } from '../websocket/team-changed';
 
 export const router = express.Router();
 const mountPoint = /^\/auth/;
@@ -229,6 +230,7 @@ postApiMethodWithUser(JOIN_TEAM, (async (data, app, user) => {
         );
         isTeamAdmin = upsertResult.is_admin;
     });
+    notifyTeamStatusChanged(app, team.id);
     return {
         teamName: team.name,
         teamCode: code,
@@ -247,6 +249,10 @@ postApiMethodWithUser(JOIN_TEAM, (async (data, app, user) => {
  */
 postApiMethodWithUser(LEAVE_TEAM, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
-    await db.team_members.update({user_id: user.id, is_active: true}, {is_active: false});
+    const rows: any = await db.team_members.update({user_id: user.id, is_active: true}, {is_active: false});
+    if (rows.length === 1) {
+        // Notify the team that this user has left:
+        notifyTeamStatusChanged(app, rows[0].team_id);
+    }
     return {result: 'ok'};
 });

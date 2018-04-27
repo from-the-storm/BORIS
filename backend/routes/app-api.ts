@@ -9,7 +9,7 @@ import {BorisDatabase} from '../db/db';
 import { InitialStateResponse, GET_INITIAL_STATE } from '../../common/api';
 import { makeApiHelper, RequireUser } from './api-utils';
 import { OtherTeamMember } from '../../common/models';
-import { isUserOnline } from '../redis/online-users';
+import { isUserOnline } from '../websocket/online-users';
 
 export const router = express.Router();
 
@@ -47,6 +47,7 @@ getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
     if (user) {
         result.user = {
             first_name: user.first_name,
+            id: user.id,
         };
         const activeTeamMembership = await db.team_members.findOne({user_id: user.id, is_active: true});
         if (activeTeamMembership !== null) {

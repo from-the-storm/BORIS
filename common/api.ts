@@ -24,6 +24,7 @@ export interface ApiMethod<RequestType, ResponseType> {
 /** GET_INITIAL_STATE response */
 export interface InitialStateResponse {
     user?: {
+        id: number;
         first_name: string;
     };
     team?: {

@@ -12,6 +12,7 @@ const Actions = UserStateActions;
 interface LoginActionType {
     type: UserStateActions.LOGIN;
     firstName: string;
+    id: number;
 }
 interface LogoutActionType {
     type: UserStateActions.LOGOUT;
