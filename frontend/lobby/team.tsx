@@ -8,8 +8,9 @@ import { Scenario, OtherTeamMember } from '../../common/models';
 import { AnyAction } from '../global/actions';
 import { RpcClientConnectionStatus } from '../rpc-client/rpc-client-actions';
 
-import * as saltine from './images/saltine.svg';
+import { Prompt } from '../prompt/prompt';
 
+import * as saltine from './images/saltine.svg';
 
 /** A row in the list of team members. */
 class TeamMemberRow extends React.PureComponent<{details: OtherTeamMember, isMe: boolean, editable: boolean}> {
@@ -26,6 +27,7 @@ class TeamMemberRow extends React.PureComponent<{details: OtherTeamMember, isMe:
             }
         </li>;
     }
+
     @bind private handleRemove() {
         confirm('Do you want to give ' + this.props.details.name + ' the unceremonious boot?');
     }
@@ -50,6 +52,7 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 interface State {
     teamView: boolean,
     editingTeam: boolean,
+    showPrompt: boolean
 }
 
 class _TeamComponent extends React.PureComponent<Props, State> {
@@ -58,6 +61,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
         this.state = ({
             teamView: true,
             editingTeam: false,
+            showPrompt: false
         })
     }
 
@@ -81,6 +85,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <button onClick={this.switchTab}><sup>#</sup>2<span>in Vancouver</span></button>
                         <button onClick={this.switchTab}><sup>#</sup>78<span>in Canada</span></button>
                     </div>
+                    <button style={{fontSize:'40px', color: 'chartreuse', background: 'hotpink'}} onClick={this.handleOpenPrompt}>prompt me</button>
                     <h3>Your team {this.props.isTeamAdmin && <button onClick={this.editTeam}>{this.state.editingTeam ? 'Done Editing' : 'Edit Team'}</button>}</h3>
                     <ul className="team">
                         <TeamMemberRow isMe={true} details={{name: this.props.myName, id: 0, online: this.props.isOnline, isAdmin: this.props.isTeamAdmin}} editable={false} />
@@ -98,8 +103,23 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                     <p>Here be the leaderboards component.</p>
                 </div>
             }
-            
+            <Prompt 
+                close={this.handleClosePrompt}
+                heading="Are you sure you want to do the thing?"
+                show={this.state.showPrompt}
+            >
+                <p>Here is some more text and context-specific buttons.</p>
+                <button>Confirm thing</button>
+            </Prompt>
         </div>;
+    }
+
+    @bind private handleOpenPrompt () {
+        this.setState({ showPrompt: true });
+    }
+      
+    @bind private handleClosePrompt () {
+        this.setState({ showPrompt: false });
     }
 
     @bind private switchTab(event: React.MouseEvent<HTMLButtonElement>) {
