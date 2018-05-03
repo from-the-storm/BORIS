@@ -12,28 +12,79 @@ import { Prompt } from '../prompt/prompt';
 
 import * as saltine from './images/saltine.svg';
 
-/** A row in the list of team members. */
-class TeamMemberRow extends React.PureComponent<{details: OtherTeamMember, isMe: boolean, editable: boolean}> {
-    public render() {
-        return <li>
-            {this.props.details.name} {this.props.isMe && "(That's you!)"}
-            {this.props.details.online && <span className="online-indicator"><span className="visually-hidden">online</span></span>}
-            {this.props.details.isAdmin && <span className="admin-indicator badge">admin</span>}
-            {this.props.editable &&
-                <span>
-                    <button aria-label="Remove team member" onClick={this.handleRemove}>X</button>
-                    <button onClick={this.handleMakeAdmin}>Make Admin</button>
-                </span>
-            }
-        </li>;
-    }
+interface TeamRowProps {
+    details: OtherTeamMember,
+    isMe: boolean,
+    editable: boolean
+}
 
-    @bind private handleRemove() {
-        confirm('Do you want to give ' + this.props.details.name + ' the unceremonious boot?');
+interface TeamRowState {
+    showAdminPrompt: boolean,
+    showRemovePrompt: boolean
+}
+
+/** A row in the list of team members. */
+class TeamMemberRow extends React.PureComponent<TeamRowProps, TeamRowState> {
+    constructor(props: TeamRowProps) {
+        super(props);
+        this.state = {
+            showAdminPrompt: false,
+            showRemovePrompt: false,
+        }
+    }
+    public render() {
+        return (
+            <li>
+                {this.props.details.name} {this.props.isMe && "(That's you!)"}
+                {this.props.details.online && <span className="online-indicator"><span className="visually-hidden">online</span></span>}
+                {this.props.details.isAdmin && <span className="admin-indicator badge">admin</span>}
+                {this.props.editable &&
+                    <span>
+                        <button aria-label="Remove team member" onClick={this.handleRemove}>X</button>
+                        <button onClick={this.handleMakeAdmin}>Make Admin</button>
+                    </span>
+                }
+                {this.state.showRemovePrompt &&
+                    <Prompt
+                        close={this.handleClosePrompt}
+                        heading="Remove team member?"
+                        show={this.state.showRemovePrompt}
+                    >
+                        <p>Are you sure you want to remove {this.props.details.name} from your team?</p>
+                        <button>Yes</button>
+                    </Prompt>
+                }
+                {this.state.showAdminPrompt &&
+                    <Prompt
+                        close={this.handleClosePrompt}
+                        heading="Assign a new admin?"
+                        show={this.state.showAdminPrompt}
+                    >
+                        <p>Do you want to make {this.props.details.name} a team admin? (You can have as many admins as you'd like.)</p>
+                        <button>Yes</button>
+                    </Prompt>
+                }
+            </li>
+        )
     }
 
     @bind private handleMakeAdmin() {
-        confirm('Do you want to make ' + this.props.details.name + ' an admin? (Your team can have as many admins as you want.)');
+        this.setState({
+            showAdminPrompt: true,
+        })
+    }
+
+    @bind private handleRemove() {
+        this.setState({
+            showRemovePrompt: true,
+        })
+    }
+
+    @bind private handleClosePrompt () {
+        this.setState({ 
+            showAdminPrompt: false,
+            showRemovePrompt: false,
+        });
     }
 }
 
@@ -85,7 +136,6 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <button onClick={this.switchTab}><sup>#</sup>2<span>in Vancouver</span></button>
                         <button onClick={this.switchTab}><sup>#</sup>78<span>in Canada</span></button>
                     </div>
-                    <button style={{fontSize:'40px', color: 'chartreuse', background: 'hotpink'}} onClick={this.handleOpenPrompt}>prompt me</button>
                     <h3>Your team {this.props.isTeamAdmin && <button onClick={this.editTeam}>{this.state.editingTeam ? 'Done Editing' : 'Edit Team'}</button>}</h3>
                     <ul className="team">
                         <TeamMemberRow isMe={true} details={{name: this.props.myName, id: 0, online: this.props.isOnline, isAdmin: this.props.isTeamAdmin}} editable={false} />
@@ -103,23 +153,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                     <p>Here be the leaderboards component.</p>
                 </div>
             }
-            <Prompt 
-                close={this.handleClosePrompt}
-                heading="Are you sure you want to do the thing?"
-                show={this.state.showPrompt}
-            >
-                <p>Here is some more text and context-specific buttons.</p>
-                <button>Confirm thing</button>
-            </Prompt>
         </div>;
-    }
-
-    @bind private handleOpenPrompt () {
-        this.setState({ showPrompt: true });
-    }
-      
-    @bind private handleClosePrompt () {
-        this.setState({ showPrompt: false });
     }
 
     @bind private switchTab(event: React.MouseEvent<HTMLButtonElement>) {

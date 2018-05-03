@@ -8,11 +8,12 @@ ReactModal.setAppElement('#app-container');
 
 interface Props {
     close: () => void,
+    fullscreen?: boolean,
     heading: string,
     show: boolean
 }
 
-export const Prompt: React.SFC<Props> = ({children, close, heading, show}) => (
+export const Prompt: React.SFC<Props> = ({children, close, fullscreen, heading, show}) => (
     <ReactModal
         isOpen={show}
         onRequestClose={close}
@@ -22,7 +23,7 @@ export const Prompt: React.SFC<Props> = ({children, close, heading, show}) => (
             describedby: "prompt-description"
         }}
         overlayClassName="prompt-overlay"
-        className="prompt-content"
+        className={fullscreen ? 'prompt-content fullscreen' : 'prompt-content'}
     >
         <h1 id="prompt-heading">{heading}</h1>
         <div id="prompt-description">{children}</div>

@@ -18,9 +18,22 @@
     -webkit-overflow-scrolling: touch;
     background: $white;
     padding: 0.5rem 1rem 1rem;
+    margin: 1rem;
     position: relative;
+        &.fullscreen {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 2rem 1.5rem;
+            background: $black;
+            color: $white;
+                #prompt-description button {
+                    border: 1px solid $white;
+                }
+        }
         h1 {
-            margin-right: 2rem;
+            margin-right: 2.5rem;
+            font-size: 1.8em;
         }
         .close {
             position: absolute;
@@ -29,4 +42,5 @@
             background: $red;
             padding: 0.5rem 0.75rem;
         }
+        
 }
