@@ -31,10 +31,16 @@ export function rpcClientMiddleware(store: MiddlewareAPI<RootState>) {
             // The 'online' event handler will try this again once the device is back online.
             return;
         }
-        // Try to reconnect:
-        client.open();
         // Indicate that we're trying to connect:
         store.dispatch<AnyAction>({type: Actions.WSCS_UNAVAILABLE, reason: RpcClientConnectionStatus.TryingToConnect});
+        // Try to reconnect:
+        client.open().catch((error: any) => {
+            // If the open fails immediately, it won't send a 'closed' event, so we need to handle this now:
+            if (store.getState().rpcClientState.status === RpcClientConnectionStatus.TryingToConnect) {
+                store.dispatch<AnyAction>({type: Actions.WSCS_UNAVAILABLE, reason: RpcClientConnectionStatus.NotConnected});
+            }
+            setTimeout(tryReconnecting, 2000);
+        });
     }
 
     window.addEventListener('online', tryReconnecting, false);
