@@ -85,7 +85,11 @@ export function notifyConnectedUsers(userIds: number[], type: NotificationType, 
     sharedWebSocketClientState.allConnections.forEach(conn => {
         if (userIds.indexOf(conn.user.id) !== -1) {
             console.log(`Notifying peer ${conn.index}`);
-            conn.peer.notify(type, data);
+            try {
+                conn.peer.notify(type, data);
+            } catch(e) {
+                console.error(`Unable to notify peer ${conn.index}: ${e}`);
+            }
         }
     });
 }
