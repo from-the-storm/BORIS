@@ -198,7 +198,7 @@ postApiMethodWithUser(CREATE_TEAM, async (data, app, user) => {
  */
 postApiMethodWithUser(JOIN_TEAM, (async (data, app, user) => {
     // Parse the data from the form:
-    const code: string = data.code;
+    const code: string = (data.code || '').toUpperCase();
     if (!code) {
         throw new SafeError("Missing team code.");
     }
