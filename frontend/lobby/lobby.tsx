@@ -31,7 +31,7 @@ class _LobbyComponent extends React.PureComponent<Props> {
     @bind private handleBackButton() {
         if (this.props.mode === Mode.ChooseScenario && this.props.viewingScenarioDetails) {
             this.props.dispatch<AnyAction>({type: Actions.SHOW_SCENARIOS_LIST});
-        } if (this.props.mode === Mode.TeamDetails) {
+        } else if (this.props.mode === Mode.TeamDetails) {
             this.props.dispatch<AnyAction>({type: Actions.SHOW_SCENARIOS_LIST});
         } else {
             this.props.dispatch<AnyAction>({type: RegistrationActions.SHOW_HOME});
