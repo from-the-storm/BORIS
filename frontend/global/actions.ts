@@ -4,6 +4,7 @@ import { InitStateActionsType } from './state/init-state-actions';
 import { LobbyStateActionsType } from '../lobby/lobby-state-actions';
 import { RegistrationStateActionsType } from '../registration/registration-state-actions';
 import { RpcClientStateActionType } from '../rpc-client/rpc-client-actions';
+import { GameStateActionsType } from './state/game-state-actions';
 
 
 export type AnyAction = (
@@ -13,4 +14,5 @@ export type AnyAction = (
     |LobbyStateActionsType
     |RegistrationStateActionsType
     |RpcClientStateActionType
+    |GameStateActionsType
 );

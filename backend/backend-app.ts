@@ -19,6 +19,7 @@ import {getDB, BorisDatabase} from './db/db';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
 import {router as lobbyRouter} from './routes/lobby-api';
+import {router as gameRouter} from './routes/game-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
 import { subscribeToRedis } from './websocket/pub-sub';
 import { rpcHandler } from './websocket/connections';
@@ -172,6 +173,9 @@ app.use('/auth', loginRegisterRouter);
 
 // Lobby API ("Choose Scenario" etc.)
 app.use('/api/lobby', lobbyRouter);
+
+// Game API
+app.use('/api/game', gameRouter);
 
 // Misc. API used by the single page app frontend:
 app.use('/api/app', appAPIRouter);

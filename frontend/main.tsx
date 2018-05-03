@@ -9,6 +9,7 @@ import {
     initStateReducer,
     userStateReducer,
     teamStateReducer,
+    gameStateReducer,
 } from './global/state';
 import { registrationStateReducer } from './registration/registration-state';
 import { lobbyStateReducer } from './lobby/lobby-state';
@@ -23,6 +24,7 @@ import { callApi } from './api';
 import { AnyAction } from './global/actions';
 import { rpcClientMiddleware } from './rpc-client/manager';
 import { Middleware } from 'redux';
+import { GameStateActions } from './global/state/game-state-actions';
 
 
 export const store = createStore(
@@ -33,6 +35,7 @@ export const store = createStore(
         registrationState: registrationStateReducer,
         lobbyState: lobbyStateReducer,
         rpcClientState: rpcClientStateReducer,
+        gameState: gameStateReducer,
     }),
     applyMiddleware(thunk, rpcClientMiddleware as Middleware),
 );
@@ -69,6 +72,13 @@ callApi(GET_INITIAL_STATE, {}).then(async data => {
                 isTeamAdmin: data.team.isTeamAdmin,
                 otherTeamMembers: data.team.otherTeamMembers,
             });
+            if (data.game) {
+                store.dispatch<AnyAction>({
+                    type: GameStateActions.START_GAME,
+                    scenarioId: data.game.scenarioId,
+                    scenarioName: data.game.scenarioName,
+                });
+            }
         }
     }
     store.dispatch<AnyAction>({type: InitStateActions.SUCCEEDED});
