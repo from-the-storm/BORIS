@@ -156,3 +156,14 @@ fieldset {
     position: absolute;
     width: 1px;
 }
+
+// Animations
+@-webkit-keyframes fade {
+    from { opacity: 1; }
+	to {   opacity: 0; }
+}
+
+@keyframes fade {
+    from { opacity: 1; }
+	to {   opacity: 0; }
+}
