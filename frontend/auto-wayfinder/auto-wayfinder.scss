@@ -1,0 +1,9 @@
+.auto-wayfinder-container {
+    height: 300px;
+    width: 100%;
+    margin: 1rem 0 1.5rem;
+        .here {
+            -webkit-animation: 850ms infinite alternate-reverse fade;
+            animation: 850ms infinite alternate-reverse fade;
+        }
+}
