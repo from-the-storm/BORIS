@@ -7,10 +7,10 @@ import './prompt.scss';
 ReactModal.setAppElement('#app-container');
 
 interface Props {
-    close: () => void,
-    fullscreen?: boolean,
-    heading: string,
-    show: boolean
+    close: () => void;
+    fullscreen?: boolean;
+    heading: string;
+    show: boolean;
 }
 
 export const Prompt: React.SFC<Props> = ({children, close, fullscreen, heading, show}) => (
