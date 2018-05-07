@@ -8,30 +8,83 @@ import { Scenario, OtherTeamMember } from '../../common/models';
 import { AnyAction } from '../global/actions';
 import { RpcClientConnectionStatus } from '../rpc-client/rpc-client-actions';
 
+import { Prompt } from '../prompt/prompt';
+
 import * as saltine from './images/saltine.svg';
 
+interface TeamRowProps {
+    details: OtherTeamMember,
+    isMe: boolean,
+    editable: boolean
+}
+
+interface TeamRowState {
+    showAdminPrompt: boolean,
+    showRemovePrompt: boolean
+}
 
 /** A row in the list of team members. */
-class TeamMemberRow extends React.PureComponent<{details: OtherTeamMember, isMe: boolean, editable: boolean}> {
-    public render() {
-        return <li>
-            {this.props.details.name} {this.props.isMe && "(That's you!)"}
-            {this.props.details.online && <span className="online-indicator"><span className="visually-hidden">online</span></span>}
-            {this.props.details.isAdmin && <span className="admin-indicator badge">admin</span>}
-            {this.props.editable &&
-                <span>
-                    <button aria-label="Remove team member" onClick={this.handleRemove}>X</button>
-                    <button onClick={this.handleMakeAdmin}>Make Admin</button>
-                </span>
-            }
-        </li>;
+class TeamMemberRow extends React.PureComponent<TeamRowProps, TeamRowState> {
+    constructor(props: TeamRowProps) {
+        super(props);
+        this.state = {
+            showAdminPrompt: false,
+            showRemovePrompt: false,
+        }
     }
-    @bind private handleRemove() {
-        confirm('Do you want to give ' + this.props.details.name + ' the unceremonious boot?');
+    public render() {
+        return (
+            <li>
+                {this.props.details.name} {this.props.isMe && "(That's you!)"}
+                {this.props.details.online && <span className="online-indicator"><span className="visually-hidden">online</span></span>}
+                {this.props.details.isAdmin && <span className="admin-indicator badge">admin</span>}
+                {this.props.editable &&
+                    <span>
+                        <button aria-label="Remove team member" onClick={this.handleRemove}>X</button>
+                        <button onClick={this.handleMakeAdmin}>Make Admin</button>
+                    </span>
+                }
+                {this.state.showRemovePrompt &&
+                    <Prompt
+                        close={this.handleClosePrompt}
+                        heading="Remove team member?"
+                        show={this.state.showRemovePrompt}
+                    >
+                        <p>Are you sure you want to remove {this.props.details.name} from your team?</p>
+                        <button>Yes</button>
+                    </Prompt>
+                }
+                {this.state.showAdminPrompt &&
+                    <Prompt
+                        close={this.handleClosePrompt}
+                        heading="Assign a new admin?"
+                        show={this.state.showAdminPrompt}
+                    >
+                        <p>Do you want to make {this.props.details.name} a team admin? (You can have as many admins as you'd like.)</p>
+                        <button>Yes</button>
+                    </Prompt>
+                }
+            </li>
+        )
     }
 
     @bind private handleMakeAdmin() {
-        confirm('Do you want to make ' + this.props.details.name + ' an admin? (Your team can have as many admins as you want.)');
+        this.setState({
+            showAdminPrompt: true,
+        })
+    }
+
+    @bind private handleRemove() {
+        this.setState({
+            showRemovePrompt: true,
+        })
+    }
+
+    @bind private handleClosePrompt () {
+        this.setState({ 
+            showAdminPrompt: false,
+            showRemovePrompt: false,
+        });
     }
 }
 
@@ -50,6 +103,7 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 interface State {
     teamView: boolean,
     editingTeam: boolean,
+    showPrompt: boolean
 }
 
 class _TeamComponent extends React.PureComponent<Props, State> {
@@ -58,6 +112,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
         this.state = ({
             teamView: true,
             editingTeam: false,
+            showPrompt: false
         })
     }
 
@@ -98,7 +153,6 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                     <p>Here be the leaderboards component.</p>
                 </div>
             }
-            
         </div>;
     }
 
