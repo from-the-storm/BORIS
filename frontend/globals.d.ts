@@ -17,5 +17,3 @@ declare module '*.svg' {
 }
 
 declare module 'jsonrpc-websocket-client';
-
-declare module 'google-map-react';
