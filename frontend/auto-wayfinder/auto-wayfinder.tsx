@@ -18,7 +18,7 @@ export class AutoWayfinder extends React.Component<Props> {
         return (
             <div className="auto-wayfinder-container">
                 <GoogleMapReact
-                    bootstrapURLKeys={{key: 'AIzaSyAzLK4sa7_VFK6DSwNC_0HkpDC3JpndZVY' }}
+                    bootstrapURLKeys={{key: 'api-goes-here' }}
                     defaultCenter={{lat: this.props.lat, lng: this.props.lng}}
                     defaultZoom={15}
                     options={{
