@@ -1,0 +1,46 @@
+@import '../global/variables-mixins';
+
+.prompt-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparentize($black, 0.1);
+}
+
+.prompt-content {
+    overflow: auto;
+    outline: none;
+    -webkit-overflow-scrolling: touch;
+    background: $white;
+    padding: 0.5rem 1rem 1rem;
+    margin: 1rem;
+    position: relative;
+        &.fullscreen {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 2rem 1.5rem;
+            background: $black;
+            color: $white;
+                #prompt-description button {
+                    border: 1px solid $white;
+                }
+        }
+        h1 {
+            margin-right: 2.5rem;
+            font-size: 1.8em;
+        }
+        .close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: $red;
+            padding: 0.5rem 0.75rem;
+        }
+        
+}
