@@ -29,12 +29,8 @@
     "nodemailer-sparkpost-transport": "~2.0.0",
     "passport": "~0.4.0",
     "passport-unique-token": "~0.1.4",
-<<<<<<< HEAD
-    "pug": "~2.0.0-rc.4",
-    "react-modal": "^3.4.4",
-=======
     "pug": "^2.0.3",
->>>>>>> master
+    "react-modal": "^3.4.4",
     "redis": "~2.8.0",
     "ts-node": "~6.0.2",
     "typescript": "~2.8.3",
