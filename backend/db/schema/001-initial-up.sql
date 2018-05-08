@@ -66,7 +66,7 @@ CREATE TABLE team_members (
 );
 
 -- A user can be a member of multiple teams but only "active" (online) on one team at any given time:
-CREATE UNIQUE INDEX active_team ON team_members (user_id) WHERE is_active = 'true';
+CREATE UNIQUE INDEX active_team ON team_members (user_id) WHERE is_active = TRUE;
 
 -- Scenarios Table
 CREATE TYPE scenario_difficulty AS ENUM ('easy', 'med', 'hard');
@@ -80,3 +80,16 @@ CREATE TABLE scenarios (
     start_point point NOT NULL DEFAULT '(49.297878, -123.088417)',
     description_html text NOT NULL DEFAULT ''
 );
+
+-- Games Table
+CREATE TABLE games (
+    id bigserial PRIMARY KEY,
+    team_id bigint NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    scenario_id bigint NOT NULL REFERENCES scenarios(id) ON DELETE CASCADE,
+    started timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM started) = '0'),
+    is_active BOOLEAN NOT NULL DEFAULT true, -- Is this team *currently* playing this game? If false and finished is null, they abandoned it.
+    finished timestamp WITH TIME ZONE NULL CHECK(EXTRACT(TIMEZONE FROM finished) = '0'),
+    CHECK((is_active = TRUE AND finished IS NULL) OR (is_active = FALSE))
+);
+-- A team can only play one game at a time
+CREATE UNIQUE INDEX active_game ON games (team_id) WHERE is_active = TRUE;

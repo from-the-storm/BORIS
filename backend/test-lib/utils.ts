@@ -8,7 +8,7 @@ import { app, startServer, stopServer } from '../backend-app';
 import { Server } from 'http';
 import { Gender } from '../../common/models';
 
-interface TestUserData extends RegisterUserRequest {
+export interface TestUserData extends RegisterUserRequest {
     id: number;
 }
 
