@@ -1,16 +1,39 @@
 -- Useful initial data for development
 
-INSERT INTO users (first_name, email, survey_data) VALUES (
-    'Bob',
-    'bob@example.com',
-    '{
-        "hasConsented": true,
-        "workInTech": true,
-        "occupation": "Bug Inserter",
-        "age": 30,
-        "gender": "m"
-    }'::jsonb
-);
+INSERT INTO users (first_name, email, survey_data) VALUES 
+    (
+        'Alice',
+        'alice@example.com',
+        '{
+            "hasConsented": true,
+            "workInTech": true,
+            "occupation": "Bug Inserter",
+            "age": 30,
+            "gender": "f"
+        }'::jsonb
+    ),
+    (
+        'Bob',
+        'bob@example.com',
+        '{
+            "hasConsented": true,
+            "workInTech": true,
+            "occupation": "Bug Inserter",
+            "age": 30,
+            "gender": "m"
+        }'::jsonb
+    ),
+    (
+        'Carl',
+        'carl@example.com',
+        '{
+            "hasConsented": true,
+            "workInTech": true,
+            "occupation": "Bug Inserter",
+            "age": 30,
+            "gender": "m"
+        }'::jsonb
+    );
 
 INSERT INTO scenarios (id, name, duration_min, difficulty, start_point_name, start_point, description_html) VALUES 
     (1, 'Earthquake Preparedness', 30, 'easy', 'SE False Creek', '(49.273373, -123.102657)', '<p>This route (approximately 700m) starts in front of Science World and follows the Seawall to the plaza area in front of Craft Beer Market.</p>'),

@@ -33,6 +33,11 @@ export interface InitialStateResponse {
         isTeamAdmin: boolean;
         otherTeamMembers: Array<OtherTeamMember>;
     };
+    game?: {
+        scenarioName: string;
+        scenarioId: number;
+        started: string;
+    }
 };
 
 export const GET_INITIAL_STATE: ApiMethod<{}, InitialStateResponse> = {path: '/api/app/get-initial-state', type: 'GET'};
@@ -104,3 +109,25 @@ export interface ScenariosResponse {
 }
 
 export const GET_SCENARIOS: ApiMethod<NoRequestParameters, ScenariosResponse> = {path: '/api/lobby/scenarios', type: 'GET'};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// game-api methods:
+
+export interface ScenariosResponse {
+    scenarios: Scenario[],
+}
+
+/** START_GAME Request */
+export interface StartGameRequest {
+    scenarioId: number;
+}
+
+export interface StartGameResponse {
+    scenarioId: number;
+    scenarioName: string;
+}
+
+export const START_GAME: ApiMethod<StartGameRequest, StartGameResponse> = {path: '/api/game/start', type: 'POST'};
+
+export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};

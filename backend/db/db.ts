@@ -35,6 +35,15 @@ export interface BorisDatabase extends massive.Database {
         is_active: boolean;
     }>;
     scenarios: massive.Table<DBScenario>;
+
+    games: massive.Table<{
+        id: number;
+        team_id: number;
+        scenario_id: number;
+        started: Date;
+        is_active: boolean;
+        finished: Date;
+    }>;
     user_by_email(email: string): Promise<User>;
     instance: pgPromise.IDatabase<{}>;
 }

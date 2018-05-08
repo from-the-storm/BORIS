@@ -5,6 +5,8 @@ import {UserState, userStateReducer} from './state/user-state';
 export {UserState, userStateReducer} from './state/user-state';
 import {TeamState, teamStateReducer} from './state/team-state';
 export {TeamState, teamStateReducer} from './state/team-state';
+import {GameState, gameStateReducer} from './state/game-state';
+export {GameState, gameStateReducer} from './state/game-state';
 
 import {RegistrationState} from '../registration/registration-state';
 import { LobbyState } from '../lobby/lobby-state';
@@ -17,4 +19,5 @@ export interface RootState {
     registrationState: RegistrationState;
     lobbyState: LobbyState;
     rpcClientState: RpcClientState;
+    gameState: GameState;
 }

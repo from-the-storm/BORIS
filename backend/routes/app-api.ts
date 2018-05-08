@@ -58,6 +58,15 @@ getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
                 isTeamAdmin: activeTeamMembership.is_admin,
                 otherTeamMembers: await getOtherTeamMembers(db, user.id),
             };
+            const activeGame = await db.games.findOne({team_id: team.id, is_active: true});
+            if (activeGame !== null) {
+                const scenario = await db.scenarios.findOne({id: activeGame.scenario_id});
+                result.game = {
+                    scenarioName: scenario.name,
+                    scenarioId: scenario.id,
+                    started: activeGame.started.toJSON(),
+                }
+            }
         }
     }
     return result;
