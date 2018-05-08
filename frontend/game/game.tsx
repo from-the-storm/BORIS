@@ -7,7 +7,7 @@ import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
 import { Prompt } from '../prompt/prompt';
 import { abandonGame } from '../global/state/game-state-actions';
-import { BorisInit } from './boris-init';
+import { SplashBorisInit } from './splash-boris-init';
 
 import * as teams from './images/teams-icon.svg';
 
@@ -32,7 +32,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
 
     public render() {
         return <RpcConnectionStatusIndicator>
-            {!this.state.hasSeenSplash && <BorisInit onDone={this.onSplashDone} />}
+            {!this.state.hasSeenSplash && <SplashBorisInit onDone={this.onSplashDone} />}
             <div className="game">
                 <header>
                     BORIS

@@ -5,7 +5,6 @@ import { connect, DispatchProp } from 'react-redux';
 import { RootState } from '../global/state';
 import { List } from 'immutable';
 import { loadScenarios, Actions } from './lobby-state-actions';
-import { Splash } from './splash';
 import { LoadingSpinnerComponent } from '../loading/loading-spinner';
 import { LoadingState } from '../loading/loading-state';
 import { AutoWayfinder } from '../auto-wayfinder/auto-wayfinder';
@@ -22,20 +21,10 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     scenariosLoadState: LoadingState;
     selectedScenarioId: number|null;
 }
-interface State {
-    hasSeenSplash: boolean;
-}
 
-class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
+class _ChooseScenarioComponent extends React.PureComponent<Props> {
     constructor(props: Props) {
         super(props);
-        this.state = { hasSeenSplash: false }
-    }
-
-    @bind splashDone() {
-        this.setState({
-            hasSeenSplash: true,
-        })
     }
 
     public render() {
@@ -60,10 +49,8 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
         }
 
         return <div>
-            {!this.state.hasSeenSplash && <Splash onDone={this.splashDone} />}
             <h1>Choose Scenario</h1>
             <p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>
-            <AutoWayfinder lat={49.277} lng={-123.149} />
             <div className="scenario-grid">
                 <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
                     {this.props.scenarios.map(s =>
