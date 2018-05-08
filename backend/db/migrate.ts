@@ -18,11 +18,18 @@ export async function migrate() {
         await db.instance.none(sql1);
         console.log(" -> done");
         
-        if (environment === 'development') {
-            console.log("Inserting default data for development");
-            const dataFilePath = path.join(__dirname, 'schema', 'dev-data.sql');
+        const loadFixture = async (fixtureName: string) => {
+            const dataFilePath = path.join(__dirname, 'schema', fixtureName);
             const devDataSql = await readFileAsync(dataFilePath, {encoding: 'utf-8'});
             await db.query(devDataSql, [], {});
+        }
+        if (environment === 'development') {
+            console.log("Inserting default data for development");
+            await loadFixture('dev-data.sql');
+            console.log(" -> done");
+        } else if (environment === 'test') {
+            console.log("Loading test data fixtures");
+            await loadFixture('test-data.sql');
             console.log(" -> done");
         }
         db.instance.$pool.end();

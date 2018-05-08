@@ -5,7 +5,7 @@ import * as express from 'express';
 
 import {config} from '../config';
 import {BorisDatabase} from '../db/db';
-import { START_GAME, ABANDON_SCENARIO } from '../../common/api';
+import { START_GAME, ABANDON_GAME } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { Scenario } from '../../common/models';
 
@@ -57,7 +57,7 @@ apiMethod(START_GAME, async (data, app, user) => {
 /**
  * API endpoint for ending the active scenario
  */
-apiMethod(ABANDON_SCENARIO, async (data, app, user) => {
+apiMethod(ABANDON_GAME, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
     const activeTeamMembership = await requireActiveTeamMembership(db, user.id);
     const game = await db.games.findOne({team_id: activeTeamMembership.team_id, is_active: true});

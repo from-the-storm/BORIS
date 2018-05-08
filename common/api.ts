@@ -130,4 +130,4 @@ export interface StartGameResponse {
 
 export const START_GAME: ApiMethod<StartGameRequest, StartGameResponse> = {path: '/api/game/start', type: 'POST'};
 
-export const ABANDON_SCENARIO: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};
+export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};

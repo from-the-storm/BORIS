@@ -1,6 +1,6 @@
 import { Dispatch } from 'redux';
 import { callApi } from '../../api';
-import { START_GAME, StartGameResponse, ABANDON_SCENARIO } from '../../../common/api';
+import { START_GAME, StartGameResponse, ABANDON_GAME } from '../../../common/api';
 
 //// Game State Actions
 
@@ -44,7 +44,7 @@ export function startGame(scenarioId: number) {
 
 export function abandonGame() {
     return async (dispatch: Dispatch<{}>, getState: () => {}) => {
-        await callApi(ABANDON_SCENARIO, {});
+        await callApi(ABANDON_GAME, {});
         dispatch<GameStateActionsType>({ type: Actions.ABANDON_GAME });
     };
 }
