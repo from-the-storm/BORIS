@@ -63,7 +63,6 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
             {!this.state.hasSeenSplash && <Splash onDone={this.splashDone} />}
             <h1>Choose Scenario</h1>
             <p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>
-            <AutoWayfinder lat={49.277} lng={-123.149} />
             <div className="scenario-grid">
                 <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
                     {this.props.scenarios.map(s =>

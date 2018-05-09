@@ -150,7 +150,23 @@ class _TeamComponent extends React.PureComponent<Props, State> {
             }
             { !teamView &&
                 <div>
-                    <p>Here be the leaderboards component.</p>
+                    <h1>Vancouver</h1>
+                    <table className="leaderboards">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Team</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Jellied Jimmies<span>Organization</span></td>
+                                <td>568</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             }
         </div>;
