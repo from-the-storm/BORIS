@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { sleep } from '../utils';
 import * as movember from './images/funded-by-movember.png';
 
 interface Props {
@@ -17,11 +18,14 @@ export class SplashBorisInit extends React.PureComponent<Props, State> {
     }
 
     componentDidMount() {
-        setTimeout(() => {
-            this.setState({ showing: false });
-            setTimeout(this.props.onDone, 1500);
-        },
-        100)
+        this.hideAfterDelay();
+    }
+
+    async hideAfterDelay() {
+        await sleep(100); // Increase to 10000 when not in development
+        this.setState({ showing: false });
+        await sleep(1500);
+        this.props.onDone();
     }
 
     render() {
