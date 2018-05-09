@@ -256,29 +256,28 @@
         width: 100%;
         margin-top: 1.5rem;
         border-collapse: collapse;
-            thead tr {
-                font-family: $fancyfont;
-                text-transform: uppercase;
-                    th {
-                        padding: 0.5rem;
-                    }
-            }
-            tbody tr {
-                td {
+        thead tr {
+            font-family: $fancyfont;
+            text-transform: uppercase;
+                th {
                     padding: 0.5rem;
-                        span {
-                            font-size: 0.75em;
-                            margin-top: 0.5rem;
-                            text-transform: uppercase;
-                            display: block;
-                        }
                 }
-                &:nth-child(odd) {
-                    background: $grey;
+        }
+        tbody tr {
+            td {
+                padding: 0.5rem;
+                span {
+                    font-size: 0.75em;
+                    margin-top: 0.5rem;
+                    text-transform: uppercase;
+                    display: block;
                 }
             }
+            &:nth-child(odd) {
+                background: $grey;
+            }
+        }
     }
-
 }
 
 @-webkit-keyframes fade {
