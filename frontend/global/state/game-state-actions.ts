@@ -1,6 +1,8 @@
 import { Dispatch } from 'redux';
 import { callApi } from '../../api';
 import { START_GAME, StartGameResponse, ABANDON_GAME } from '../../../common/api';
+import { AnyAction } from '../actions';
+import { MessagesStateActions } from './messages-state-actions';
 
 //// Game State Actions
 
@@ -31,6 +33,11 @@ export function startGame(scenarioId: number) {
         try {
             result = await callApi(START_GAME, {scenarioId,});
         } catch(err) {
+            dispatch<AnyAction>({
+                type: MessagesStateActions.SHOW_ERROR,
+                title: "Unable to start game",
+                errorHtml: err.message,
+            });
             console.error(err);
             return;
         }

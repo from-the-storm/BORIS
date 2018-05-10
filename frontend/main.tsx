@@ -10,6 +10,7 @@ import {
     userStateReducer,
     teamStateReducer,
     gameStateReducer,
+    messagesStateReducer,
 } from './global/state';
 import { registrationStateReducer } from './registration/registration-state';
 import { lobbyStateReducer } from './lobby/lobby-state';
@@ -30,6 +31,7 @@ import { GameStateActions } from './global/state/game-state-actions';
 export const store = createStore(
     combineReducers<RootState>({
         initState: initStateReducer,
+        messagesState: messagesStateReducer,
         userState: userStateReducer,
         teamState: teamStateReducer,
         registrationState: registrationStateReducer,
