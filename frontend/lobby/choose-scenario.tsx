@@ -7,6 +7,7 @@ import { List } from 'immutable';
 import { loadScenarios, Actions } from './lobby-state-actions';
 import { LoadingSpinnerComponent } from '../loading/loading-spinner';
 import { LoadingState } from '../loading/loading-state';
+import { AutoWayfinder } from '../auto-wayfinder/auto-wayfinder';
 import { Scenario } from '../../common/models';
 import { AnyAction } from '../global/actions';
 import { startGame } from '../global/state/game-state-actions';
@@ -20,10 +21,20 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     scenariosLoadState: LoadingState;
     selectedScenarioId: number|null;
 }
+interface State {
+    showMap: boolean;
+}
 
-class _ChooseScenarioComponent extends React.PureComponent<Props> {
+class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
+        this.state = ({
+            showMap: false,
+        })
+    }
+
+    @bind handleShowMap() {
+        this.setState({ showMap: true, });
     }
 
     public render() {
@@ -40,7 +51,10 @@ class _ChooseScenarioComponent extends React.PureComponent<Props> {
                 <div className="scenario-info details">
                     <span className={selectedScenario.difficulty}>{selectedScenario.difficulty}</span>
                     <span>{selectedScenario.duration_min} mins</span><br />
-                    <span>Start at <a title="View on map" href="#">{selectedScenario.start_point_name}</a></span>
+                    <span>Start at <a title="View on map" onClick={this.handleShowMap}>{selectedScenario.start_point_name}</a></span>
+                    {this.state.showMap &&
+                        <AutoWayfinder lat={selectedScenario.start_point.lat} lng={selectedScenario.start_point.lng} zoom={16} />
+                    }
                 </div>
                 <button onClick={() => { this.startScenario(selectedScenario.id); }}>Start!</button>
                 <div className="scenario-description" dangerouslySetInnerHTML={{__html: selectedScenario.description_html}}></div>

@@ -1,0 +1,29 @@
+.auto-wayfinder-container {
+    height: 300px;
+    width: 100%;
+    margin: 1rem 0 1.5rem;
+
+    .lost-marker {
+        $totalWidth: 58.313px;
+        $totalHeight: 58.314px;
+
+        position: absolute;
+        left: -$totalWidth / 2;
+        top: -$totalHeight / 2;
+        width: $totalWidth;
+        height: $totalHeight;
+
+        -webkit-animation: 850ms infinite alternate-reverse fade;
+        animation: 850ms infinite alternate-reverse fade;
+    }
+    .start-marker {
+        $totalWidth: 20.405px;
+        $totalHeight: 28.285px;
+
+        position: absolute;
+        left: -$totalWidth / 2;
+        top: -$totalHeight;
+        width: $totalWidth;
+        height: $totalHeight;
+    }
+}
