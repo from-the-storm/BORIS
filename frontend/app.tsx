@@ -1,11 +1,16 @@
 import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
+import {bind} from 'bind-decorator';
 
 import { RootState } from './global/state';
 import { Mode as RegistrationMode } from './registration/registration-state';
 import { LobbyComponent } from './lobby/lobby';
 import { RegistrationComponent } from './registration/registration';
 import { GameComponent } from './game/game';
+import { Message } from './global/state/messages-state';
+import { Prompt } from './prompt/prompt';
+import { AnyAction } from './global/actions';
+import { MessagesStateActions } from './global/state/messages-state-actions';
 
 // Include our SCSS (via webpack magic)
 import './global/global-styles.scss';
@@ -17,17 +22,31 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     hasJoinedTeam: boolean;
     isPlaying: boolean;
     readyToPlay: boolean;
+    modalMessage: Message;
 }
 
 class _App extends React.PureComponent<Props> {
     public render() {
-        if (this.props.isPlaying) {
-            return <GameComponent/>;
-        } else if (this.props.readyToPlay) {
-            return <LobbyComponent/>;
-        } else {
-            return <RegistrationComponent/>;
-        }
+        return <>
+            {
+                this.props.isPlaying ? <GameComponent/> :
+                this.props.readyToPlay ? <LobbyComponent/> :
+                /* otherwise ? */ <RegistrationComponent/>
+            }
+            {this.props.modalMessage &&
+                <Prompt close={this.handleCloseMessage}
+                    heading={this.props.modalMessage.title}
+                    show={true}
+                >
+                    <div dangerouslySetInnerHTML={{ __html: this.props.modalMessage.html }} />
+                    <button onClick={this.handleCloseMessage}>OK</button>
+                </Prompt>
+            }
+        </>;
+    }
+
+    @bind handleCloseMessage() {
+        this.props.dispatch<AnyAction>({type: MessagesStateActions.DISMISS_MESSAGE});
     }
 }
 
@@ -36,4 +55,5 @@ export const App = connect((state: RootState, ownProps: OwnProps) => ({
     hasJoinedTeam: state.teamState.hasJoinedTeam,
     isPlaying: state.gameState.isActive,
     readyToPlay: state.registrationState.mode === RegistrationMode.ReadyToPlay,
+    modalMessage: state.messagesState.currentMessage,
 }))(_App);
