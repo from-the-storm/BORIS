@@ -24,11 +24,18 @@
             height: 100%;
             width: 100%;
             margin: 0;
-            padding: 2rem 1.5rem;
+            padding: 0 1.5rem;
             background: $black;
             color: $white;
                 #prompt-description button {
                     border: 1px solid $white;
+                }
+                h1 {
+                    margin-top: 1.5rem;
+                }
+                a.small {
+                    color: $red;
+                    padding-top: 0.75rem;
                 }
         }
         h1 {

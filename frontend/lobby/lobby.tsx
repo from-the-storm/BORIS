@@ -47,7 +47,7 @@ class _LobbyComponent extends React.PureComponent<Props> {
             <div className="lobby">
                 <header>
                     <button onClick={this.handleBackButton}>◀</button>
-                    <button className="right" onClick={this.handleTeamButton}><img height="22" width="22" src={teams} alt="Teams" /></button>
+                    <button onClick={this.handleTeamButton}><img height="22" width="22" src={teams} alt="Teams" /></button>
                 </header>
                 <div className="content">
                     {
