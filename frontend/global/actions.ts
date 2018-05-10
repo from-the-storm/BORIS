@@ -5,10 +5,12 @@ import { LobbyStateActionsType } from '../lobby/lobby-state-actions';
 import { RegistrationStateActionsType } from '../registration/registration-state-actions';
 import { RpcClientStateActionType } from '../rpc-client/rpc-client-actions';
 import { GameStateActionsType } from './state/game-state-actions';
+import { MessagesStateActionsType } from './state/messages-state-actions';
 
 
 export type AnyAction = (
     InitStateActionsType
+    |MessagesStateActionsType
     |TeamStateActionsType
     |UserStateActionsType
     |LobbyStateActionsType

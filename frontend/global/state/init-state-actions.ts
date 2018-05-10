@@ -1,5 +1,3 @@
-import {Dispatch} from 'redux';
-
 //// Init State Actions
 
 export enum InitStateActions {
