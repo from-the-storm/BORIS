@@ -14,8 +14,8 @@ interface Props {
     zoom?: number;
 }
 
-const LostMarker: React.SFC<Props> = () => <img className="here" src={marker} alt="You Should Be Here" />;
-const StartMarker: React.SFC<Props> = () => <img src={starting} alt="Scenario Start Point" />;
+const LostMarker: React.SFC<Props> = () => <img className="lost-marker" src={marker} alt="You Should Be Here" />;
+const StartMarker: React.SFC<Props> = () => <img className="start-marker" src={starting} alt="Scenario Start Point" />;
 
 export class AutoWayfinder extends React.Component<Props> {
     render() {
