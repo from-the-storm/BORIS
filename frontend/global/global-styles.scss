@@ -15,12 +15,12 @@ header {
 }
 .content {
     padding: 1rem;
-    margin-top: 40px;
         p:first-of-type {
             margin-top: 0;
         }
 }
-header {
+
+header.fixed {
     background-color: $black;
     width: 100%;
     height: 40px;
@@ -35,6 +35,9 @@ header {
             font-size: 1em;
             line-height: 20px;
             height: 40px;
+        }
+        ~ .content {
+            margin-top: 40px;
         }
 }
 

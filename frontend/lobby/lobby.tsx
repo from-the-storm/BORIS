@@ -45,7 +45,7 @@ class _LobbyComponent extends React.PureComponent<Props> {
     public render() {
         return <RpcConnectionStatusIndicator>
             <div className="lobby">
-                <header>
+                <header className="fixed">
                     <button onClick={this.handleBackButton}>◀</button>
                     <button onClick={this.handleTeamButton}><img height="22" width="22" src={teams} alt="Teams" /></button>
                 </header>

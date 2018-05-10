@@ -94,6 +94,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     }
 
     @bind private showScenarioDetails(scenarioId: number) {
+        this.setState({showMap: false});
         this.props.dispatch<AnyAction>({type: Actions.SHOW_SCENARIO_DETAILS, scenarioId});
     }
 

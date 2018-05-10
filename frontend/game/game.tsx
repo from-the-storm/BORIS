@@ -35,7 +35,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
         return <RpcConnectionStatusIndicator>
             {!this.state.hasSeenSplash && <SplashBorisInit onDone={this.onSplashDone} />}
             <div className="game">
-                <header>
+                <header className="fixed">
                     <button onClick={this.handleQuitButton}>◀</button>
                     <h1>{this.props.scenarioName.replace(/[aeiouy]/ig,'')}</h1>
                     <button className="help" onClick={this.handleHelpButton}>?</button>
