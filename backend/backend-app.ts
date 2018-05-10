@@ -66,8 +66,8 @@ const RedisStore = connectRedis(session);
 export const redisClient = redis.createClient({
     host: config.redis_host,
     port: config.redis_port,
-    password: config.redis_password,
     prefix: config.redis_prefix,
+    ...(config.redis_password ? {password: config.redis_password} : {})
 });
 app.set('redisClient', redisClient);
 app.set('pubsubClient', redisClient.duplicate()); // A dedicated connection is required for redis pub/sub subscriber functionality
