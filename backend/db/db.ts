@@ -3,7 +3,7 @@ import * as postgres from 'pg';
 import * as pgPromise from 'pg-promise';
 
 import {config} from '../config';
-import { User, DBScenario, Team } from './models';
+import { User, DBScenario, Team, Game } from './models';
 
 export interface BorisDatabase extends massive.Database {
     users: massive.Table<User>;
@@ -28,16 +28,21 @@ export interface BorisDatabase extends massive.Database {
         is_admin: boolean;
         is_active: boolean;
     }>;
+    scripts: massive.Table<{
+        id: number;
+        name: string;
+        description: string;
+    }>;
+    steps: massive.Table<{
+        id: number;
+        script_id: number;
+        index: number;
+        type: string;
+        data: any;
+    }>;
     scenarios: massive.Table<DBScenario>;
 
-    games: massive.Table<{
-        id: number;
-        team_id: number;
-        scenario_id: number;
-        started: Date;
-        is_active: boolean;
-        finished: Date;
-    }>;
+    games: massive.Table<Game>;
     user_by_email(email: string): Promise<User>;
     instance: pgPromise.IDatabase<{}>;
 }
