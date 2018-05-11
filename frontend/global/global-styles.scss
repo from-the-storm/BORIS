@@ -20,6 +20,30 @@ header {
         }
 }
 
+header.fixed {
+    background-color: $black;
+    width: 100%;
+    height: 40px;
+    text-align: left;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    max-width: 64em;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+        button {
+            font-size: 1em;
+            line-height: 20px;
+            height: 40px;
+        }
+        ~ .content {
+            margin-top: 40px;
+        }
+}
+
 // Typography
 p {
     line-height: 1.7;

@@ -75,3 +75,15 @@
     -webkit-animation: 1.5s forwards fade;
     animation: 1.5s forwards fade;
 }
+
+.game {
+    header {
+        h1 {
+            color: darken($white, 20%);
+            font-size: 1.2em;
+        }
+        .help {
+            font-size: 1.3em;
+        }
+    } 
+}
