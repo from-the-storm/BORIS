@@ -20,6 +20,42 @@
             }
     }
 
+    @-webkit-keyframes cycle {
+        from { -webkit-transform: translateX(0); }
+        to { -webkit-transform: translateX(-100%); }
+    }
+
+    @keyframes cycle {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+    }
+
+    #market-button-container {
+        max-width: 800px;
+        margin: 0 auto 0.5rem;
+            button.market {
+                background: none;
+                overflow: hidden;
+                padding: 0;
+                    &#open {
+                        img {
+                            width: 200%;
+                            max-width: none;
+                            -webkit-animation: 1.5s steps(2) infinite cycle;
+                            animation: 1.5s steps(2) infinite cycle;
+                        }
+                    }
+                    &#actualized {
+                        img {
+                            width: 300%;
+                            max-width: none;
+                            -webkit-animation: 1s steps(3) infinite cycle;
+                            animation: 1s steps(3) infinite cycle;
+                        }
+                    }
+            }
+    }
+
     .scenario-grid {
         display: flex;
         flex-wrap: wrap;
