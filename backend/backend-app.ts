@@ -21,6 +21,7 @@ import {router as loginRegisterRouter} from './routes/login-register';
 import {router as lobbyRouter} from './routes/lobby-api';
 import {router as gameRouter} from './routes/game-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
+import {router as appAdminRouter} from './routes/admin-api';
 import { subscribeToRedis } from './websocket/pub-sub';
 import { rpcHandler } from './websocket/connections';
 
@@ -179,6 +180,10 @@ app.use('/api/game', gameRouter);
 
 // Misc. API used by the single page app frontend:
 app.use('/api/app', appAPIRouter);
+
+// The Admin single page React app:
+app.use('/api/admin', appAdminRouter);
+app.get(/\/admin(\/.*)?/, (req, res) => { res.render('react-admin-app'); });
 
 if (environment === 'test') {
     app.use('/test-utils', testHelperRouter);
