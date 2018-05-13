@@ -27,6 +27,12 @@ interface ListResponse<T> {
     data: T[],
     count: number,
 }
+/**
+ * Helper function for defining a REST API andpoint that returns a list of objects
+ * Mostly this adds pagination support
+ * @param path The URL path to this resource, excluding the API prefix that all endpoints share
+ * @param fn A method that loads the data from the database and returns it, along with a total count.
+ */
 function defineListMethod<T>(path: string, fn: (criteria: any, queryOptions: massive.QueryOptions, db: BorisDatabase, user: UserType, app: express.Application) => Promise<ListResponse<T>>) {
     const methodDefinition: ApiMethod<ListRequest, ListResponse<T>> = {path: `/api/admin/${path}`, type: 'GET'};
     defineMethod(methodDefinition, async(data, app, user) => {
@@ -39,28 +45,43 @@ function defineListMethod<T>(path: string, fn: (criteria: any, queryOptions: mas
         return result;
     });
 }
+/**
+ * Find all mathing obects from a PostgreSQL/MassiveJS table, also returning the total
+ * number as if no 'limit' clause were applied.
+ *
+ * You MUST explicitly specify either 'fields' or 'columns' in the options, otherwise
+ * no columns will be returned.
+ *
+ * @param table A massiveJS database table
+ * @param criteria optional filtering criteria
+ * @param _options query options
+ */
+async function queryWithCount<T>(table: massive.Table<T>, criteria: any, _options: any): Promise<{data: T[], count: number}> {
+    let options = {exprs: {}, ..._options};
+    options.exprs.full_count = 'count(*) OVER ()'; // Merge 'full_count' expression into any existing 'exprs' option
+    const results: any = await table.find(criteria, options);
+    if (results.length === 0) {
+        return {data: [], count: 0};
+    } else {
+        const count = results[0].full_count;
+        return {
+            count,
+            data: results.map((r: any) => { delete r.full_count; return r; }),
+        }
+    }
+}
 
 defineListMethod<BasicUser>('users', async (criteria, queryOptions, db, app, user) => {
-    const [users, count] = await Promise.all([
-        db.users.find(criteria, {...queryOptions, columns: ['id', 'first_name', 'email', 'created']}),
-        db.users.count(criteria).then(c => +c),
-    ]);
-    return { data: users, count, };
+    return queryWithCount(db.users, criteria, {...queryOptions, fields: ['id', 'first_name', 'email', 'created']});
 });
 
 defineListMethod<Team>('teams', async (criteria, queryOptions, db, app, user) => {
-    const [teams, count] = await Promise.all([
-        db.teams.find(criteria, {...queryOptions}),
-        db.teams.count(criteria).then(c => +c),
-    ]);
-    return { data: teams, count, };
+    return queryWithCount(db.teams, criteria, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
 });
 
 defineListMethod<Scenario>('scenarios', async (criteria, queryOptions, db, app, user) => {
-    const [rawScenarios, count] = await Promise.all([
-        db.scenarios.find(criteria, {...queryOptions}),
-        db.scenarios.count(criteria).then(c => +c),
-    ]);
-    const scenarios = rawScenarios.map( scenarioFromDbScenario );
+    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'description_html', 'start_point', ];
+    const {data, count} = await queryWithCount(db.scenarios, {...criteria, is_active: true}, {...queryOptions, fields});
+    const scenarios = data.map( scenarioFromDbScenario );
     return { data: scenarios, count, };
 });
