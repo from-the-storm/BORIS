@@ -27,13 +27,18 @@ function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Pr
     };
 }
 
-export enum RequireUser { Required, AnonymousOnly, UserOptional };
+export enum RequireUser { Required, AnonymousOnly, UserOptional, AdminUserRequired };
 
 export function makeApiHelper(router: express.Router, mountPath: RegExp, requireUser: RequireUser = RequireUser.Required) {
 
     function checkUserLoggedIn(req: express.Request) {
-        if (requireUser === RequireUser.Required && !req.user) {
-            throw new SafeError("You are not logged in.");
+        if (requireUser === RequireUser.Required || requireUser == RequireUser.AdminUserRequired) {
+            if (!req.user) {
+                throw new SafeError("You are not logged in.");
+            }
+            if (requireUser == RequireUser.AdminUserRequired && req.user.id !== 1) {
+                throw new SafeError("You are not an admin user.");
+            }
         } else if (requireUser === RequireUser.AnonymousOnly && req.user) {
             throw new SafeError("You are already logged in.");
         }

@@ -3,7 +3,7 @@ import * as postgres from 'pg';
 import * as pgPromise from 'pg-promise';
 
 import {config} from '../config';
-import { User, DBScenario } from './models';
+import { User, DBScenario, Team } from './models';
 
 export interface BorisDatabase extends massive.Database {
     users: massive.Table<User>;
@@ -20,13 +20,7 @@ export interface BorisDatabase extends massive.Database {
         user_id: number;
         created: Date;
     }>;
-    teams: massive.Table<{
-        id: number;
-        name: string;
-        organization: string;
-        code: string;
-        created: Date;
-    }>;
+    teams: massive.Table<Team>;
     team_members: massive.Table<{
         id: number;
         user_id: number;
