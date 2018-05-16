@@ -10,9 +10,6 @@ interface Props {
 }
 
 export class MarketButton extends React.PureComponent<Props> {
-    constructor(props: Props) {
-        super(props);
-    }
     render() {
         const image = this.setImage();
         const id = image.substring(image.lastIndexOf("/") + 1, image.lastIndexOf("-"));
@@ -30,10 +27,9 @@ export class MarketButton extends React.PureComponent<Props> {
                 return open;
             }
             return actualized;
-        } 
-        else if (this.props.completedScenarios >= 3) {
+        } else if (this.props.completedScenarios >= 3) {
             return boarded;
-        } 
+        }
         return taped;
     }
 }
