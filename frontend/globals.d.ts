@@ -17,3 +17,5 @@ declare module '*.svg' {
 }
 
 declare module 'jsonrpc-websocket-client';
+
+declare module 'react-admin';
