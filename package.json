@@ -51,6 +51,7 @@
     "@types/react": "^16.0.41",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^5.0.19",
+    "@types/react-test-renderer": "^16.0.1",
     "@types/redis": "^2.8.6",
     "@types/request-promise-native": "^1.0.14",
     "@types/selenium-webdriver": "~3.0.8",
@@ -72,6 +73,7 @@
     "react-admin": "^2.0.0-RC3",
     "react-dom": "~16.0.0",
     "react-redux": "^5.0.7",
+    "react-test-renderer": "~16.0.0",
     "redux": "~3.7.2",
     "redux-thunk": "~2.2.0",
     "request": "~2.85.0",
@@ -93,7 +95,8 @@
       }
     },
     "transform": {
-      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+      "\\.(svg|png|jpg)$": "<rootDir>/frontend/test-utils/file-transformer.js"
     },
     "testRegex": ".*\\-test.(ts|tsx|js)$",
     "moduleFileExtensions": [
@@ -101,6 +104,9 @@
       "tsx",
       "js",
       "json"
-    ]
+    ],
+    "moduleNameMapper": {
+      "\\.scss$": "<rootDir>/frontend/test-utils/file-mock.js"
+    }
   }
 }

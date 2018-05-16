@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<MarketButton> Component When 1 scenario(s) have been completed Shows 'Market is Open' when user is The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="open"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/open-HASH.png"
+    />
+  </button>
+</div>
+`;
+
+exports[`<MarketButton> Component When 1 scenario(s) have been completed Shows 'Move Along' market image when user is not The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="move"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/move-HASH.png"
+    />
+  </button>
+</div>
+`;
+
+exports[`<MarketButton> Component When 2 scenario(s) have been completed Shows 'Market is Open' when user is The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="open"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/open-HASH.png"
+    />
+  </button>
+</div>
+`;
+
+exports[`<MarketButton> Component When 2 scenario(s) have been completed Shows 'Move Along' market image when user is not The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="move"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/move-HASH.png"
+    />
+  </button>
+</div>
+`;
+
+exports[`<MarketButton> Component When 3 scenario(s) have been completed Shows "actualized" image when user is The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="actualized"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/actualized-HASH.png"
+    />
+  </button>
+</div>
+`;
+
+exports[`<MarketButton> Component When 3 scenario(s) have been completed Shows 'Market is Closed' market image when user is not The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="closed"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/closed-HASH.png"
+    />
+  </button>
+</div>
+`;
+
+exports[`<MarketButton> Component When 4 scenario(s) have been completed Shows "actualized" image when user is The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="actualized"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/actualized-HASH.png"
+    />
+  </button>
+</div>
+`;
+
+exports[`<MarketButton> Component When 4 scenario(s) have been completed Shows 'Market is Closed' market image when user is not The Burdened 1`] = `
+<div
+  id="market-button-container"
+>
+  <button
+    className="market"
+    id="closed"
+  >
+    <img
+      alt="Market Button"
+      src="frontend/lobby/images/market/closed-HASH.png"
+    />
+  </button>
+</div>
+`;
