@@ -11,6 +11,7 @@
     bottom: 0;
     max-width: 64em;
     margin: 0 auto;
+    z-index: 2;
     background: transparentize($black, 0.1);
 }
 
