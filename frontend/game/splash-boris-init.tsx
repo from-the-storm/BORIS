@@ -22,7 +22,7 @@ export class SplashBorisInit extends React.PureComponent<Props, State> {
     }
 
     async hideAfterDelay() {
-        await sleep(100); // Increase to 10000 when not in development
+        await sleep(100); // Increase to 7000 when not in development
         this.setState({ showing: false });
         await sleep(1500);
         this.props.onDone();

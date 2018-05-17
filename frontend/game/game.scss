@@ -20,6 +20,18 @@
 	to { background-position: -1360px; }
 }
 
+@-webkit-keyframes pop-in {
+	0% { transform: scale(0.95); opacity: 0; }
+	70% { transform: scale(1.05); }
+	100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pop-in {
+	0% { transform: scale(0.95); opacity: 0; }
+	70% { transform: scale(1.05); }
+	100% { transform: scale(1); opacity: 1; }
+}
+
 .splash, .sponsor {
     position: fixed;
     height: 100%;
@@ -27,6 +39,7 @@
     top: 0;
     left: 0;
     background: $black;
+    z-index: 3;
 }
 
 .sponsor, .boris {
@@ -85,5 +98,161 @@
         .help {
             font-size: 1.3em;
         }
-    } 
+    }
+    .chat-segment {
+        margin: 0 0 1.5rem 40px;
+        float: left;
+        clear: both;
+            p {
+                background: $grey;
+                padding: 0.4em 0.5rem;
+                margin: 0;
+                margin: 0.1rem 0;
+                border-radius: 3px;
+                border-bottom-left-radius: 0;
+                position: relative;
+                float: left;
+                clear: left;
+                    &:last-child:before {
+                        content: url('./images/chat-boris.png');
+                        position: absolute;
+                        height: 40px;
+                        height: 40px;
+                        bottom: 0;
+                        left: -48px;
+                    }
+                    span.saltines {
+                        border-bottom: 2px solid;
+                        font-weight: bold;
+                        position: relative;
+                            &.gained {
+                                border-color: $green;
+                            }
+                            &.lost {
+                                border-color: $red;
+                            }
+                    }
+                    &.in {
+                        animation: pop-in 0.2s forwards ease-in;
+                    }
+            }
+            &.backfeed {   
+                p:last-child:before {
+                    content: url('./images/chat-backfeed.png');                 
+                }             
+            }
+            &.clarence {
+                p:last-child:before {
+                    content: url('./images/chat-clarence.png');                    
+                }
+            }
+    }
+    .response-segment {
+        margin: 0 0 1.5rem 40px;
+        float: right;
+        text-align: right;
+        clear: both;
+            button {
+                text-align: right;
+                font-family: $textfont;
+                font-size: 1em;
+                border-radius: 3px;
+                text-transform: none;
+                border-bottom-right-radius: 0;
+                padding: 0.4em 0.5rem;
+                line-height: 1.7;
+                margin: 0.1rem 0;
+                float: right;
+                clear: right;
+                    &.correct {
+                        background: $green;
+                        color: $black;
+                    }
+                    &.wrong {
+                        background: $red;
+                    }
+            }
+            form {
+                padding: 0.5rem;
+                background: $black;
+                border-radius: 3px;
+                border-bottom-right-radius: 0;
+                margin-right: 0.5rem;
+                    input, textarea {
+                        margin-bottom: 0;
+                        background: none;
+                        color: $white;
+                        display: block;
+                    }
+                    button {
+                        text-transform: uppercase;
+                        font-family: $fancyfont;
+                        margin: 1rem -0.5rem 0;
+                    }
+            }
+    }
+    .no-segment {
+        background: $black;
+        float: left;
+        clear: both;
+        margin: 0.5rem -1rem 2.3rem;
+        padding: 1rem;
+        position: relative;
+            p {
+                color: $white;
+                font-family: $consolefont;    
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                    &:before {
+                        content: '>> ';
+                    }      
+            }
+            &:before, &:after {
+                content: '';
+                display: block;
+                position: absolute;
+                left: 0;
+                right: 0;
+                height: 0.8rem;
+                background-size: 0.7rem 2rem;
+                background-position: 0 -1rem;
+            }
+            &:before {
+                background-image: 
+                linear-gradient(45deg, $black 33.333%, transparent 33.333%, transparent 66.667%, $black 66.667%),
+                linear-gradient(-45deg, $black 33.333%, transparent 33.333%, transparent 66.667%, $black 66.667%);
+                top: -0.8rem;
+            }
+            &:after {
+                background-image: 
+                linear-gradient(45deg, transparent 33.333%, $black 33.333%, $black 66.667%, transparent 66.667%),
+                linear-gradient(-45deg, transparent 33.333%, $black 33.333%, $black 66.667%, transparent 66.667%);
+                bottom: -0.8rem;
+            }
+    }
+    .bulletin-segment {
+        position: relative;
+        margin: 0 0 1.5rem;
+        float: left;
+        clear: both;
+        border-top: 2px solid $grey;
+        border-bottom: 2px solid $grey;
+        padding: 0.5rem 0;
+        &:after {
+            content: 'BULLETIN';
+            opacity: 0.2;
+            font-family: $fancyfont;
+            font-size: 48px;
+            transform: rotate(-10deg) translateY(-45%);
+            position: absolute;
+            display: block;
+            top: 45%;
+            text-align: center;
+            width: 100%;
+        }
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
 }
