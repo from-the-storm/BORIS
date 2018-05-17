@@ -8,6 +8,7 @@ import { loadScenarios, Actions } from './lobby-state-actions';
 import { LoadingSpinnerComponent } from '../loading/loading-spinner';
 import { LoadingState } from '../loading/loading-state';
 import { AutoWayfinder } from '../auto-wayfinder/auto-wayfinder';
+import { MarketButton } from './market-button';
 import { Scenario } from '../../common/models';
 import { AnyAction } from '../global/actions';
 import { startGame } from '../global/state/game-state-actions';
@@ -20,6 +21,8 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     scenarios: List<Scenario>;
     scenariosLoadState: LoadingState;
     selectedScenarioId: number|null;
+    scenariosComplete: number;  // How many scenarios this team has completed.
+    playerIsTheBurdened: boolean; // Did this player have the role of "the burdened" on this team's last scenario? (Affects the Marketplace)
 }
 interface State {
     showMap: boolean;
@@ -63,7 +66,10 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
 
         return <div>
             <h1>Choose Scenario</h1>
-            <p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>
+            {this.props.scenariosComplete === 0 ? 
+                (<p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>) : 
+                (<MarketButton completedScenarios={this.props.scenariosComplete} isBurdened={this.props.playerIsTheBurdened} />)
+            }
             <div className="scenario-grid">
                 <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
                     {this.props.scenarios.map(s =>
@@ -110,5 +116,7 @@ export const ChooseScenarioComponent = connect((state: RootState, ownProps: OwnP
         scenarios: state.lobbyState.scenarios,
         scenariosLoadState: state.lobbyState.scenariosState,
         selectedScenarioId,
+        scenariosComplete: 0,
+        playerIsTheBurdened: true,
     };
 })(_ChooseScenarioComponent);
