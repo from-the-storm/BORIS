@@ -4,11 +4,13 @@ import { Scenario } from "../../common/models";
 import { GameVar, GameVarScope } from "./vars";
 
 interface GameManagerInitData {
+    db: BorisDatabase;
     game: Game;
     teamVars: any;
 }
 
 export class GameManager {
+    private readonly db: BorisDatabase;
     readonly gameId: number;
     readonly teamId: number;
     gameVars: any;
@@ -17,9 +19,11 @@ export class GameManager {
     readonly steps: Map<number, {}>;
 
     constructor(data: GameManagerInitData) {
+        this.db = data.db;
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
         this.gameVars = data.game.game_vars;
+        this.teamVars = data.teamVars;
         this.pendingTeamVars = data.game.pending_team_vars;
     }
 
@@ -40,13 +44,17 @@ export class GameManager {
         const team = await db.teams.findOne(game.team_id);
 
         return new GameManager({
+            db,
             game,
             teamVars: team.game_vars,
         });
     }
 
-    public getVar<T>(variable: Readonly<GameVar<T>>, stepId: number): T {
+    public getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T {
         if (variable.scope === GameVarScope.Step) {
+            if (stepId === undefined) {
+                throw new Error('Must specify stepId to set a step-scoped variable.');
+            }
             const newVariable: Readonly<GameVar<T>> = {...variable, key: `step${stepId}:${variable.key}`};
             return this._getGameVar(newVariable);
         } else if (variable.scope === GameVarScope.Game) {
@@ -55,11 +63,27 @@ export class GameManager {
             return this._getTeamVar(variable);
         }
     }
+    public async setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number) {
+        if (variable.scope === GameVarScope.Step) {
+            if (stepId === undefined) {
+                throw new Error('Must specify stepId to set a step-scoped variable.');
+            }
+            const newVariable: Readonly<GameVar<T>> = {...variable, key: `step${stepId}:${variable.key}`};
+            await this._setGameVar(newVariable, updater);
+        } else if (variable.scope === GameVarScope.Game) {
+            await this._setGameVar(variable, updater);
+        } else if (variable.scope === GameVarScope.Team) {
+            await this._setTeamVar(variable, updater);
+        }
+    }
     private _getGameVar<T>(variable: Readonly<GameVar<T>>): T {
         if (variable.key in this.gameVars) {
             return this.gameVars[variable.key];
         }
         return variable.default;
+    }
+    private async _setGameVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
+        // TODO
     }
     private _getTeamVar<T>(variable: Readonly<GameVar<T>>): T {
         if (variable.key in this.pendingTeamVars) {
@@ -69,5 +93,26 @@ export class GameManager {
         } else {
             return variable.default;
         }
+    }
+    private async _setTeamVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
+        await this.db.instance.tx('update_team_var', async (task) => {
+            // Acquire a row-level lock on the row we're about to update, then call the updater
+            // method, then save the result. This enables atomic increments, etc.
+            const origData = await task.one('SELECT pending_team_vars FROM games WHERE id = $1 FOR UPDATE', [this.gameId]);
+            const origValue: T = (
+                variable.key in origData.pending_team_vars ? origData.pending_team_vars[variable.key] :
+                variable.key in this.teamVars ? this.teamVars[variable.key] :
+                variable.default
+            );
+            const newValue = updater(origValue);
+            const result = await task.one(
+                `UPDATE games SET 
+                    pending_team_vars = jsonb_set(pending_team_vars, $2, to_jsonb($3))
+                WHERE id = $1
+                RETURNING pending_team_vars;`,
+                [this.gameId, `{${variable.key}}`, newValue]
+            );
+            this.pendingTeamVars = result.pending_team_vars;
+        });
     }
 }
