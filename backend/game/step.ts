@@ -25,6 +25,9 @@ abstract class Step {
     protected getVar<T>(variable: GameVar<T>): T {
         return this.manager.getVar(variable, this.id);
     }
+    protected async setVar<T>(variable: GameVar<T>, updater: (val: T) => T): Promise<T> {
+        return this.manager.setVar(variable, updater, this.id);
+    }
 
     public abstract getUiState(): AnyUiState;
 

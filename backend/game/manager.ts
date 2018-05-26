@@ -63,17 +63,17 @@ export class GameManager {
             return this._getTeamVar(variable);
         }
     }
-    public async setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number) {
+    public async setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T> {
         if (variable.scope === GameVarScope.Step) {
             if (stepId === undefined) {
                 throw new Error('Must specify stepId to set a step-scoped variable.');
             }
             const newVariable: Readonly<GameVar<T>> = {...variable, key: `step${stepId}:${variable.key}`};
-            await this._setGameVar(newVariable, updater);
+            return this._setGameVar(newVariable, updater);
         } else if (variable.scope === GameVarScope.Game) {
-            await this._setGameVar(variable, updater);
+            return this._setGameVar(variable, updater);
         } else if (variable.scope === GameVarScope.Team) {
-            await this._setTeamVar(variable, updater);
+            return this._setTeamVar(variable, updater);
         }
     }
     private _getGameVar<T>(variable: Readonly<GameVar<T>>): T {
@@ -83,7 +83,22 @@ export class GameManager {
         return variable.default;
     }
     private async _setGameVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
-        // TODO
+        return await this.db.instance.tx('update_game_var', async (task) => {
+            // Acquire a row-level lock on the row we're about to update, then call the updater
+            // method, then save the result. This enables atomic increments, etc.
+            const origData = await task.one('SELECT game_vars FROM games WHERE id = $1 FOR UPDATE', [this.gameId]);
+            const origValue: T = variable.key in origData.game_vars ? origData.game_vars[variable.key] : variable.default;
+            const newValue = updater(origValue);
+            const forceCast = typeof newValue === 'string' ? '::text' : ''; // to_jsonb() needs to know how to interpret a string type.
+            const result = await task.one(
+                // use jsonb_set to guarantee that we don't affect other variables
+                `UPDATE games SET game_vars = jsonb_set(game_vars, $2, to_jsonb($3${forceCast}))
+                WHERE id = $1 RETURNING game_vars;`,
+                [this.gameId, `{${variable.key}}`, newValue]
+            );
+            this.gameVars = result.game_vars;
+            return newValue;
+        });
     }
     private _getTeamVar<T>(variable: Readonly<GameVar<T>>): T {
         if (variable.key in this.pendingTeamVars) {
@@ -95,7 +110,7 @@ export class GameManager {
         }
     }
     private async _setTeamVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
-        await this.db.instance.tx('update_team_var', async (task) => {
+        return this.db.instance.tx('update_team_var', async (task) => {
             // Acquire a row-level lock on the row we're about to update, then call the updater
             // method, then save the result. This enables atomic increments, etc.
             const origData = await task.one('SELECT pending_team_vars FROM games WHERE id = $1 FOR UPDATE', [this.gameId]);
@@ -105,14 +120,15 @@ export class GameManager {
                 variable.default
             );
             const newValue = updater(origValue);
+            const forceCast = typeof newValue === 'string' ? '::text' : ''; // to_jsonb() needs to know how to interpret a string type.
             const result = await task.one(
-                `UPDATE games SET 
-                    pending_team_vars = jsonb_set(pending_team_vars, $2, to_jsonb($3))
-                WHERE id = $1
-                RETURNING pending_team_vars;`,
+                // use jsonb_set to guarantee that we don't affect other variables
+                `UPDATE games SET pending_team_vars = jsonb_set(pending_team_vars, $2, to_jsonb($3${forceCast}))
+                WHERE id = $1 RETURNING pending_team_vars;`,
                 [this.gameId, `{${variable.key}}`, newValue]
             );
             this.pendingTeamVars = result.pending_team_vars;
+            return newValue;
         });
     }
 }

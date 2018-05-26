@@ -5,6 +5,8 @@ import { GameVar, GameVarScope } from "./vars";
 import { GameManager } from './manager';
 
 const teamVarNumber: GameVar<number> = {key: 'teamVarNumber', scope: GameVarScope.Team, default: 10};
+const gameVarNumber: GameVar<number> = {key: 'gameVarNumber', scope: GameVarScope.Game, default: 15};
+const stepVarString: GameVar<string> = {key: 'stepVarNumber', scope: GameVarScope.Step, default: ""};
 
 describe("GameManager tests", () => {
     let db: BorisDatabase;
@@ -33,10 +35,44 @@ describe("GameManager tests", () => {
             });
 
             it("Returns the new value when it gets set", async () => {
-                await gameManager.setVar(teamVarNumber, val => 42);
+                const setResult = await gameManager.setVar(teamVarNumber, val => 42);
+                expect(setResult).toEqual(42);
                 expect(gameManager.getVar(teamVarNumber)).toEqual(42);
                 await gameManager.setVar(teamVarNumber, val => ++val);
                 expect(gameManager.getVar(teamVarNumber)).toEqual(43);
+            });
+
+        });
+
+        describe("Game Scope", async () => {
+
+            it("Returns the default value when it hasn't been set", async () => {
+                expect(gameManager.getVar(gameVarNumber)).toEqual(gameVarNumber.default);
+            });
+
+            it("Returns the new value when it gets set", async () => {
+                const setResult = await gameManager.setVar(gameVarNumber, val => 42);
+                expect(setResult).toEqual(42);
+                expect(gameManager.getVar(gameVarNumber)).toEqual(42);
+                await gameManager.setVar(gameVarNumber, val => ++val);
+                expect(gameManager.getVar(gameVarNumber)).toEqual(43);
+            });
+
+        });
+
+        describe("Step Scope", async () => {
+
+            it("Returns the default value when it hasn't been set", async () => {
+                expect(gameManager.getVar(stepVarString, 1)).toEqual(stepVarString.default);
+            });
+
+            it("Is scoped to a step ID", async () => {
+                const setResult = await gameManager.setVar(stepVarString, val => "Bob", 1);
+                expect(setResult).toEqual("Bob");
+                await gameManager.setVar(stepVarString, val => "Axe", 5);
+                expect(gameManager.getVar(stepVarString, 1)).toEqual("Bob");
+                expect(gameManager.getVar(stepVarString, 2)).toEqual("");
+                expect(gameManager.getVar(stepVarString, 5)).toEqual("Axe");
             });
 
         });
