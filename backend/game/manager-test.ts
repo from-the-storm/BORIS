@@ -3,6 +3,7 @@ import { TEST_SCENARIO_ID, TEST_TEAM_ID } from '../test-lib/test-data';
 import { BorisDatabase, getDB } from '../db/db';
 import { GameVar, GameVarScope } from "./vars";
 import { GameManager } from './manager';
+import { getTeamVar } from './team-vars';
 
 const teamVarNumber: GameVar<number> = {key: 'teamVarNumber', scope: GameVarScope.Team, default: 10};
 const gameVarNumber: GameVar<number> = {key: 'gameVarNumber', scope: GameVarScope.Game, default: 15};
@@ -40,6 +41,23 @@ describe("GameManager tests", () => {
                 expect(gameManager.getVar(teamVarNumber)).toEqual(42);
                 await gameManager.setVar(teamVarNumber, val => ++val);
                 expect(gameManager.getVar(teamVarNumber)).toEqual(43);
+            });
+
+            it("Does not permanently affect the team vars if the game is abandoned", async() => {
+                expect(await getTeamVar(teamVarNumber, TEST_TEAM_ID, db)).toEqual(10); // Default value
+                await gameManager.setVar(teamVarNumber, val => 42);
+                expect(await getTeamVar(teamVarNumber, TEST_TEAM_ID, db)).toEqual(42);
+                await gameManager.abandon();
+                expect(await getTeamVar(teamVarNumber, TEST_TEAM_ID, db)).toEqual(10);
+            });
+
+            it("Permanently affects the team vars if the game completes successfully", async() => {
+                expect(await getTeamVar(teamVarNumber, TEST_TEAM_ID, db)).toEqual(10); // Default value
+                await gameManager.setVar(teamVarNumber, val => 42);
+                expect(await getTeamVar(teamVarNumber, TEST_TEAM_ID, db)).toEqual(42);
+                await gameManager.finish();
+                expect(await getTeamVar(teamVarNumber, TEST_TEAM_ID, db)).toEqual(42);
+                // Note: the new value '42' will affect any subsequent test cases here.
             });
 
         });

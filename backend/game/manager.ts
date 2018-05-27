@@ -131,4 +131,37 @@ export class GameManager {
             return newValue;
         });
     }
+    /**
+     * Mark this game as abandoned.
+     * Discard any pending changes to the team vars (like # of saltines earned).
+     */
+    public async abandon() {
+        await this.db.games.update({id: this.gameId}, {is_active: false});
+    }
+    /**
+     * Mark this game as successfully finished.
+     * Save any pending changes to the team vars (like # of saltines earned).
+     */
+    public async finish() {
+        // Mark the game as finished, but check that it wasn't already finished or abandoned
+        this.db.instance.tx('update_team_var', async (task) => {
+            let result: any;
+            try {
+                result = await task.one(
+                    `UPDATE games SET finished = NOW(), is_active = FALSE WHERE id = $1 AND is_active = TRUE RETURNING pending_team_vars`,
+                    [this.gameId]
+                );
+            } catch (err) {
+                throw new Error("Game was not active.");
+            }
+            const pendingTeamVars = result.pending_team_vars;
+            // Always fetch the latest team vars from the DB in this transaction instead of trusting this.teamVars:
+            const oldTeamVars = (await task.one('SELECT game_vars FROM teams WHERE id = $1', [this.teamId])).game_vars;
+            const combinedTeamVars = {...oldTeamVars, ...pendingTeamVars};
+            await task.none(
+                `UPDATE teams SET game_vars = $2 WHERE id = $1`,
+                [this.teamId, combinedTeamVars]
+            );
+        });
+    }
 }

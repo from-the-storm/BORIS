@@ -8,6 +8,7 @@ import {BorisDatabase} from '../db/db';
 import { START_GAME, ABANDON_GAME } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { Scenario } from '../../common/models';
+import { GameManager } from '../game/manager';
 
 export const router = express.Router();
 
@@ -62,7 +63,8 @@ apiMethod(ABANDON_GAME, async (data, app, user) => {
     const activeTeamMembership = await requireActiveTeamMembership(db, user.id);
     const game = await db.games.findOne({team_id: activeTeamMembership.team_id, is_active: true});
     if (game !== null) {
-        await db.games.update({id: game.id}, {is_active: false}); // We leave 'finished' NULL to indicate this was abandoned, not completed.
+        const gameManager = await GameManager.loadGame(db, game.id);
+        await gameManager.abandon();
     }
     return {result: 'ok'};
 });
