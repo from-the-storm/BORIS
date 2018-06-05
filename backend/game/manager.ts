@@ -144,14 +144,16 @@ export class GameManager {
      */
     public async finish() {
         // Mark the game as finished, but check that it wasn't already finished or abandoned
-        this.db.instance.tx('update_team_var', async (task) => {
+        return this.db.instance.tx('update_team_var', async (task) => {
             let result: any;
+            await task.none('START TRANSACTION');
             try {
                 result = await task.one(
                     `UPDATE games SET finished = NOW(), is_active = FALSE WHERE id = $1 AND is_active = TRUE RETURNING pending_team_vars`,
                     [this.gameId]
                 );
             } catch (err) {
+                await task.none('ROLLBACK');
                 throw new Error("Game was not active.");
             }
             const pendingTeamVars = result.pending_team_vars;
@@ -162,6 +164,7 @@ export class GameManager {
                 `UPDATE teams SET game_vars = $2 WHERE id = $1`,
                 [this.teamId, combinedTeamVars]
             );
+            await task.none('COMMIT');
         });
     }
 }

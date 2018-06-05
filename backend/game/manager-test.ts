@@ -27,6 +27,17 @@ describe("GameManager tests", () => {
         await db.games.update({id: gameId}, {is_active: false});
     });
 
+    describe("finish()", async () => {
+        it("throws an error if the game was abandoned.", async () => {
+            await gameManager.abandon();
+            await expect(gameManager.finish()).rejects.toHaveProperty('message', "Game was not active.");
+        });
+        it("throws an error if the game was completed.", async () => {
+            await gameManager.finish();
+            await expect(gameManager.finish()).rejects.toHaveProperty('message', "Game was not active.");
+        });
+    });
+
     describe("GameVars", async () => {
 
         describe("Team Scope", async () => {
