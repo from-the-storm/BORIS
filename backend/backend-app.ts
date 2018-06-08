@@ -250,9 +250,9 @@ async function stopServer() {
     await new Promise((resolve) => {
         server.close(resolve);
     });
+    await app.get('pubsubClient').quit();
+    await redisClient.quit();
     await db.instance.$pool.end();
-    redisClient.unref();
-    app.get('pubsubClient').unref();
 }
 
 export {app, config, startServer, stopServer};
