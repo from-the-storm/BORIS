@@ -3,7 +3,7 @@ import * as postgres from 'pg';
 import * as pgPromise from 'pg-promise';
 
 import {config} from '../config';
-import { User, DBScenario, Team, Game } from './models';
+import { User, DBScenario, Team, Game, Script } from './models';
 
 export interface BorisDatabase extends massive.Database {
     users: massive.Table<User>;
@@ -28,11 +28,7 @@ export interface BorisDatabase extends massive.Database {
         is_admin: boolean;
         is_active: boolean;
     }>;
-    scripts: massive.Table<{
-        id: number;
-        name: string;
-        description: string;
-    }>;
+    scripts: massive.Table<Script>;
     steps: massive.Table<{
         id: number;
         script_id: number;
