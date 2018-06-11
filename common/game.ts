@@ -19,15 +19,21 @@ export enum StepType {
 
 interface UiState {
     type: StepType,
+    stepId: number,
 }
 export interface MessageStepUiState extends UiState {
+    type: StepType.MessageStep;
     message: string;
     forRoles: RoleSet;
 }
 export interface FreeResponseStepUiState extends UiState {
+    type: StepType.FreeResponse;
     multiline: boolean;
+    complete: boolean; // Has a value been entered by the user already?
+    value: string; // The value the user entered, if any
 }
 export type AnyUiState = (
     |MessageStepUiState
     |FreeResponseStepUiState
+    |null
 );

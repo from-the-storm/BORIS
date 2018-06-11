@@ -1,4 +1,5 @@
 import { Scenario, OtherTeamMember, Gender } from "./models";
+import { AnyUiState } from "./game";
 
 /** Default return value of API methods that don't return any useful data */
 export interface EmptyApiResponse {
@@ -128,6 +129,14 @@ export interface StartGameResponse {
     scenarioName: string;
 }
 
+/** GET_UI_STATE Request */
+export interface GetUiStateResponse {
+    updateSequence: number;
+    state: AnyUiState[];
+}
+
 export const START_GAME: ApiMethod<StartGameRequest, StartGameResponse> = {path: '/api/game/start', type: 'POST'};
+
+export const GET_UI_STATE: ApiMethod<NoRequestParameters, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
 
 export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};

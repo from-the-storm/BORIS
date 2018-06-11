@@ -2,12 +2,36 @@ import { BorisDatabase } from "../db/db";
 import { Game, scenarioFromDbScenario } from "../db/models";
 import { Scenario } from "../../common/models";
 import { GameVar, GameVarScope } from "./vars";
+import { Step } from "./step";
+import { AnyUiState } from "../../common/game";
 
 interface GameManagerInitData {
     db: BorisDatabase;
     game: Game;
     teamVars: any;
 }
+
+// Temporarily hard-coding the steps for development:
+const STEPS_DEV = [
+    {'step': 'message', 'message': "Hello! This is a test."},
+    {'step': 'message', 'message': "Hello! This is the next message."},
+    {'step': 'message', 'message': "Hello! This is the third message."},
+    {'step': 'free response', key: 'testInput'},
+];
+
+const currentStepVar: GameVar<number> = {key: 'step#', scope: GameVarScope.Game, default: -1};
+// Next UI update sequence ID. This is incremented and sent with any UI update
+// so that clients can ensure the UI update sequence has continuous IDs in order
+// to know that they didn't miss any updates.
+const lastUiUpdateSeqId: GameVar<number> = {key: 'ui_seq', scope: GameVarScope.Game, default: 0};
+
+/**
+ * Instances of GameManager, one cached per game.
+ * Always access GameManager via GameManager.loadGame()
+ * 
+ * Uses a promise as a form of locking when initializing a new one.
+ */
+const gameManagerCache = new Map<number, Promise<GameManager>>();
 
 export class GameManager {
     private readonly db: BorisDatabase;
@@ -16,38 +40,151 @@ export class GameManager {
     gameVars: any;
     pendingTeamVars: any; // team vars that will be saved to the team.game_vars when the game is completed.
     readonly teamVars: any;
-    readonly steps: Map<number, {}>;
+    readonly steps: ReadonlyMap<number, Step>;
 
-    constructor(data: GameManagerInitData) {
+    private constructor(data: GameManagerInitData) {
         this.db = data.db;
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
         this.gameVars = data.game.game_vars;
         this.teamVars = data.teamVars;
         this.pendingTeamVars = data.game.pending_team_vars;
+        // Load the steps:
+        const steps = new Map<number, Step>();
+        STEPS_DEV.forEach((val, idx) => {
+            const stepId: number = idx * 10; // For now use index*10; in the future, these IDs may be database row IDs etc.
+            const step = Step.loadFromData(val, stepId, this);
+            steps.set(stepId, step);
+        });
+        this.steps = steps;
+        // Since this GameManager is only initialized once per game,
+        // we are either starting a new game or the server has restarted
+        // while this game was active. In either case, run the current step:
+        this.currentStep.run();
+    }
+
+    get currentStep(): Step {
+        const currentStepId = this.getVar(currentStepVar);
+        if (currentStepId === -1) {
+            // Return the first step, whatever it is:
+            return this.steps.values().next().value;
+        }
+        return this.steps.get(currentStepId);
+    }
+
+    public getUiState(): AnyUiState[] {
+        const uiState: AnyUiState[] = [];
+        const currentStepId = this.currentStep.id;
+        for (const step of this.steps.values()) {
+            uiState.push(step.getUiState());
+            if (step.id === currentStepId) {
+                break; // Don't bother returning a whole bunch of 'null' values beyond the current step.
+            }
+        }
+        return uiState;
+    }
+
+    /**
+     * Steps are primarily keyed by their numeric ID, but sometimes (e.g. for UI)
+     * updates, we want to know their index in the flattened list of steps.
+     * @param stepId 
+     */
+    private getStepIndex(stepId: number): number {
+        let stepIndex: number;
+        let i = 0;
+        for (const step of this.steps.values()) {
+            if (step.id === stepId) {
+                stepIndex = i;
+                break;
+            }
+            i++;
+        }
+        if (stepIndex === undefined) {
+            throw new Error(`Step with ID ${stepId} not found in GameManager's step list.`);
+        }
+        return stepIndex;
+    }
+
+    public async pushUiUpdate(stepId: number) {
+        // Find the index of the step
+        const stepIndex = this.getStepIndex(stepId);
+        const step = this.steps.get(stepId);
+        console.log(`Notifying players that step ${stepIndex} has changed its UI.`);
+        // Generate an ID for this notification
+        const notificationId: number = await this.setVar(lastUiUpdateSeqId, oldVal => oldVal++);
+        // TODO: Push out a websocket notification
+    }
+
+    /**
+     * Get the UI update sequence ID. This number is incremented with every UI update
+     * notification that gets sent out. Any client that processes events should refresh
+     * the whole UI state if the sequence is ever discontinuous, since that means some
+     * updates were lost.
+     */
+    public get uiUpdateSequenceId(): number {
+        return this.getVar(lastUiUpdateSeqId);
+    }
+
+    /**
+     * Advance to the next step, or mark the game as complete if we're already
+     * on the last step.
+     */
+    public async advanceToNextstep() {
+        const currentStepId = this.currentStep.id;
+        // Figure out the ID of the step after the current one:
+        let found = false;
+        for (const step of this.steps.values()) {
+            if (found) {
+                // The previous step was the current step, so this is the next step:
+                await this.setVar(currentStepVar, () => step.id);
+                // And run the next step:
+                this.steps.get(step.id).run();
+                return;
+            } else if (step.id === currentStepId) {
+                found = true;
+            }
+        }
+        // If we get here, we must be at/past the last step. So end the game:
+        await this.finish();
     }
 
     static async loadGame(db: BorisDatabase, gameId: number): Promise<GameManager> {
-        const game = await db.games.findOne(gameId);
-        if (game === null) {
-            throw new Error(`Game ${gameId} not found.`);
+        // Check if the GameManager is already loaded in gameManagerCache
+        // If it is, return it. If not, initialize a new one.
+        // Everything is wrapped in promises to avoid issues if this method were to
+        // get called again with the same gameId before a GameManager has finished loading.
+        const cachedGM = gameManagerCache.get(gameId)
+        if (cachedGM !== undefined) {
+            try {
+                return await cachedGM;
+            } catch (err) {
+                // The promise to retrieve the cached GameManager failed. We'll need to try creating a new one.
+            }
         }
-        if (!game.is_active) {
-            throw new Error(`Game ${gameId} is not active.`)
-        }
-        if (game.finished !== null) {
-            throw new Error(`Game ${gameId} is active but finished - shouldn't happen.`)
-        }
+        const newGameManagerPromise = (async () => {
+            const game = await db.games.findOne(gameId);
+            if (game === null) {
+                throw new Error(`Game ${gameId} not found.`);
+            }
+            if (!game.is_active) {
+                throw new Error(`Game ${gameId} is not active.`)
+            }
+            if (game.finished !== null) {
+                throw new Error(`Game ${gameId} is active but finished - shouldn't happen.`)
+            }
 
-        //const scenario = scenarioFromDbScenario(await db.scenarios.findOne(game.scenario_id));
+            //const scenario = scenarioFromDbScenario(await db.scenarios.findOne(game.scenario_id));
 
-        const team = await db.teams.findOne(game.team_id);
+            const team = await db.teams.findOne(game.team_id);
 
-        return new GameManager({
-            db,
-            game,
-            teamVars: team.game_vars,
-        });
+            return new GameManager({
+                db,
+                game,
+                teamVars: team.game_vars,
+            });
+        })();
+        gameManagerCache.set(gameId, newGameManagerPromise);
+        return await newGameManagerPromise;
     }
 
     public getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T {
