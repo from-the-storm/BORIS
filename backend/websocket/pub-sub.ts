@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as redis from 'redis';
 
+import { app } from '../backend-app';
 import {config} from '../config';
 import {BorisDatabase} from '../db/db';
 import { notifyConnectedUsers } from './connections';
@@ -15,8 +16,12 @@ interface PubSubMessageData {
 
 const eventsChannel = config.redis_prefix + "app_events";
 
-export function subscribeToRedis(app: express.Application) {
-    const pubsubClient = app.get('pubsubClient') as redis.RedisClient;
+function getPubSubClient() {
+    return app.get('pubsubClient') as redis.RedisClient;
+}
+
+export function subscribeToRedis() {
+    const pubsubClient = getPubSubClient();
     pubsubClient.subscribe(eventsChannel);
     pubsubClient.on('message', async (channel, message) => {
         if (channel != eventsChannel) {
@@ -38,7 +43,7 @@ export function subscribeToRedis(app: express.Application) {
     });
 }
 
-export function publishEvent(app: express.Application, teamId: number, event: AnyNotification) {
+export function publishEvent(teamId: number, event: AnyNotification) {
     const redisClient: redis.RedisClient = app.get('redisClient');
     const data: PubSubMessageData = {teamId, event};
     redisClient.publish(eventsChannel, JSON.stringify(data));

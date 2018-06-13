@@ -21,7 +21,7 @@ export function handleNotification(store: Store<RootState>, event: AnyNotificati
         store.dispatch<AnyAction>({type: TeamStateActions.TEAM_MEMBERS_CHANGED, isTeamAdmin, otherTeamMembers});
     } else if (event.type === NotificationType.GAME_UI_UPDATE) {
         if (store.getState().gameState.isActive) {
-            store.dispatch(updateStepUiState(event.stepIndex, event.newStepUi, event.notificationId));
+            store.dispatch(updateStepUiState(event.stepIndex, event.newStepUi, event.uiUpdateSeqId));
         }
     }
 }

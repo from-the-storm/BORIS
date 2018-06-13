@@ -23,7 +23,7 @@ export interface TeamChangedNotification {
 export interface GameUiChangedNotification {
     type: NotificationType.GAME_UI_UPDATE;
     /** This number gets increased by 1 with each UI notification, to ensure none get missed. */
-    notificationId: number;
+    uiUpdateSeqId: number;
     /** Which step was changed (by index, not by ID) */
     stepIndex: number;
     /** The new UI state for the step that changed. */

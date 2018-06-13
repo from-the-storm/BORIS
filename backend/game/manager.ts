@@ -1,4 +1,4 @@
-import * as express from 'express';
+import { app } from "../backend-app";
 import { BorisDatabase } from "../db/db";
 import { Game, scenarioFromDbScenario } from "../db/models";
 import { Scenario } from "../../common/models";
@@ -8,8 +8,14 @@ import { AnyUiState } from "../../common/game";
 import { publishEvent } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
 
+/** External services that the GameManager needs to run */
+interface GameManagerContext {
+    db: BorisDatabase;
+    publishEvent: typeof publishEvent;
+}
+
 interface GameManagerInitData {
-    app: express.Application;
+    context: GameManagerContext;
     game: Game;
     teamVars: any;
 }
@@ -37,7 +43,6 @@ const lastUiUpdateSeqId: GameVar<number> = {key: 'ui_seq', scope: GameVarScope.G
 const gameManagerCache = new Map<number, Promise<GameManager>>();
 
 export class GameManager {
-    private readonly app: express.Application;
     private readonly db: BorisDatabase;
     readonly gameId: number;
     readonly teamId: number;
@@ -47,8 +52,7 @@ export class GameManager {
     readonly steps: ReadonlyMap<number, Step>;
 
     private constructor(data: GameManagerInitData) {
-        this.app = data.app;
-        this.db = data.app.get('db');
+        this.db = data.context.db;
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
         this.gameVars = data.game.game_vars;
@@ -116,15 +120,15 @@ export class GameManager {
         const step = this.steps.get(stepId);
         console.log(`Notifying players that step ${stepIndex} has changed its UI.`);
         // Generate an ID for this notification
-        const notificationId: number = await this.setVar(lastUiUpdateSeqId, oldVal => oldVal + 1);
+        const uiUpdateSeqId: number = await this.setVar(lastUiUpdateSeqId, oldVal => oldVal + 1);
         // Push out a websocket notification:
         const event: GameUiChangedNotification = {
             type: NotificationType.GAME_UI_UPDATE,
-            notificationId,
+            uiUpdateSeqId,
             stepIndex,
             newStepUi: step.getUiState(),
         };
-        publishEvent(this.app, this.teamId, event);
+        publishEvent(this.teamId, event);
     }
 
     /**
@@ -133,7 +137,7 @@ export class GameManager {
      * the whole UI state if the sequence is ever discontinuous, since that means some
      * updates were lost.
      */
-    public get uiUpdateSequenceId(): number {
+    public get uiUpdateSeqId(): number {
         return this.getVar(lastUiUpdateSeqId);
     }
 
@@ -160,7 +164,7 @@ export class GameManager {
         await this.finish();
     }
 
-    static async loadGame(app: express.Application, gameId: number): Promise<GameManager> {
+    static async loadGame(gameId: number, context?: GameManagerContext): Promise<GameManager> {
         // Check if the GameManager is already loaded in gameManagerCache
         // If it is, return it. If not, initialize a new one.
         // Everything is wrapped in promises to avoid issues if this method were to
@@ -173,9 +177,15 @@ export class GameManager {
                 // The promise to retrieve the cached GameManager failed. We'll need to try creating a new one.
             }
         }
-        const db: BorisDatabase = app.get('db');
+        // 
+        if (context === undefined) {
+            context = {
+                db: app.get('db'),
+                publishEvent: publishEvent,
+            }
+        }
         const newGameManagerPromise = (async () => {
-            const game = await db.games.findOne(gameId);
+            const game = await context.db.games.findOne(gameId);
             if (game === null) {
                 throw new Error(`Game ${gameId} not found.`);
             }
@@ -188,13 +198,9 @@ export class GameManager {
 
             //const scenario = scenarioFromDbScenario(await db.scenarios.findOne(game.scenario_id));
 
-            const team = await db.teams.findOne(game.team_id);
+            const team = await context.db.teams.findOne(game.team_id);
 
-            return new GameManager({
-                app,
-                game,
-                teamVars: team.game_vars,
-            });
+            return new GameManager({context, game, teamVars: team.game_vars});
         })();
         gameManagerCache.set(gameId, newGameManagerPromise);
         return await newGameManagerPromise;

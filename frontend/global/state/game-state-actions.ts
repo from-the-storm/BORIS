@@ -30,13 +30,13 @@ interface AbandonGameAction {
 interface SetUiStateAction {
     type: GameStateActions.SET_UI_STATE;
     state: AnyUiState[];
-    updateSequence: number;
+    uiUpdateSeqId: number;
 }
 
 interface UpdateStepUiStateAction {
     type: GameStateActions.UPDATE_STEP_UI_STATE;
     stepIndex: number;
-    updateSequence: number;
+    uiUpdateSeqId: number;
     state: AnyUiState;
 }
 
@@ -89,18 +89,18 @@ export function refreshGameUiState() {
         dispatch<GameStateActionsType>({
             type: Actions.SET_UI_STATE,
             state: result.state,
-            updateSequence: result.updateSequence,
+            uiUpdateSeqId: result.uiUpdateSeqId,
         });
     };
 }
 
-export function updateStepUiState(stepIndex: number, newState: AnyUiState, notificationSeqId: number) {
+export function updateStepUiState(stepIndex: number, newState: AnyUiState, uiUpdateSeqId: number) {
     return async (dispatch: Dispatch<{}>, getState: () => RootState) => {
-        if (notificationSeqId === getState().gameState.uiUpdateSequence + 1) {
+        if (uiUpdateSeqId === getState().gameState.uiUpdateSeqId + 1) {
             dispatch<AnyAction>({
                 type: Actions.UPDATE_STEP_UI_STATE,
                 stepIndex,
-                updateSequence: notificationSeqId,
+                uiUpdateSeqId: uiUpdateSeqId,
                 state: newState,
             });
         } else {

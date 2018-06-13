@@ -17,7 +17,7 @@ export class GameState extends Record({
     scenarioId: 0,
     scenarioName: "Unknown scenario",
     uiState: List<AnyUiState>(),
-    uiUpdateSequence: -1,
+    uiUpdateSeqId: -1,
     // ^ Whenever the server pushes out UI updates, they include a 'sequence number'.
     // It should always be increased by one; if not, we missed some updates and
     // should retrieve the whole list from the server from scratch.
@@ -45,11 +45,11 @@ export function gameStateReducer(state?: GameState, action?: AnyAction): GameSta
     case Actions.SET_UI_STATE:
         return state.merge({
             uiState: List<AnyUiState>(action.state),
-            uiUpdateSequence: action.updateSequence,
+            uiUpdateSeqId: action.uiUpdateSeqId,
         })
     case Actions.UPDATE_STEP_UI_STATE:
-        // Always call this action via the updateStepUiState() action creator, so it can verify that uiUpdateSequence is continuous
-        return state.setIn(['uiState', action.stepIndex], action.state).set('uiUpdateSequence', action.updateSequence);
+        // Always call this action via the updateStepUiState() action creator, so it can verify that uiUpdateSeqId is continuous
+        return state.setIn(['uiState', action.stepIndex], action.state).set('uiUpdateSeqId', action.uiUpdateSeqId);
     case Actions.ABANDON_GAME:
         // The team has abandoned the game:
         return state.clear();

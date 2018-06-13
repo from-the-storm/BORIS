@@ -131,7 +131,7 @@ export interface StartGameResponse {
 
 /** GET_UI_STATE Request */
 export interface GetUiStateResponse {
-    updateSequence: number;
+    uiUpdateSeqId: number;
     state: AnyUiState[];
 }
 

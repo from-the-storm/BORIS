@@ -38,7 +38,7 @@ async function getActiveGameForUser(app: express.Application, userId: number): P
     if (game === null) {
         return noActiveGame;
     }
-    return await GameManager.loadGame(app, game.id);
+    return await GameManager.loadGame(game.id);
 }
 
 /**
@@ -91,7 +91,7 @@ apiMethod(GET_UI_STATE, async (data, app, user) => {
         throw new SafeError("No game is currently active.");
     }
     return {
-        updateSequence: gameManager.uiUpdateSequenceId,
+        uiUpdateSeqId: gameManager.uiUpdateSeqId,
         state: gameManager.getUiState(),
     };
 });

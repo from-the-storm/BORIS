@@ -25,10 +25,7 @@ export async function notifyTeamStatusChanged(app: express.Application, teamId: 
             isAdmin: row.is_admin,
         });
     }
-    publishEvent(app, teamId, {
-        type: NotificationType.TEAM_CHANGED,
-        teamMembers,
-    });
+    publishEvent(teamId, {type: NotificationType.TEAM_CHANGED, teamMembers});
 }
 
 /**
