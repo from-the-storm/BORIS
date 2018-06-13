@@ -1,4 +1,4 @@
-import {Record} from 'immutable';
+import {Record, List} from 'immutable';
 import {Dispatch} from 'redux';
 
 import {GameStateActions as Actions} from './game-state-actions';
@@ -6,6 +6,7 @@ import {TeamStateActions} from './team-state-actions';
 import {UserStateActions} from './user-state-actions';
 import { AnyAction } from '../actions';
 import { OtherTeamMember } from '../../../common/models';
+import { AnyUiState } from '../../../common/game';
 
 /**
  * State of the game (has the game started, which scenario is being played, etc.)
@@ -15,6 +16,11 @@ export class GameState extends Record({
     isActive: false,
     scenarioId: 0,
     scenarioName: "Unknown scenario",
+    uiState: List<AnyUiState>(),
+    uiUpdateSequence: -1,
+    // ^ Whenever the server pushes out UI updates, they include a 'sequence number'.
+    // It should always be increased by one; if not, we missed some updates and
+    // should retrieve the whole list from the server from scratch.
 }) {
 
 }
@@ -36,6 +42,11 @@ export function gameStateReducer(state?: GameState, action?: AnyAction): GameSta
             scenarioId: action.scenarioId,
             scenarioName: action.scenarioName,
         });
+    case Actions.SET_UI_STATE:
+        return state.merge({
+            uiState: List<AnyUiState>(action.state),
+            uiUpdateSequence: action.updateSequence,
+        })
     case Actions.ABANDON_GAME:
         // The team has abandoned the game:
         return state.clear();

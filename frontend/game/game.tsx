@@ -1,15 +1,18 @@
 import {bind} from 'bind-decorator';
 import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
+import { List } from 'immutable';
 
-import {RootState} from '../global/state';
+import { AnyUiState, StepType } from '../../common/game';
+import { RootState } from '../global/state';
 import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
 import { Prompt } from '../prompt/prompt';
 import { abandonGame } from '../global/state/game-state-actions';
 import { SplashBorisInit } from './splash-boris-init';
 
-import * as teams from './images/teams-icon.svg';
+import { MessageStep } from './ui-steps/message-step';
+import { FreeResponseStep } from './ui-steps/free-response-step';
 
 // Include our SCSS (via webpack magic)
 import './game.scss';
@@ -18,6 +21,7 @@ interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {
     scenarioName: string;
+    uiState: List<AnyUiState>;
 }
 interface State {
     showHelpPrompt: boolean;
@@ -32,6 +36,15 @@ class _GameComponent extends React.PureComponent<Props, State> {
     }
 
     public render() {
+        const uiElements: JSX.Element[] = [];
+        this.props.uiState.forEach(step => {
+            uiElements.push(
+                step === null ? null :
+                step.type === StepType.MessageStep ? <MessageStep key={step.stepId} {...step} /> :
+                step.type === StepType.FreeResponse ? <FreeResponseStep key={step.stepId} {...step} /> :
+                null
+            );
+        });
         return <RpcConnectionStatusIndicator>
             {!this.state.hasSeenSplash && <SplashBorisInit onDone={this.onSplashDone} />}
             <div className="game">
@@ -41,6 +54,10 @@ class _GameComponent extends React.PureComponent<Props, State> {
                     <button className="help" onClick={this.handleHelpButton}>?</button>
                 </header>
                 <div className="content">
+                    {uiElements}
+                    <div className="chat-segment">
+                        <br/><br/><br/><br/><br/><br/><br/><br/>
+                    </div>
                     <div className="chat-segment">
                         <p>It's always better on holiday.</p>
                         <p>So much better on holiday.</p>
@@ -147,4 +164,5 @@ class _GameComponent extends React.PureComponent<Props, State> {
 
 export const GameComponent = connect((state: RootState, ownProps: OwnProps) => ({
     scenarioName: state.gameState.scenarioName,
+    uiState: state.gameState.uiState,
 }))(_GameComponent);

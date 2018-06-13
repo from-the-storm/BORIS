@@ -25,7 +25,7 @@ import { callApi } from './api';
 import { AnyAction } from './global/actions';
 import { rpcClientMiddleware } from './rpc-client/manager';
 import { Middleware } from 'redux';
-import { GameStateActions } from './global/state/game-state-actions';
+import { GameStateActions, refreshGameUiState } from './global/state/game-state-actions';
 
 
 export const store = createStore(
@@ -80,6 +80,7 @@ callApi(GET_INITIAL_STATE, {}).then(async data => {
                     scenarioId: data.game.scenarioId,
                     scenarioName: data.game.scenarioName,
                 });
+                store.dispatch(refreshGameUiState());
             }
         }
     }
