@@ -69,24 +69,6 @@ CREATE TABLE team_members (
 -- A user can be a member of multiple teams but only "active" (online) on one team at any given time:
 CREATE UNIQUE INDEX active_team ON team_members (user_id) WHERE is_active = TRUE;
 
--- Scripts Table
--- Scripts consist of a list of steps. A step has its own state machine and runs on the server to
--- create the game experience.
-CREATE TABLE scripts (
-    id bigserial PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT NOT NULL DEFAULT ''
-);
-
--- Steps Table
-CREATE TABLE steps (
-    id bigserial PRIMARY KEY,
-    script_id bigint NOT NULL REFERENCES scripts(id) ON DELETE CASCADE,
-    index integer UNIQUE, -- Used to define the order of the steps in a script
-    type TEXT NOT NULL,
-    data jsonb NOT NULL DEFAULT '{}'::jsonb
-);
-
 -- Scenarios Table
 CREATE TYPE scenario_difficulty AS ENUM ('easy', 'med', 'hard');
 CREATE TABLE scenarios (

@@ -59,9 +59,3 @@ export interface Game {
     game_vars: any;
     pending_team_vars: any;
 }
-
-export interface Script {
-    id: number;
-    name: string;
-    description: string;
-}
