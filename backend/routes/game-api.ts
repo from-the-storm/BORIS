@@ -31,13 +31,14 @@ const noActiveGame = Symbol();
  * @param db The BorisDatabase
  * @param userId The ID of the user whose active game you want
  */
-async function getActiveGameForUser(db: BorisDatabase, userId: number): Promise<GameManager|typeof noActiveGame> {
+async function getActiveGameForUser(app: express.Application, userId: number): Promise<GameManager|typeof noActiveGame> {
+    const db: BorisDatabase = app.get('db');
     const activeTeamMembership = await requireActiveTeamMembership(db, userId);
     const game = await db.games.findOne({team_id: activeTeamMembership.team_id, is_active: true});
     if (game === null) {
         return noActiveGame;
     }
-    return await GameManager.loadGame(db, game.id);
+    return await GameManager.loadGame(app, game.id);
 }
 
 /**
@@ -77,8 +78,7 @@ apiMethod(START_GAME, async (data, app, user) => {
  * API endpoint for ending the active scenario
  */
 apiMethod(ABANDON_GAME, async (data, app, user) => {
-    const db: BorisDatabase = app.get("db");
-    const gameManager = await getActiveGameForUser(db, user.id);
+    const gameManager = await getActiveGameForUser(app, user.id);
     if (gameManager !== noActiveGame) {
         await gameManager.abandon();
     }
@@ -86,8 +86,7 @@ apiMethod(ABANDON_GAME, async (data, app, user) => {
 });
 
 apiMethod(GET_UI_STATE, async (data, app, user) => {
-    const db: BorisDatabase = app.get("db");
-    const gameManager = await getActiveGameForUser(db, user.id);
+    const gameManager = await getActiveGameForUser(app, user.id);
     if (gameManager === noActiveGame) {
         throw new SafeError("No game is currently active.");
     }

@@ -4,6 +4,7 @@ import { START_GAME, StartGameResponse, ABANDON_GAME, GET_UI_STATE, GetUiStateRe
 import { AnyAction } from '../actions';
 import { MessagesStateActions } from './messages-state-actions';
 import { AnyUiState } from '../../../common/game';
+import { RootState } from '../state';
 
 //// Game State Actions
 
@@ -12,6 +13,7 @@ export enum GameStateActions {
     START_GAME = 'G_GS_START_GAME', // Started a game
     ABANDON_GAME = 'G_GS_ABANDON_GAME', // Aborted a game without finishing it
     SET_UI_STATE = 'G_GS_SET_UI_STATE', // Refresh the entire game UI state
+    UPDATE_STEP_UI_STATE = 'G_GS_UPDATE_STEP_UI_STATE', // Refresh the UI state of just one step
 }
 const Actions = GameStateActions;
 
@@ -31,7 +33,19 @@ interface SetUiStateAction {
     updateSequence: number;
 }
 
-export type GameStateActionsType = StartGameAction|AbandonGameAction|SetUiStateAction;
+interface UpdateStepUiStateAction {
+    type: GameStateActions.UPDATE_STEP_UI_STATE;
+    stepIndex: number;
+    updateSequence: number;
+    state: AnyUiState;
+}
+
+export type GameStateActionsType = (
+    |StartGameAction
+    |AbandonGameAction
+    |SetUiStateAction
+    |UpdateStepUiStateAction
+);
 
 //// Action Creators
 
@@ -77,6 +91,23 @@ export function refreshGameUiState() {
             state: result.state,
             updateSequence: result.updateSequence,
         });
+    };
+}
+
+export function updateStepUiState(stepIndex: number, newState: AnyUiState, notificationSeqId: number) {
+    return async (dispatch: Dispatch<{}>, getState: () => RootState) => {
+        if (notificationSeqId === getState().gameState.uiUpdateSequence + 1) {
+            dispatch<AnyAction>({
+                type: Actions.UPDATE_STEP_UI_STATE,
+                stepIndex,
+                updateSequence: notificationSeqId,
+                state: newState,
+            });
+        } else {
+            // We probably missed a notification, e.g. from being offline temporarily. Refresh the whole UI.
+            console.error("Missed a UI update notification; doing a full refresh.");
+            dispatch(refreshGameUiState());
+        }
     };
 }
 

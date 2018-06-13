@@ -4,6 +4,7 @@ import { BorisDatabase, getDB } from '../db/db';
 import { GameVar, GameVarScope } from "./vars";
 import { GameManager } from './manager';
 import { getTeamVar } from './team-vars';
+import { app } from '../backend-app';
 
 const teamVarNumber: GameVar<number> = {key: 'teamVarNumber', scope: GameVarScope.Team, default: 10};
 const gameVarNumber: GameVar<number> = {key: 'gameVarNumber', scope: GameVarScope.Game, default: 15};
@@ -21,7 +22,7 @@ describe("GameManager tests", () => {
             scenario_id: TEST_SCENARIO_ID,
             is_active: true,
         })).id;
-        gameManager = await GameManager.loadGame(db, gameId);
+        gameManager = await GameManager.loadGame(app, gameId);
     });
     afterEach(async () => {
         await db.games.update({id: gameId}, {is_active: false});

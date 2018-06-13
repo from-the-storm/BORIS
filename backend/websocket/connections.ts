@@ -9,7 +9,7 @@ import {JsonRpcMessage} from 'json-rpc-protocol';
 import { UserType } from "../express-extended";
 import { setUserOnline, setUserOffline } from './online-users';
 import { notifyTeamStatusChangedForUser } from './team-changed';
-import { NotificationType } from '../../common/notifications';
+import { AnyNotification } from '../../common/notifications';
 
 interface ConnectionState {
     // A mutable state variable used to track information about this specific connection.
@@ -81,12 +81,12 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
     peer.notify('connection_ready'); // Clients can/should wait for this before sending data (which will be more reliable than sending immediately after an 'open' event)
 }
 
-export function notifyConnectedUsers(userIds: number[], type: NotificationType, data: any) {
+export function notifyConnectedUsers(userIds: number[], event: AnyNotification) {
     sharedWebSocketClientState.allConnections.forEach(conn => {
         if (userIds.indexOf(conn.user.id) !== -1) {
             console.log(`Notifying peer ${conn.index}`);
             try {
-                conn.peer.notify(type, data);
+                conn.peer.notify(event.type, event);
             } catch(e) {
                 console.error(`Unable to notify peer ${conn.index}: ${e}`);
             }

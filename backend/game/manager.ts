@@ -1,12 +1,15 @@
+import * as express from 'express';
 import { BorisDatabase } from "../db/db";
 import { Game, scenarioFromDbScenario } from "../db/models";
 import { Scenario } from "../../common/models";
 import { GameVar, GameVarScope } from "./vars";
 import { Step } from "./step";
 import { AnyUiState } from "../../common/game";
+import { publishEvent } from "../websocket/pub-sub";
+import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
 
 interface GameManagerInitData {
-    db: BorisDatabase;
+    app: express.Application;
     game: Game;
     teamVars: any;
 }
@@ -34,6 +37,7 @@ const lastUiUpdateSeqId: GameVar<number> = {key: 'ui_seq', scope: GameVarScope.G
 const gameManagerCache = new Map<number, Promise<GameManager>>();
 
 export class GameManager {
+    private readonly app: express.Application;
     private readonly db: BorisDatabase;
     readonly gameId: number;
     readonly teamId: number;
@@ -43,7 +47,8 @@ export class GameManager {
     readonly steps: ReadonlyMap<number, Step>;
 
     private constructor(data: GameManagerInitData) {
-        this.db = data.db;
+        this.app = data.app;
+        this.db = data.app.get('db');
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
         this.gameVars = data.game.game_vars;
@@ -111,8 +116,15 @@ export class GameManager {
         const step = this.steps.get(stepId);
         console.log(`Notifying players that step ${stepIndex} has changed its UI.`);
         // Generate an ID for this notification
-        const notificationId: number = await this.setVar(lastUiUpdateSeqId, oldVal => oldVal++);
-        // TODO: Push out a websocket notification
+        const notificationId: number = await this.setVar(lastUiUpdateSeqId, oldVal => oldVal + 1);
+        // Push out a websocket notification:
+        const event: GameUiChangedNotification = {
+            type: NotificationType.GAME_UI_UPDATE,
+            notificationId,
+            stepIndex,
+            newStepUi: step.getUiState(),
+        };
+        publishEvent(this.app, this.teamId, event);
     }
 
     /**
@@ -148,7 +160,7 @@ export class GameManager {
         await this.finish();
     }
 
-    static async loadGame(db: BorisDatabase, gameId: number): Promise<GameManager> {
+    static async loadGame(app: express.Application, gameId: number): Promise<GameManager> {
         // Check if the GameManager is already loaded in gameManagerCache
         // If it is, return it. If not, initialize a new one.
         // Everything is wrapped in promises to avoid issues if this method were to
@@ -161,6 +173,7 @@ export class GameManager {
                 // The promise to retrieve the cached GameManager failed. We'll need to try creating a new one.
             }
         }
+        const db: BorisDatabase = app.get('db');
         const newGameManagerPromise = (async () => {
             const game = await db.games.findOne(gameId);
             if (game === null) {
@@ -178,7 +191,7 @@ export class GameManager {
             const team = await db.teams.findOne(game.team_id);
 
             return new GameManager({
-                db,
+                app,
                 game,
                 teamVars: team.game_vars,
             });

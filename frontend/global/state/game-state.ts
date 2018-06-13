@@ -47,6 +47,9 @@ export function gameStateReducer(state?: GameState, action?: AnyAction): GameSta
             uiState: List<AnyUiState>(action.state),
             uiUpdateSequence: action.updateSequence,
         })
+    case Actions.UPDATE_STEP_UI_STATE:
+        // Always call this action via the updateStepUiState() action creator, so it can verify that uiUpdateSequence is continuous
+        return state.setIn(['uiState', action.stepIndex], action.state).set('uiUpdateSequence', action.updateSequence);
     case Actions.ABANDON_GAME:
         // The team has abandoned the game:
         return state.clear();
