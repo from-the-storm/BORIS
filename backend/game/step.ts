@@ -88,32 +88,42 @@ export abstract class Step {
 
 class MessageStep extends Step {
     public static readonly stepType: StepType = StepType.MessageStep;
-    readonly settings: {message: string};
-    public static readonly showMessage: GameVar<boolean> = {key: 'show', scope: GameVarScope.Step, default: false};
+    readonly settings: {
+        messages: string[],
+        character?: string,
+    };
+    public static readonly numMessagesShown: GameVar<number> = {key: 'show', scope: GameVarScope.Step, default: 0};
+    get numMessagesShown() { return this.getVar(MessageStep.numMessagesShown); }
 
     async run() {
-        await this.sleep('m', 5000);
-        await this.setVar(MessageStep.showMessage, true);
-        this.pushUiUpdate();
+        while (this.numMessagesShown < this.settings.messages.length) {
+            await this.sleep(`m${this.numMessagesShown}`, 1000);
+            await this.setVar(MessageStep.numMessagesShown, n => n + 1);
+            this.pushUiUpdate();
+        }
         this.advanceToNextstep();
     }
 
     protected validateSettings() {
-        if (typeof this.settings.message !== 'string' || !this.settings.message) {
-            throw new Error("Message step must have a message defined.");
+        if (!Array.isArray(this.settings.messages)) {
+            throw new Error("Message step must have a list of messages defined.");
+        }
+        if (this.settings.character && typeof this.settings.character !== 'string') {
+            throw new Error(`Invalid character: ${this.settings.character}`);
         }
     }
 
     getUiState(): MessageStepUiState {
-        if (!this.getVar(MessageStep.showMessage)) {
+        if (this.numMessagesShown === 0) {
             return null;
         }
         const saltines = this.getVar(SaltinesVar);
         return {
             type: StepType.MessageStep,
             stepId: this.id,
-            message: this.settings.message,
+            messages: this.settings.messages.slice(0, this.numMessagesShown),
             forRoles: [GameUserRole.Wayfinder],
+            ...(this.settings.character ? {character: this.settings.character} : {})
         };
     }
 }

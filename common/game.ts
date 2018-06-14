@@ -23,7 +23,8 @@ interface UiState {
 }
 export interface MessageStepUiState extends UiState {
     type: StepType.MessageStep;
-    message: string;
+    messages: string[];
+    character?: string;
     forRoles: RoleSet;
 }
 export interface FreeResponseStepUiState extends UiState {

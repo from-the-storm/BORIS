@@ -17,8 +17,8 @@ export class MessageStep extends React.PureComponent<Props, State> {
 
     public render() {
         return (
-            <div className="chat-segment">
-                <p>{this.props.message}</p>
+            <div className={"chat-segment" + (this.props.character ? ` ${this.props.character}` : '')}>
+                {this.props.messages.map((msg, idx) => <p key={idx}>{msg}</p>)}
             </div>
         );
     }
