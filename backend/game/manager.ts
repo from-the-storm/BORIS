@@ -7,6 +7,8 @@ import { AnyUiState } from "../../common/game";
 import { publishEvent } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
 import { loadScriptFile } from "./script-loader";
+import { SafeError } from "../routes/api-utils";
+import { GameStatus } from "../../common/api";
 
 /** External services that the GameManager needs to run */
 interface GameManagerContext {
@@ -192,7 +194,7 @@ export class GameManager {
                 throw new Error(`Game ${gameId} is active but finished - shouldn't happen.`)
             }
 
-            //const scenario = scenarioFromDbScenario(await db.scenarios.findOne(game.scenario_id));
+            const scenario = await context.db.scenarios.findOne({id: game.scenario_id, is_active: true});
             const scriptSteps = await loadScriptFile('dev-script'); // TODO: let the scenario specify the script
 
             const team = await context.db.teams.findOne(game.team_id);
@@ -200,6 +202,49 @@ export class GameManager {
             return new GameManager({context, game, teamVars: team.game_vars, scriptSteps});
         })();
         gameManagerCache.set(gameId, newGameManagerPromise);
+        return await newGameManagerPromise;
+    }
+
+    static async startGame(teamId: number, scenarioId: number, context?: GameManagerContext): Promise<{manager: GameManager, status: GameStatus}> {
+        if (context === undefined) {
+            context = {
+                db: await getDB(),
+                publishEvent: publishEvent,
+            }
+        }
+        const newGameManagerPromise = (async () => {
+            const team = await context.db.teams.findOne({id: teamId});
+            const teamMembers = +await context.db.team_members.count({team_id: team.id, is_active: true});
+            if (teamMembers < 2) {
+                throw new SafeError("You must have at least two people on your team to play.");
+            } else if (teamMembers > 5) {
+                throw new SafeError("Too many people on the team."); // This shouldn't be possible.
+            }
+            const scenario = await context.db.scenarios.findOne({id: scenarioId, is_active: true});
+            if (scenario === null) {
+                throw new SafeError("Invalid scenario.");
+            }
+            // Start the game!
+            let game: Game;
+            try {
+                game = await context.db.games.insert({
+                    team_id: team.id,
+                    scenario_id: scenario.id,
+                    is_active: true,
+                });
+            } catch (error) {
+                throw new SafeError("Unable to start playing. Did the game already start?");
+            }
+            const manager = await GameManager.loadGame(game.id, context);
+            // Notify everyone that the game has started:
+            const gameStatus: GameStatus = {
+                scenarioId: scenario.id,
+                scenarioName: scenario.name,
+                isActive: true,
+            };
+            context.publishEvent(team.id, {type: NotificationType.GAME_STATUS_CHANGED, ...gameStatus});
+            return {manager, status: gameStatus};
+        })();
         return await newGameManagerPromise;
     }
 
