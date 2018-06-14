@@ -39,21 +39,26 @@ export interface BorisDatabase extends massive.Database {
 // greater than Number.MAX_SAFE_INTEGER, but we don't expect that case.
 postgres.types.setTypeParser(20, val => parseInt(val));
 
+let db: Promise<BorisDatabase>;
+
 /**
  * getDB: Get the database, as a promise returning the Massive.js DB
  */
 export function getDB() {
-    return massive(
-        {
-            host: config.db_host,
-            port: config.db_port,
-            database: config.db_name,
-            user: config.db_user,
-            password: config.db_password,
-        },
-        {
-            //scripts: `${__dirname}/scripts`,
-            enhancedFunctions: true,
-        }
-    ) as any as Promise<BorisDatabase>;
+    if (db === undefined) {
+        db = massive(
+            {
+                host: config.db_host,
+                port: config.db_port,
+                database: config.db_name,
+                user: config.db_user,
+                password: config.db_password,
+            },
+            {
+                //scripts: `${__dirname}/scripts`,
+                enhancedFunctions: true,
+            }
+        ) as any as Promise<BorisDatabase>;
+    }
+    return db;
 }

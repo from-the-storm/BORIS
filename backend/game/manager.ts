@@ -1,5 +1,4 @@
-import { app } from "../backend-app";
-import { BorisDatabase } from "../db/db";
+import { BorisDatabase, getDB } from "../db/db";
 import { Game, scenarioFromDbScenario } from "../db/models";
 import { Scenario } from "../../common/models";
 import { GameVar, GameVarScope } from "./vars";
@@ -177,7 +176,7 @@ export class GameManager {
         // 
         if (context === undefined) {
             context = {
-                db: app.get('db'),
+                db: await getDB(),
                 publishEvent: publishEvent,
             }
         }

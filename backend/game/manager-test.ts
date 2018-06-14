@@ -13,7 +13,7 @@ describe("GameManager tests", () => {
     let db: BorisDatabase;
     let gameId: number;
     let gameManager: GameManager;
-    beforeAll(async () => { db = await getDB(); console.log("DB initialized"); });
+    beforeAll(async () => { db = await getDB(); });
     afterAll(async () => { await db.instance.$pool.end(); });
     beforeEach(async () => {
         gameId = (await db.games.insert({
