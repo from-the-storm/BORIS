@@ -149,6 +149,9 @@ export class GameManager {
                 await this.setVar(currentStepVar, () => step.id);
                 // And run the next step:
                 this.steps.get(step.id).run();
+                if (step.getUiState() !== null) {
+                    this.pushUiUpdate(step.id);
+                }
                 return;
             } else if (step.id === currentStepId) {
                 found = true;
