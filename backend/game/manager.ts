@@ -290,6 +290,12 @@ export class GameManager {
      */
     public async abandon() {
         await this.db.games.update({id: this.gameId}, {is_active: false});
+        publishEvent(this.teamId, {
+            type: NotificationType.GAME_STATUS_CHANGED,
+            scenarioId: 0,
+            scenarioName: "",
+            isActive: false,
+        });
     }
     /**
      * Mark this game as successfully finished.

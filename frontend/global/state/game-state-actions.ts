@@ -1,6 +1,6 @@
 import { Dispatch } from 'redux';
 import { callApi } from '../../api';
-import { START_GAME, StartGameResponse, ABANDON_GAME, GET_UI_STATE, GetUiStateResponse } from '../../../common/api';
+import { START_GAME, GameStatus, ABANDON_GAME, GET_UI_STATE, GetUiStateResponse } from '../../../common/api';
 import { AnyAction } from '../actions';
 import { MessagesStateActions } from './messages-state-actions';
 import { AnyUiState } from '../../../common/game';
@@ -51,7 +51,7 @@ export type GameStateActionsType = (
 
 export function startGame(scenarioId: number) {
     return async (dispatch: Dispatch<{}>, getState: () => {}) => {
-        let result: StartGameResponse;
+        let result: GameStatus;
         try {
             result = await callApi(START_GAME, {scenarioId,});
         } catch(err) {

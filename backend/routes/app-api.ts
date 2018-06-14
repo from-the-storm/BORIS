@@ -64,7 +64,7 @@ getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
                 result.game = {
                     scenarioName: scenario.name,
                     scenarioId: scenario.id,
-                    started: activeGame.started.toJSON(),
+                    isActive: true,
                 }
             }
         }

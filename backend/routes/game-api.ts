@@ -5,10 +5,12 @@ import * as express from 'express';
 
 import {config} from '../config';
 import {BorisDatabase} from '../db/db';
-import { START_GAME, ABANDON_GAME, GET_UI_STATE } from '../../common/api';
+import { START_GAME, ABANDON_GAME, GET_UI_STATE, GameStatus } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { Scenario } from '../../common/models';
 import { GameManager } from '../game/manager';
+import { publishEvent } from '../websocket/pub-sub';
+import { NotificationType } from '../../common/notifications';
 
 export const router = express.Router();
 
@@ -68,10 +70,13 @@ apiMethod(START_GAME, async (data, app, user) => {
     } catch (error) {
         throw new SafeError("Unable to start playing. Did the game already start?");
     }
-    return {
+    const gameStatus: GameStatus = {
         scenarioId: scenario.id,
         scenarioName: scenario.name,
+        isActive: true,
     };
+    publishEvent(team.id, {type: NotificationType.GAME_STATUS_CHANGED, ...gameStatus});
+    return gameStatus;
 });
 
 /**

@@ -22,6 +22,12 @@ export interface ApiMethod<RequestType, ResponseType> {
 ///////////////////////////////////////////////////////////////////////////////
 // app-api methods:
 
+export interface GameStatus {
+    scenarioId: number;
+    scenarioName: string;
+    isActive: boolean;
+}
+
 /** GET_INITIAL_STATE response */
 export interface InitialStateResponse {
     user?: {
@@ -34,11 +40,7 @@ export interface InitialStateResponse {
         isTeamAdmin: boolean;
         otherTeamMembers: Array<OtherTeamMember>;
     };
-    game?: {
-        scenarioName: string;
-        scenarioId: number;
-        started: string;
-    }
+    game?: GameStatus;
 };
 
 export const GET_INITIAL_STATE: ApiMethod<{}, InitialStateResponse> = {path: '/api/app/get-initial-state', type: 'GET'};
@@ -124,18 +126,13 @@ export interface StartGameRequest {
     scenarioId: number;
 }
 
-export interface StartGameResponse {
-    scenarioId: number;
-    scenarioName: string;
-}
-
 /** GET_UI_STATE Request */
 export interface GetUiStateResponse {
     uiUpdateSeqId: number;
     state: AnyUiState[];
 }
 
-export const START_GAME: ApiMethod<StartGameRequest, StartGameResponse> = {path: '/api/game/start', type: 'POST'};
+export const START_GAME: ApiMethod<StartGameRequest, GameStatus> = {path: '/api/game/start', type: 'POST'};
 
 export const GET_UI_STATE: ApiMethod<NoRequestParameters, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
 
