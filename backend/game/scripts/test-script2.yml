@@ -1,0 +1,3 @@
+---
+- step: message
+  message: Hello! This is a message from the second script file.

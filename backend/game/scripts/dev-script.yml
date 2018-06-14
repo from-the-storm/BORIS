@@ -1,0 +1,9 @@
+---
+- step: message
+  message: Hello! This is a test.
+- step: message
+  message: "Hello! This is the next message."
+- step: message
+  message: "Hello! This is the third message."
+- step: free response
+  key: 'testInput'

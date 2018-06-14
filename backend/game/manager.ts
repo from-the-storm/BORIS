@@ -7,6 +7,7 @@ import { Step } from "./step";
 import { AnyUiState } from "../../common/game";
 import { publishEvent } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
+import { loadScriptFile } from "./script-loader";
 
 /** External services that the GameManager needs to run */
 interface GameManagerContext {
@@ -18,15 +19,8 @@ interface GameManagerInitData {
     context: GameManagerContext;
     game: Game;
     teamVars: any;
+    scriptSteps: any[];
 }
-
-// Temporarily hard-coding the steps for development:
-const STEPS_DEV = [
-    {'step': 'message', 'message': "Hello! This is a test."},
-    {'step': 'message', 'message': "Hello! This is the next message."},
-    {'step': 'message', 'message': "Hello! This is the third message."},
-    {'step': 'free response', key: 'testInput'},
-];
 
 const currentStepVar: GameVar<number> = {key: 'step#', scope: GameVarScope.Game, default: -1};
 // Next UI update sequence ID. This is incremented and sent with any UI update
@@ -60,7 +54,7 @@ export class GameManager {
         this.pendingTeamVars = data.game.pending_team_vars;
         // Load the steps:
         const steps = new Map<number, Step>();
-        STEPS_DEV.forEach((val, idx) => {
+        data.scriptSteps.forEach((val, idx) => {
             const stepId: number = idx * 10; // For now use index*10; in the future, these IDs may be database row IDs etc.
             const step = Step.loadFromData(val, stepId, this);
             steps.set(stepId, step);
@@ -197,10 +191,11 @@ export class GameManager {
             }
 
             //const scenario = scenarioFromDbScenario(await db.scenarios.findOne(game.scenario_id));
+            const scriptSteps = await loadScriptFile('dev-script'); // TODO: let the scenario specify the script
 
             const team = await context.db.teams.findOne(game.team_id);
 
-            return new GameManager({context, game, teamVars: team.game_vars});
+            return new GameManager({context, game, teamVars: team.game_vars, scriptSteps});
         })();
         gameManagerCache.set(gameId, newGameManagerPromise);
         return await newGameManagerPromise;

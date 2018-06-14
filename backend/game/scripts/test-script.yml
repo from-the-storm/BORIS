@@ -1,0 +1,4 @@
+---
+- step: message
+  message: Hello! This is a test.
+- include: test-script2
