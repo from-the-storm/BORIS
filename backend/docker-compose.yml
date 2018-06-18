@@ -1,12 +1,14 @@
 version: '3'
 services:
   redis:
+    container_name: boris.dev.redis
     image: "redis:4.0-alpine"
     command: >
      --requirepass devpassword 
     ports:
       - "3331:6379"
   postgres:
+    container_name: boris.dev.postgres
     image: "postgres:10.1-alpine"
     ports:
       - "3332:5432"
