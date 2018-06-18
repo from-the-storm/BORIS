@@ -4,7 +4,7 @@
 import * as express from 'express';
 
 import {BorisDatabase} from '../db/db';
-import { START_GAME, ABANDON_GAME, GET_UI_STATE } from '../../common/api';
+import { START_GAME, ABANDON_GAME, GET_UI_STATE, STEP_RESPONSE } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { GameManager } from '../game/manager';
 
@@ -69,4 +69,21 @@ apiMethod(GET_UI_STATE, async (data, app, user) => {
         uiUpdateSeqId: gameManager.uiUpdateSeqId,
         state: gameManager.getUiState(),
     };
+});
+
+/**
+ * A player is submitting some kind of response to a "step" in the script.
+ * For example, selecitng a choice from a multiple choice prompt.
+ */
+apiMethod(STEP_RESPONSE, async (data, app, user) => {
+    const gameManager = await getActiveGameForUser(app, user.id);
+    if (gameManager === noActiveGame) {
+        throw new SafeError("No game is currently active.");
+    }
+    if (gameManager.currentStep.id !== data.stepId) {
+        console.error(`Step ${data.stepId} is no longer the current step in this game's script.`);
+        throw new SafeError("Cannot submit answer: game has moved on.");
+    }
+    await gameManager.currentStep.handleResponse(data);
+    return {result: 'ok'};
 });

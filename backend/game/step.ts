@@ -1,6 +1,8 @@
-import { AnyUiState, StepType, GameUserRole, MessageStepUiState, FreeResponseStepUiState } from "../../common/game";
+import { AnyUiState, StepType, GameUserRole, MessageStepUiState, FreeResponseStepUiState, MultipleChoiceStepUiState } from "../../common/game";
 import { GameManager } from "./manager";
 import { GameVar, GameVarScope } from "./vars";
+import { StepResponseRequest, MultipleChoiceStepResponseRequest } from "../../common/api";
+import { SafeError } from "../routes/api-utils";
 
 
 const SaltinesVar: GameVar<number> = {key: 'saltines', scope: GameVarScope.Team, default: 0};
@@ -20,8 +22,7 @@ export abstract class Step {
     constructor(args: StepParams) {
         this.id = args.id;
         this.manager = args.manager;
-        this.settings = args.settings;
-        this.validateSettings();
+        this.settings = this.parseConfig(args.settings);
     }
 
     static loadFromData(data: any, id: number, manager: GameManager) {
@@ -30,6 +31,7 @@ export abstract class Step {
         switch (step) {
             case 'message': return new MessageStep(args);
             case 'free response': return new FreeResponseStep(args);
+            case 'choice': return new MultipleChoiceStep(args);
             default: throw new Error(`Unable to load type with step type "${step}".`);
         }
     }
@@ -42,9 +44,15 @@ export abstract class Step {
         return this.manager.setVar(variable, updater, this.id);
     }
 
-    protected validateSettings() {}
+    protected parseConfig(config: any) {
+        return config;
+    }
 
     public abstract getUiState(): AnyUiState;
+
+    public async handleResponse(data: StepResponseRequest) {
+        throw new SafeError("Cannot submit data to this step.");
+    }
 
     protected advanceToNextstep(): Promise<void> {
         return this.manager.advanceToNextstep();
@@ -104,13 +112,14 @@ class MessageStep extends Step {
         this.advanceToNextstep();
     }
 
-    protected validateSettings() {
-        if (!Array.isArray(this.settings.messages)) {
+    protected parseConfig(config: any): any {
+        if (!Array.isArray(config.messages)) {
             throw new Error("Message step must have a list of messages defined.");
         }
-        if (this.settings.character && typeof this.settings.character !== 'string') {
-            throw new Error(`Invalid character: ${this.settings.character}`);
+        if (config.character && typeof config.character !== 'string') {
+            throw new Error(`Invalid character: ${config.character}`);
         }
+        return config;
     }
 
     getUiState(): MessageStepUiState {
@@ -137,10 +146,11 @@ class FreeResponseStep extends Step {
         //this.pushUiUpdate();
     }
 
-    protected validateSettings() {
-        if (typeof this.settings.key !== 'string' || !this.settings.key) {
+    protected parseConfig(config: any): any {
+        if (typeof config.key !== 'string' || !config.key) {
             throw new Error("Free Response step must have a key defined (e.g. 'key: userGuess').");
         }
+        return config;
     }
 
     get valueVar(): GameVar<string> {
@@ -159,3 +169,101 @@ class FreeResponseStep extends Step {
     }
 }
 
+
+interface MultipleChoiceStepSettings {
+    id: string,
+    choices: {id: string, choiceText: string}[],
+    correctChoice?: string,
+};
+class MultipleChoiceStep extends Step {
+    public static readonly stepType: StepType = StepType.FreeResponse;
+    readonly settings: MultipleChoiceStepSettings;
+
+    async run() {
+        if (this.choiceHasBeenMade) {
+            // This shouldn't happen, but if somehow this step gets initialized
+            // after a choice has been made but without advancing to the next step
+            // (i.e. the server crashed while handling a choice event), proceed.
+            this.advanceToNextstep();
+        }
+    }
+
+    protected parseConfig(config: any): MultipleChoiceStepSettings {
+        // Parse yaml config like:
+        // - step: choice
+        //   id: howfar
+        //   correct: halfway
+        //   choices:
+        //     - halfway: Halfway there
+        //     - alone: You said survive alone
+        if (typeof config.id !== 'string') {
+            throw new Error("Multiple step must have an 'id' defined to store the user's choice.");
+        }
+        if (!Array.isArray(config.choices)) {
+            throw new Error("Multiple choice step should have an array of choices called 'choices'.");
+        }
+        let choices: {id: string, choiceText: string}[] = [];
+        for (const entry of config.choices) {
+            const keys = Object.keys(entry); // Should only be one, e.g. 'halfway'
+            if (keys.length != 1) { throw new Error("Invalid choice in Multiple Choice step"); }
+            choices.push({id: keys[0], choiceText: entry[keys[0]]});
+        }
+        return {
+            id: config.id,
+            choices,
+            correctChoice: (config.correct && (choices.map(c => c.id).indexOf(config.correct) !== -1)) ? config.correct : undefined,
+        }
+    }
+
+    get choiceVar(): GameVar<string> {
+        return {key: `mc:${this.settings.id}`, scope: GameVarScope.Game, default: ''};
+    }
+
+    get choiceHasBeenMade(): boolean {
+        const choiceId = this.getVar(this.choiceVar);
+        return choiceId && this.isChoiceIdValid(choiceId);
+    }
+
+    isChoiceIdValid(choiceId: string): boolean {
+        for (const choice of this.settings.choices) {
+            if (choice.id == choiceId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getUiState(): MultipleChoiceStepUiState {
+        const choiceId = this.getVar(this.choiceVar);
+        const choiceMade = this.choiceHasBeenMade;
+        return {
+            type: StepType.MultipleChoice,
+            stepId: this.id,
+            choiceMade,
+            choices: this.settings.choices.map(c => ({
+                id: c.id,
+                choiceText: c.choiceText,
+                selected: choiceId === c.id,
+                correct: (
+                    !choiceMade ? null : // If the user hasn't picked a choice yet, don't return a correctness
+                    this.settings.correctChoice === undefined ? null : // If there is "no right answer", don't return a correctness
+                    c.id === choiceId ? (this.settings.correctChoice === c.id) : // The user chose this answer, and it's correct.
+                    (this.settings.correctChoice === c.id) ? true :
+                    null // This answer wasn't selected and is not correct.
+                ),
+            })),
+        };
+    }
+
+    public async handleResponse(data: MultipleChoiceStepResponseRequest) {
+        if (!this.isChoiceIdValid(data.choiceId)) {
+            throw new SafeError("Invalid choice.");
+        }
+        if (this.choiceHasBeenMade) {
+            throw new SafeError("Choice already made.");
+        }
+        await this.setVar(this.choiceVar, data.choiceId);
+        await this.pushUiUpdate();
+        this.advanceToNextstep();
+    }
+}

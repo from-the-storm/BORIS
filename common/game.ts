@@ -15,6 +15,7 @@ export enum StepType {
     Unknown = '?',
     MessageStep = 'm',
     FreeResponse = 'fr',
+    MultipleChoice = 'mc',
 }
 
 interface UiState {
@@ -33,8 +34,14 @@ export interface FreeResponseStepUiState extends UiState {
     complete: boolean; // Has a value been entered by the user already?
     value: string; // The value the user entered, if any
 }
+export interface MultipleChoiceStepUiState extends UiState {
+    type: StepType.MultipleChoice;
+    choiceMade: boolean;
+    choices: {id: string, choiceText: string, selected: boolean, correct: boolean|null}[];
+}
 export type AnyUiState = (
     |MessageStepUiState
     |FreeResponseStepUiState
+    |MultipleChoiceStepUiState
     |null
 );

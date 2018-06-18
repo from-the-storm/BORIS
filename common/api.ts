@@ -117,23 +117,32 @@ export const GET_SCENARIOS: ApiMethod<NoRequestParameters, ScenariosResponse> = 
 ///////////////////////////////////////////////////////////////////////////////
 // game-api methods:
 
-export interface ScenariosResponse {
-    scenarios: Scenario[],
-}
-
 /** START_GAME Request */
 export interface StartGameRequest {
     scenarioId: number;
 }
+export const START_GAME: ApiMethod<StartGameRequest, GameStatus> = {path: '/api/game/start', type: 'POST'};
 
 /** GET_UI_STATE Request */
 export interface GetUiStateResponse {
     uiUpdateSeqId: number;
     state: AnyUiState[];
 }
-
-export const START_GAME: ApiMethod<StartGameRequest, GameStatus> = {path: '/api/game/start', type: 'POST'};
-
 export const GET_UI_STATE: ApiMethod<NoRequestParameters, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
 
 export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};
+
+/** 
+ * STEP_RESPONSE Request: A player is submitting some kind of response to a "step" in the script.
+ * For example, selecitng a choice from a multiple choice prompt.
+ **/
+interface BaseStepResponseRequest {
+    stepId: number;
+}
+export interface MultipleChoiceStepResponseRequest extends BaseStepResponseRequest {
+    choiceId: string;
+}
+export type StepResponseRequest = (
+    |MultipleChoiceStepResponseRequest
+);
+export const STEP_RESPONSE: ApiMethod<StepResponseRequest, EmptyApiResponse> = {path: '/api/game/step', type: 'POST'};

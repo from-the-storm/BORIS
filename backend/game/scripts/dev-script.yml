@@ -8,10 +8,26 @@
   character: backfeed
   messages:
     - How far do we have to stretch the truth to fit the lifestyles borrowed and overdue?
+- step: choice
+  id: howfar
+  choices:
+    - halfway: Halfway there
+    - alone: You said survive alone
 - step: message
   character: clarence
   messages:
     - Funny how music put times in perspective
     - Add a soundtrack to your life and perfect it. Whenever you are feeling blue keep walking and we can get far.
+- step: choice
+  id: randomsaying
+  correct: again
+  choices:
+    - where: Where's he get it all from?
+    - temper: This hell of a temper
+    - again: It's so good to see you again
+    - beautiful: It's beautiful when he talks to you even though we can't really tell what he's saying
+- step: message
+  messages:
+    - That's right. +10 saltines for your team. Or sorry, wait. No -2 saltines for your team.
 - step: free response
   key: 'testInput'

@@ -13,6 +13,7 @@ import { SplashBorisInit } from './splash-boris-init';
 
 import { MessageStep } from './ui-steps/message-step';
 import { FreeResponseStep } from './ui-steps/free-response-step';
+import { MultipleChoiceStep } from './ui-steps/choice-step';
 
 // Include our SCSS (via webpack magic)
 import './game.scss';
@@ -42,7 +43,8 @@ class _GameComponent extends React.PureComponent<Props, State> {
                 step === null ? null :
                 step.type === StepType.MessageStep ? <MessageStep key={step.stepId} {...step} /> :
                 step.type === StepType.FreeResponse ? <FreeResponseStep key={step.stepId} {...step} /> :
-                null
+                step.type === StepType.MultipleChoice ? <MultipleChoiceStep key={step.stepId} {...step} /> :
+                <div className="chat-segment"><strong>Unsupported step type</strong></div>
             );
         });
         return <RpcConnectionStatusIndicator>
