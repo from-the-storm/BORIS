@@ -34,3 +34,16 @@ Steps for Windows 10:
 1. In the project's root directory run `npm run watch`
 
 Go to http://localhost:3333/ to see the results.
+
+Docker container
+----------------
+To create a docker container for deployment, run `make container`. Then you can run it with e.g.
+
+```
+docker run -t -p 3333:3333 --env BORIS_CONFIG='{"production": {"redis_host": "docker.for.mac.host.internal", "db_host": "docker.for.mac.host.internal"}}' boris
+```
+
+To run database migrations using the docker image:
+```
+docker exec -it <container name or ID> node /app/backend/db/migrate.js
+```

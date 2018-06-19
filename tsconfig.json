@@ -18,7 +18,11 @@
         "**/*.tsx"
     ],
     "exclude": [
+        "backend/test-lib",
         "frontend",
+        "integration",
+        "**/*-test.ts",
+        "**/*-test.tsx",
         "node_modules"
     ]
 }
