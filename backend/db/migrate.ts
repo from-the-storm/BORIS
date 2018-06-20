@@ -27,8 +27,8 @@ export async function migrate() {
             }
             // Apply this migration
             await db.instance.tx(migrationId, async (task) => {
-                task.none(sql);
-                task.none("INSERT INTO __migrations (migration_id) VALUES ($1);", [migrationId]);
+                await task.none(sql);
+                await task.none("INSERT INTO __migrations (migration_id) VALUES ($1);", [migrationId]);
             });
             console.log(` -> ${migrationId} applied`);
         }
