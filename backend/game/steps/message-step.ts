@@ -37,7 +37,6 @@ export class MessageStep extends Step {
             type: StepType.MessageStep,
             stepId: this.id,
             messages: this.settings.messages.slice(0, this.numMessagesShown),
-            forRoles: [GameUserRole.Wayfinder],
             ...(this.settings.character ? {character: this.settings.character} : {})
         };
     }

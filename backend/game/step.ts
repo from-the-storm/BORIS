@@ -1,19 +1,19 @@
-import { AnyUiState, StepType, GameUserRole, MessageStepUiState, FreeResponseStepUiState, MultipleChoiceStepUiState } from "../../common/game";
-import { GameManager } from "./manager";
+import { AnyUiState, StepType } from "../../common/game";
+import { GameManagerStepInterface } from "./manager";
 import { GameVar, GameVarScope } from "./vars";
-import { StepResponseRequest, MultipleChoiceStepResponseRequest, FreeResponseStepResponseRequest } from "../../common/api";
+import { StepResponseRequest } from "../../common/api";
 import { SafeError } from "../routes/api-utils";
 
 
 export interface StepParams {
     id: number;
-    manager: GameManager;
+    manager: GameManagerStepInterface;
     settings: Readonly<any>; // settings that define how this step works (immutable)
 }
 
 export abstract class Step {
     readonly id: number;
-    private readonly manager: GameManager;
+    private readonly manager: GameManagerStepInterface;
     readonly settings: any;
     public static readonly stepType: StepType = StepType.Unknown;
 

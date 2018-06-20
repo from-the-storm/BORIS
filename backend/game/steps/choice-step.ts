@@ -89,6 +89,6 @@ export class MultipleChoiceStep extends Step {
     /** Has the user selected a choice yet? */
     public get isComplete() {
         const choiceId = this.getVar(this.choiceVar);
-        return choiceId && this.isChoiceIdValid(choiceId);
+        return !!(choiceId && this.isChoiceIdValid(choiceId));
     }
 }

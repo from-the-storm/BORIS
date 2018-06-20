@@ -26,7 +26,6 @@ export class FreeResponseStep extends Step {
         return {
             type: StepType.FreeResponse,
             stepId: this.id,
-            multiline: false,
             complete: value !== '',
             value,
         };

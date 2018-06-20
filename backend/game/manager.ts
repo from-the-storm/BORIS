@@ -38,7 +38,18 @@ const lastUiUpdateSeqId: GameVar<number> = {key: 'ui_seq', scope: GameVarScope.G
  */
 const gameManagerCache = new Map<number, Promise<GameManager>>();
 
-export class GameManager {
+/** 
+ * The interface for GameManager that is used by Step subclasses.
+ * We define an interface so we can mock it for tests, and to ensure
+ * steps only call a limited API.
+ **/
+export interface GameManagerStepInterface {
+    pushUiUpdate(stepId: number): Promise<void>;
+    getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T;
+    setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T>;
+}
+
+export class GameManager implements GameManagerStepInterface {
     private readonly db: BorisDatabase;
     readonly gameId: number;
     readonly teamId: number;

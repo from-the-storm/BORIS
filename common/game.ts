@@ -26,11 +26,10 @@ export interface MessageStepUiState extends UiState {
     type: StepType.MessageStep;
     messages: string[];
     character?: string;
-    forRoles: RoleSet;
 }
 export interface FreeResponseStepUiState extends UiState {
     type: StepType.FreeResponse;
-    multiline: boolean;
+    //multiline: boolean; // Do we need multiline support in the future?
     complete: boolean; // Has a value been entered by the user already?
     value: string; // The value the user entered, if any
 }
