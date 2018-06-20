@@ -7,14 +7,6 @@ import { User, DBScenario, Team, Game } from './models';
 
 export interface BorisDatabase extends massive.Database {
     users: massive.Table<User>;
-    activity: massive.Table<{
-        id: number;
-        user_id: number;
-        event_type: string;
-        timestamp: Date;
-        last_active: Date;
-        details: any;
-    }>;
     login_requests: massive.Table<{
         code: string;
         user_id: number;

@@ -35,17 +35,6 @@ CREATE TABLE login_requests (
     created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0')
 );
 
--- User activity log
-CREATE TABLE activity (
-    id bigserial PRIMARY KEY,
-    user_id bigint NULL REFERENCES users(id) ON DELETE CASCADE,
-    event_type TEXT NOT NULL,
-    "timestamp" timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM "timestamp") = '0'),
-    details jsonb NOT NULL DEFAULT '{}'::jsonb
-);
--- User activity log is immutable
-CREATE TRIGGER trg_prevent_update__activity BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE fn_prevent_update();
-
 -- Teams table
 CREATE TABLE teams (
     id bigserial PRIMARY KEY,
