@@ -11,11 +11,27 @@ export async function migrate() {
     try {
         const db = await getDB();
 
-        console.log("Applying main migration");
-        const file1path = path.join(__dirname, 'schema', '001-initial-up.sql');
-        const sql1 = await readFileAsync(file1path, {encoding: 'utf-8'});
-        // Apply main migration:
-        await db.instance.none(sql1);
+        console.log("Checking migration history");
+        await db.instance.none("CREATE TABLE IF NOT EXISTS __migrations (migration_id TEXT PRIMARY KEY);");
+
+        console.log("Applying main migrations");
+        const migrations = [
+            '001-initial-up',
+        ];
+        for (const migrationId of migrations) {
+            const filePath = path.join(__dirname, 'schema', `${migrationId}.sql`);
+            const sql = await readFileAsync(filePath, {encoding: 'utf-8'});
+            const result = await db.instance.oneOrNone("SELECT 1 FROM __migrations WHERE migration_id = $1;", [migrationId]);
+            if (result !== null) {
+                continue; // This migration is already applied
+            }
+            // Apply this migration
+            await db.instance.tx(migrationId, async (task) => {
+                task.none(sql);
+                task.none("INSERT INTO __migrations (migration_id) VALUES ($1);", [migrationId]);
+            });
+            console.log(` -> ${migrationId} applied`);
+        }
         console.log(" -> done");
         
         const loadFixture = async (fixtureName: string) => {
