@@ -75,6 +75,7 @@ CREATE TABLE scenarios (
     id bigserial PRIMARY KEY,
     is_active BOOLEAN NOT NULL DEFAULT true,
     name TEXT NOT NULL,
+    script TEXT NOT NULL DEFAULT '',
     duration_min integer NOT NULL DEFAULT 30,
     difficulty scenario_difficulty NOT NULL DEFAULT 'med',
     start_point_name TEXT NOT NULL DEFAULT 'Start Point',

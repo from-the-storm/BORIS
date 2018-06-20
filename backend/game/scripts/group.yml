@@ -1,0 +1,14 @@
+---
+- step: message
+  messages:
+    - "Please read aloud and press DONE when you’re finished:"
+    - "Begin imagination: it is the post-apocalypse. Life-threatening annoyances abound. As you glance warily at your teammates, it finally hits you: All you have left on this earth is each other."
+    - It’s a deeply troubling thought. You’re all flawed. You have human biases that frame how you understand and respond to situations. You must learn these biases. You must master them. Only then does your group stand a chance at surviving.
+    - That’s the objective of the GROUP DYNAMICS scenario.
+    - If you perform, you’ll get the chance to face off against the mysterious NEGOTIATOR, THE POWER OF WHOM CANNOT BE SUFFICIENTLY STATED WITHOUT SHOUTING.
+    - Generally speaking, earning favor with the Negotiator yields some sort of**7a0_positiveConsequence();?
+- step: choice
+  id: doneintro
+  choices:
+    - done: Done
+- include: dev-script

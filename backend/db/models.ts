@@ -29,6 +29,8 @@ export interface Team {
 
 export interface DBScenario extends BaseScenario {
     is_active: boolean;
+    /** Script: which .yml file in game/scripts/ to use for this scenario. */
+    script: string;
     /** Note that X is the latitude and Y is the longitude */
     start_point: {x: number, y: number};
 }
