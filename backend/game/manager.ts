@@ -3,6 +3,7 @@ import { Game, scenarioFromDbScenario } from "../db/models";
 import { Scenario } from "../../common/models";
 import { GameVar, GameVarScope } from "./vars";
 import { Step } from "./step";
+import { loadStepFromData } from "./steps/loader";
 import { AnyUiState } from "../../common/game";
 import { publishEvent } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
@@ -57,7 +58,7 @@ export class GameManager {
         const steps = new Map<number, Step>();
         data.scriptSteps.forEach((val, idx) => {
             const stepId: number = idx * 10; // For now use index*10; in the future, these IDs may be database row IDs etc.
-            const step = Step.loadFromData(val, stepId, this);
+            const step = loadStepFromData(val, stepId, this);
             steps.set(stepId, step);
         });
         this.steps = steps;
