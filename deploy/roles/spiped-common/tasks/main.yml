@@ -1,0 +1,18 @@
+---
+# Tasks required for both spiped-server and spiped-client
+- name: Create secure key for {{spiped_servicename}} spiped connection
+  command: dd if=/dev/urandom bs=32 count=1 of={{spiped_local_keyfile}}
+  delegate_to: localhost
+  become: false
+  args:
+    creates: "{{spiped_local_keyfile}}"
+- name: Ensure spiped configuration directory exists
+  file: path=/etc/spiped/ state=directory owner=root
+- name: Install secure key for {{spiped_servicename}} spiped connection
+  copy:
+    src: "{{spiped_local_keyfile}}"
+    dest: "{{spiped_keyfile}}"
+    owner: root
+    mode: 0600
+- name: Install spiped
+  apt: name=spiped state=present

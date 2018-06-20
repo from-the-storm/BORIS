@@ -1,0 +1,8 @@
+---
+dependencies:
+  - { role: common }
+  - { role: redis-common }
+  - role: spiped-server
+    spiped_service_port: 6379
+    spiped_port: "{{redis_spiped_port}}"
+    spiped_servicename: redis

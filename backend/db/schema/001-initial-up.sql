@@ -1,5 +1,5 @@
 -- We need UUID functionality from pgcrypto
-CREATE EXTENSION pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Generic function for preventing updates to any immutable data:
 CREATE OR REPLACE FUNCTION fn_prevent_update() RETURNS trigger AS $$

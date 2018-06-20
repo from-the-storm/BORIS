@@ -1,0 +1,10 @@
+---
+# This is the port used for server-to-server spiped communication.
+# It must be different than the normal service port and the spiped_client_local_port
+# in order to avoid conflicts when one machine is both server and client.
+spiped_port: 1235
+spiped_servicename: service
+spiped_keyfile: /etc/spiped/{{spiped_servicename}}.key
+# path to where the keyfile is stored on the machine running ansible.
+# This file will be securely generated if it doesn't already exist.
+spiped_local_keyfile: "{{boris_deploy_private_dir}}credentials/{{spiped_servicename}}_spipe_key"

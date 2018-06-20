@@ -1,0 +1,3 @@
+---
+# We use a redis password as a second layer of security, even though it's a weak one
+# redis_password: SET ME (in your playbook)

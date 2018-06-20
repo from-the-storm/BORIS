@@ -1,0 +1,16 @@
+---
+# An app server that runs BORIS in Docker
+#
+# If your host/inventory file (../../deploy-private/ansible_hosts) is set up
+# with hosts/groups/vars, you can run this playbook with:
+#    ansible-playbook playbook-app.yml -e "target=prod_app_next"
+# where the target is a group or individual server name/hostname
+- hosts: '{{ target }}'
+  remote_user: root
+  vars:
+    # hostname:
+    common_server_hostname: "boris-{{boris_instance_name}}-app"
+  vars_files:
+    - vars/globals.yml
+  roles:
+    - { role: app }

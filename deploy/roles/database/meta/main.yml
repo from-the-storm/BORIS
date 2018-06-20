@@ -1,0 +1,8 @@
+---
+dependencies:
+  - { role: common }
+  - { role: database-common }  # Role with things required for DB server and/or client. This role needs the server stuff.
+  - role: spiped-server
+    spiped_service_port: 5432
+    spiped_port: "{{postgres_spiped_port}}"
+    spiped_servicename: postgres

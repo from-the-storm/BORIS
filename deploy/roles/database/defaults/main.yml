@@ -1,0 +1,2 @@
+---
+database_postgres_backup_script_file: /usr/local/bin/backup-postgres.sh

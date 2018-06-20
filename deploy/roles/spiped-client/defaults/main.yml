@@ -1,0 +1,10 @@
+---
+# This is the IP that apps will connect to to use this spiped-secured service.
+# It should always be 127.0.0.1 unless you need to change it to a virtual network
+# e.g. to expose the service to docker
+spiped_client_local_ip: 127.0.0.1
+# This is the port on localhost that apps will connect to to use this spiped-secured service
+spiped_client_local_port: 1234
+# The hostname or IP of the remote server where the service (and spiped) actually run.
+# If this is an IP it must be in [square brackets]
+spiped_server: "[127.0.0.1]"

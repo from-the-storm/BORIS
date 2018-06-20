@@ -1,0 +1,11 @@
+---
+
+boris_postgresql_version: 10
+database_postgres_admin_user_name: overlord
+# Password for PostgreSQL admin user:
+database_postgres_admin_password: "{{ lookup('password', boris_deploy_private_dir + 'credentials/pg_admin_password length=64') }}"
+# spiped configuration:
+postgres_secure_ip: 127.0.0.1  # IP on which the spiped client is running. Should always be an IP belonging to the current machine.
+postgres_secure_port: 5555
+postgres_spiped_port: 5430
+postgres_host: localhost
