@@ -7,7 +7,7 @@ import * as massive from 'massive';
 import { UserType } from '../express-extended';
 import { config } from '../config';
 import { BorisDatabase } from '../db/db';
-import { BasicUser, Team, scenarioFromDbScenario } from '../db/models';
+import { BasicUser, Team, scenarioFromDbScenario, Game } from '../db/models';
 import { ApiMethod } from '../../common/api';
 import { makeApiHelper, RequireUser } from './api-utils';
 import { OtherTeamMember, Scenario } from '../../common/models';
@@ -84,4 +84,10 @@ defineListMethod<Scenario>('scenarios', async (criteria, queryOptions, db, app, 
     const {data, count} = await queryWithCount(db.scenarios, {...criteria, is_active: true}, {...queryOptions, fields});
     const scenarios = data.map( scenarioFromDbScenario );
     return { data: scenarios, count, };
+});
+
+defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {
+    const fields = ['id', 'team_id', 'scenario_id', 'started', 'is_active', 'finished'];
+    const {data, count} = await queryWithCount(db.games, {...criteria}, {...queryOptions, fields});
+    return { data, count, };
 });

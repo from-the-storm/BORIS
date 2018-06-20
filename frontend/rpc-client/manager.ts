@@ -69,7 +69,7 @@ export function rpcClientMiddleware(store: MiddlewareAPI<RootState>) {
             store.dispatch<AnyAction>({type: Actions.WSCS_AVAILABLE});
             console.log("CONNECTION READY");
         } else {
-            handleNotification(store as Store<RootState>, notification.method, notification.params);
+            handleNotification(store as Store<RootState>, notification.params);
         }
         console.log('notification received', notification);
     })

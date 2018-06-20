@@ -7,6 +7,7 @@ import { dataProvider } from './data-provider';
 import { UserList } from './users';
 import { TeamList } from './teams';
 import { ScenarioList } from './scenarios';
+import { GameList } from './games';
 
 const history = createHistory({ basename: '/admin' });
 
@@ -15,6 +16,7 @@ const App = () => (
         <Resource name="users" list={UserList} />
         <Resource name="teams" list={TeamList} />
         <Resource name="scenarios" list={ScenarioList} />
+        <Resource name="games" list={GameList} />
     </Admin>
 );
 

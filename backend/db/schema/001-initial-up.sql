@@ -12,7 +12,7 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE users (
     id bigserial PRIMARY KEY,
     first_name varchar(150) NOT NULL,
-    email varchar(500) NOT NULL CHECK (email LIKE '%@%'),
+    email TEXT NOT NULL CHECK (email LIKE '%@%'),
     created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0'),
     -- "last active" value used to tell when users are online:
     last_active timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM last_active) = '0'),
@@ -39,7 +39,7 @@ CREATE TABLE login_requests (
 CREATE TABLE activity (
     id bigserial PRIMARY KEY,
     user_id bigint NULL REFERENCES users(id) ON DELETE CASCADE,
-    event_type varchar(500) NOT NULL,
+    event_type TEXT NOT NULL,
     "timestamp" timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM "timestamp") = '0'),
     details jsonb NOT NULL DEFAULT '{}'::jsonb
 );
@@ -49,10 +49,11 @@ CREATE TRIGGER trg_prevent_update__activity BEFORE UPDATE ON users FOR EACH ROW 
 -- Teams table
 CREATE TABLE teams (
     id bigserial PRIMARY KEY,
-    name varchar(500) NOT NULL,
-    organization varchar(500) NOT NULL,
+    name TEXT NOT NULL,
+    organization TEXT NOT NULL,
     code varchar(10) NOT NULL UNIQUE,
-    created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0')
+    created timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM created) = '0'),
+    game_vars jsonb NOT NULL DEFAULT '{}'::jsonb -- team_vars:
 );
 
 CREATE TABLE team_members (
@@ -73,10 +74,10 @@ CREATE TYPE scenario_difficulty AS ENUM ('easy', 'med', 'hard');
 CREATE TABLE scenarios (
     id bigserial PRIMARY KEY,
     is_active BOOLEAN NOT NULL DEFAULT true,
-    name varchar(500) NOT NULL,
+    name TEXT NOT NULL,
     duration_min integer NOT NULL DEFAULT 30,
     difficulty scenario_difficulty NOT NULL DEFAULT 'med',
-    start_point_name varchar(500) NOT NULL DEFAULT 'Start Point',
+    start_point_name TEXT NOT NULL DEFAULT 'Start Point',
     start_point point NOT NULL DEFAULT '(49.297878, -123.088417)',
     description_html text NOT NULL DEFAULT ''
 );
@@ -89,7 +90,9 @@ CREATE TABLE games (
     started timestamp WITH TIME ZONE NOT NULL DEFAULT NOW() CHECK(EXTRACT(TIMEZONE FROM started) = '0'),
     is_active BOOLEAN NOT NULL DEFAULT true, -- Is this team *currently* playing this game? If false and finished is null, they abandoned it.
     finished timestamp WITH TIME ZONE NULL CHECK(EXTRACT(TIMEZONE FROM finished) = '0'),
-    CHECK((is_active = TRUE AND finished IS NULL) OR (is_active = FALSE))
+    CHECK((is_active = TRUE AND finished IS NULL) OR (is_active = FALSE)),
+    game_vars jsonb NOT NULL DEFAULT '{}'::jsonb, -- game_vars (and step vars which are game_vars prefixed with a step_id)
+    pending_team_vars jsonb NOT NULL DEFAULT '{}'::jsonb -- updates to team vars that will be applied once this game ends
 );
 -- A team can only play one game at a time
 CREATE UNIQUE INDEX active_game ON games (team_id) WHERE is_active = TRUE;

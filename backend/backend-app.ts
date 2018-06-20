@@ -16,13 +16,14 @@ import { Server } from 'http';
 
 import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
+import { getRedisClient } from './db/redisClient';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
 import {router as lobbyRouter} from './routes/lobby-api';
 import {router as gameRouter} from './routes/game-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
 import {router as appAdminRouter} from './routes/admin-api';
-import { subscribeToRedis } from './websocket/pub-sub';
+import { subscribeToRedis, getPubSubClient } from './websocket/pub-sub';
 import { rpcHandler } from './websocket/connections';
 
 // Declare our additions to the Express API:
@@ -64,16 +65,8 @@ app.use(bodyParser.json());
 
 // Configure redis and session store:
 const RedisStore = connectRedis(session);
-export const redisClient = redis.createClient({
-    host: config.redis_host,
-    port: config.redis_port,
-    prefix: config.redis_prefix,
-    ...(config.redis_password ? {password: config.redis_password} : {})
-});
-app.set('redisClient', redisClient);
-app.set('pubsubClient', redisClient.duplicate()); // A dedicated connection is required for redis pub/sub subscriber functionality
 app.use(session({
-    store: new RedisStore({client: redisClient, logErrors: true}),
+    store: new RedisStore({client: getRedisClient(), logErrors: true}),
     secret: config.secret_key,
     name: 'boris_sid',
     cookie: {
@@ -197,7 +190,7 @@ app.ws('/rpc', rpcHandler);
 ////////////////////////////////////////////////////////////////////////////////
 // Redis pub/sub notifications (used to know when to send notifications to websocket clients)
 
-subscribeToRedis(app);
+subscribeToRedis();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Error handling:
@@ -250,9 +243,9 @@ async function stopServer() {
     await new Promise((resolve) => {
         server.close(resolve);
     });
+    await getPubSubClient().quit();
+    await getRedisClient().quit();
     await db.instance.$pool.end();
-    redisClient.unref();
-    app.get('pubsubClient').unref();
 }
 
 export {app, config, startServer, stopServer};

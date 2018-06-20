@@ -1,4 +1,5 @@
 import { Scenario, OtherTeamMember, Gender } from "./models";
+import { AnyUiState } from "./game";
 
 /** Default return value of API methods that don't return any useful data */
 export interface EmptyApiResponse {
@@ -21,6 +22,12 @@ export interface ApiMethod<RequestType, ResponseType> {
 ///////////////////////////////////////////////////////////////////////////////
 // app-api methods:
 
+export interface GameStatus {
+    scenarioId: number;
+    scenarioName: string;
+    isActive: boolean;
+}
+
 /** GET_INITIAL_STATE response */
 export interface InitialStateResponse {
     user?: {
@@ -33,11 +40,7 @@ export interface InitialStateResponse {
         isTeamAdmin: boolean;
         otherTeamMembers: Array<OtherTeamMember>;
     };
-    game?: {
-        scenarioName: string;
-        scenarioId: number;
-        started: string;
-    }
+    game?: GameStatus;
 };
 
 export const GET_INITIAL_STATE: ApiMethod<{}, InitialStateResponse> = {path: '/api/app/get-initial-state', type: 'GET'};
@@ -114,20 +117,36 @@ export const GET_SCENARIOS: ApiMethod<NoRequestParameters, ScenariosResponse> = 
 ///////////////////////////////////////////////////////////////////////////////
 // game-api methods:
 
-export interface ScenariosResponse {
-    scenarios: Scenario[],
-}
-
 /** START_GAME Request */
 export interface StartGameRequest {
     scenarioId: number;
 }
+export const START_GAME: ApiMethod<StartGameRequest, GameStatus> = {path: '/api/game/start', type: 'POST'};
 
-export interface StartGameResponse {
-    scenarioId: number;
-    scenarioName: string;
+/** GET_UI_STATE Request */
+export interface GetUiStateResponse {
+    uiUpdateSeqId: number;
+    state: AnyUiState[];
 }
-
-export const START_GAME: ApiMethod<StartGameRequest, StartGameResponse> = {path: '/api/game/start', type: 'POST'};
+export const GET_UI_STATE: ApiMethod<NoRequestParameters, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
 
 export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};
+
+/** 
+ * STEP_RESPONSE Request: A player is submitting some kind of response to a "step" in the script.
+ * For example, selecitng a choice from a multiple choice prompt.
+ **/
+interface BaseStepResponseRequest {
+    stepId: number;
+}
+export interface FreeResponseStepResponseRequest extends BaseStepResponseRequest {
+    value: string;
+}
+export interface MultipleChoiceStepResponseRequest extends BaseStepResponseRequest {
+    choiceId: string;
+}
+export type StepResponseRequest = (
+    |FreeResponseStepResponseRequest
+    |MultipleChoiceStepResponseRequest
+);
+export const STEP_RESPONSE: ApiMethod<StepResponseRequest, EmptyApiResponse> = {path: '/api/game/step', type: 'POST'};

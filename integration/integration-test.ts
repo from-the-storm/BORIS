@@ -57,7 +57,7 @@ describe("BORIS Integration tests", () => {
         await driver.get(borisURL);
         expect(await driver.getTitle()).toBe("BORIS");
         expect(await getHeaderText(driver)).toBe("WOULD YOU SURVIVE THE END OF THE WORLD?");
-    });
+    }, 10000);
 
     test('Registration Test', async () => {
         const email = 'tom@example.com';

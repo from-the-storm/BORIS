@@ -1,23 +1,40 @@
-import * as express from 'express';
 import * as redis from 'redis';
 
-import {config} from '../config';
-import {BorisDatabase} from '../db/db';
+import { config } from '../config';
+import { BorisDatabase, getDB } from '../db/db';
+import { getRedisClient } from '../db/redisClient';
 import { notifyConnectedUsers } from './connections';
-import { NotificationType } from '../../common/notifications';
+import { AnyNotification } from '../../common/notifications';
+
+
+let redisPubSubClient: redis.RedisClient;
+
+/**
+ * Get the shared redis client instance that we use for subscribing to pub/sub notifications
+ */
+export function getPubSubClient() {
+    if (redisPubSubClient === undefined) {
+        redisPubSubClient = redis.createClient({
+            host: config.redis_host,
+            port: config.redis_port,
+            prefix: config.redis_prefix,
+            ...(config.redis_password ? {password: config.redis_password} : {})
+        });
+    }
+    return redisPubSubClient;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Redis pub/sub notifications (used to know when to send notifications to websocket clients)
 interface PubSubMessageData {
     teamId: number;
-    eventType: NotificationType;
-    data: any;
+    event: AnyNotification;
 }
 
 const eventsChannel = config.redis_prefix + "app_events";
 
-export function subscribeToRedis(app: express.Application) {
-    const pubsubClient = app.get('pubsubClient') as redis.RedisClient;
+export function subscribeToRedis() {
+    const pubsubClient = getPubSubClient();
     pubsubClient.subscribe(eventsChannel);
     pubsubClient.on('message', async (channel, message) => {
         if (channel != eventsChannel) {
@@ -33,13 +50,14 @@ export function subscribeToRedis(app: express.Application) {
         console.log("pubsub message: ", message);
         // Get the list of relevant users:
         const teamId: number = data.teamId;
-        const db: BorisDatabase = app.get('db');
+        const db: BorisDatabase = await getDB();
         const userIds = (await db.team_members.find({team_id: teamId, is_active: true})).map(tm => tm.user_id);
-        notifyConnectedUsers(userIds, data.eventType, data.data);
+        notifyConnectedUsers(userIds, data.event);
     });
 }
 
-export function publishEvent(app: express.Application, event: PubSubMessageData) {
-    const redisClient: redis.RedisClient = app.get('redisClient');
-    redisClient.publish(eventsChannel, JSON.stringify(event));
+export function publishEvent(teamId: number, event: AnyNotification) {
+    const redisClient = getRedisClient();
+    const data: PubSubMessageData = {teamId, event};
+    redisClient.publish(eventsChannel, JSON.stringify(data));
 }

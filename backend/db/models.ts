@@ -24,6 +24,7 @@ export interface Team {
     organization: string;
     code: string;
     created: Date;
+    game_vars: any;
 }
 
 export interface DBScenario extends BaseScenario {
@@ -46,4 +47,15 @@ export function scenarioFromDbScenario(s: DBScenario): Scenario {
         description_html: s.description_html,
         start_point: {lat: s.start_point.x, lng: s.start_point.y},
     };
+}
+
+export interface Game {
+    id: number;
+    team_id: number;
+    scenario_id: number;
+    started: Date;
+    is_active: boolean;
+    finished: Date;
+    game_vars: any;
+    pending_team_vars: any;
 }
