@@ -1,0 +1,21 @@
+---
+- name: Install Redis
+  apt: name=redis-server state=present
+- name: Block Redis via firewall (extra precaution)
+  ufw: rule=deny port=6379 proto=tcp
+- name: Allow Redis connections via spiped through firewall
+  ufw: rule=allow port={{redis_spiped_port}} proto=tcp
+- name: Disallow direct external traffic to Redis
+  lineinfile:
+    dest="/etc/redis/redis.conf"
+    regexp='^bind .*'
+    line='bind 127.0.0.1'
+  notify:
+    - reload redis
+- name: Set a password for Redis
+  lineinfile:
+    dest="/etc/redis/redis.conf"
+    regexp='^(# )?requirepass .*'
+    line="requirepass {{redis_password}}"
+  notify:
+    - reload redis

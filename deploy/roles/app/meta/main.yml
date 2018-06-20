@@ -1,0 +1,9 @@
+---
+dependencies:
+  - { role: common }
+  - role: database-common
+    postgres_secure_ip: "{{ boris_docker_network_host_ip }}"
+  - role: redis-common
+    redis_secure_ip: "{{ boris_docker_network_host_ip }}"
+  - { role: geerlingguy-docker }
+  - { role: docker-ansible }

@@ -1,0 +1,10 @@
+[Unit]
+Description={{spiped_servicename}} spiped client
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/spiped -F -e -s [{{spiped_client_local_ip}}]:{{spiped_client_local_port}} -t {{spiped_server}}:{{spiped_port}} -k {{spiped_keyfile}}
+
+[Install]
+WantedBy=multi-user.target

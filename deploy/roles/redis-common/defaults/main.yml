@@ -1,0 +1,15 @@
+---
+# Password for redis
+redis_password: "{{ lookup('password', boris_deploy_private_dir + 'credentials/redis_password length=64') }}"
+# Because redis security is based around network access, we secure it
+# behind spiped, so clients must connect via spiped on this port rather
+# than connecting directly to Redis.
+redis_secure_port: 6381
+# IP on which the spiped client is running. Should always be an IP belonging to the current machine.
+redis_secure_ip: 127.0.0.1
+# This is the port used for server-to-server spiped communication for redis.
+# It must be different than the normal redis port and the redis_secure_port
+# in order to avoid conflicts when one machine is both server and client.
+redis_spiped_port: 6380
+# The IP of the server running redis+spiped server
+redis_host: localhost

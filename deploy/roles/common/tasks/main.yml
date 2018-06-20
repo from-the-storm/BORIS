@@ -1,0 +1,30 @@
+---
+- name: update apt cache
+  apt: update_cache=yes
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - htop
+    - unattended-upgrades
+    - fail2ban
+    - build-essential
+    - g++
+    - ntp
+
+- name: Set hostname
+  hostname: name="{{common_server_hostname}}"
+- name: Add hostname to /etc/hosts
+  lineinfile:
+    dest="/etc/hosts"
+    regexp="127\.0\.0\.1.*"
+    line="127.0.0.1 localhost {{common_server_hostname}}"
+
+- name: Allow SSH through firewall
+  ufw: rule=allow port=ssh proto=tcp
+- name: Enable firewall
+  ufw: state=enabled policy=deny
+- name: Enable SSH forwarding with sudo
+  lineinfile:
+    dest: /etc/sudoers
+    insertafter: '^#?\s*Defaults\s+env_keep\b'
+    line: 'Defaults    env_keep += "SSH_AUTH_SOCK"'

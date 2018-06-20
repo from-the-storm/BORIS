@@ -1,0 +1,8 @@
+---
+# Install docker via pip so that ansible docker plugins work
+
+- name: Install pip so we can install docker python package
+  apt: name=python3-pip state=present
+- name: Install docker python package
+  pip:
+    name: docker

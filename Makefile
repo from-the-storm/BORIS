@@ -10,4 +10,4 @@ static:
 	npm run build
 
 container: clean transpile static
-	docker build -t boris .
+	docker build -t fromthestorm/boris .

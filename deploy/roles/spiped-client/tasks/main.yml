@@ -1,0 +1,5 @@
+---
+- name: Install {{spiped_servicename}} spiped client service
+  template: src=spiped-client-systemd.service dest=/lib/systemd/system/spiped-{{spiped_servicename}}-client.service
+- name: Start {{spiped_servicename}} spiped client service
+  service: name=spiped-{{spiped_servicename}}-client enabled=yes state=started

@@ -1,0 +1,17 @@
+---
+# A database server that runs PostgreSQL and Redis
+# Meant to be accessible via a private network only
+#
+# If your host/inventory file (../../deploy-private/ansible_hosts) is set up
+# with hosts/groups/vars, you can run this playbook with:
+#    ansible-playbook playbook-db-server.yml -e "target=prod_db"
+# where the target is a group or individual server name/hostname
+- hosts: '{{ target }}'
+  remote_user: root
+  vars:
+    common_server_hostname: "boris-{{boris_instance_name}}-db"
+  vars_files:
+    - vars/globals.yml
+  roles:
+    - { role: database }
+    - { role: redis }
