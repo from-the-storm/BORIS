@@ -139,10 +139,14 @@ export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {p
 interface BaseStepResponseRequest {
     stepId: number;
 }
+export interface FreeResponseStepResponseRequest extends BaseStepResponseRequest {
+    value: string;
+}
 export interface MultipleChoiceStepResponseRequest extends BaseStepResponseRequest {
     choiceId: string;
 }
 export type StepResponseRequest = (
+    |FreeResponseStepResponseRequest
     |MultipleChoiceStepResponseRequest
 );
 export const STEP_RESPONSE: ApiMethod<StepResponseRequest, EmptyApiResponse> = {path: '/api/game/step', type: 'POST'};

@@ -30,4 +30,9 @@
   messages:
     - That's right. +10 saltines for your team. Or sorry, wait. No -2 saltines for your team.
 - step: free response
-  key: 'testInput'
+  key: testInput
+- step: message
+  messages:
+    - "And again, enter one more input to complete this script:"
+- step: free response
+  key: testInput2

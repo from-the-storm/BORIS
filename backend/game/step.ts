@@ -1,7 +1,7 @@
 import { AnyUiState, StepType, GameUserRole, MessageStepUiState, FreeResponseStepUiState, MultipleChoiceStepUiState } from "../../common/game";
 import { GameManager } from "./manager";
 import { GameVar, GameVarScope } from "./vars";
-import { StepResponseRequest, MultipleChoiceStepResponseRequest } from "../../common/api";
+import { StepResponseRequest, MultipleChoiceStepResponseRequest, FreeResponseStepResponseRequest } from "../../common/api";
 import { SafeError } from "../routes/api-utils";
 
 
@@ -58,7 +58,19 @@ export abstract class Step {
      **/
     public abstract get isComplete(): boolean;
 
+    /** Handle input from the user, while this step is active. */
     public async handleResponse(data: StepResponseRequest) {
+        if (this.isComplete) {
+            throw new SafeError("Choice already made.");
+        }
+        return this._handleResponse(data);
+    }
+
+    /**
+     * Step-type-sepcific implementation to handle input from the user, while this step is active.
+     * this.isComplete is guaranteed to be false if this gets called.
+     **/
+    protected async _handleResponse(data: StepResponseRequest) {
         throw new SafeError("Cannot submit data to this step.");
     }
 
@@ -173,6 +185,15 @@ class FreeResponseStep extends Step {
         };
     }
 
+    protected async _handleResponse(data: FreeResponseStepResponseRequest) {
+        let value = data.value ? data.value.trim() : '';
+        if (value === '') {
+            throw new SafeError("Invalid input (empty).");
+        }
+        await this.setVar(this.valueVar, data.value);
+        await this.pushUiUpdate();
+    }
+
     public get isComplete() {
         return this.getVar(this.valueVar) !== '';
     }
@@ -252,12 +273,9 @@ class MultipleChoiceStep extends Step {
         };
     }
 
-    public async handleResponse(data: MultipleChoiceStepResponseRequest) {
+    protected async _handleResponse(data: MultipleChoiceStepResponseRequest) {
         if (!this.isChoiceIdValid(data.choiceId)) {
             throw new SafeError("Invalid choice.");
-        }
-        if (this.isComplete) {
-            throw new SafeError("Choice already made.");
         }
         await this.setVar(this.choiceVar, data.choiceId);
         await this.pushUiUpdate();
