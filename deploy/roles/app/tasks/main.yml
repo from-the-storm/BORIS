@@ -63,4 +63,28 @@
     login_password: "{{ database_postgres_admin_password }}"
     port: "{{ postgres_secure_port }}"
 
-# DB migration?
+# Create the boris container:
+- name: Configure Boris docker container
+  docker_container:
+    name: boris
+    image: "fromthestorm/boris:{{ boris_image_tag }}"
+    state: started
+    restart: yes
+    ports:
+      - "80:3333"
+    networks:
+        - name: "{{ boris_docker_network_name }}"
+    env_file: "{{ boris_app_environ_file }}"
+
+# Run migrations
+- name: Run migrations
+  command: docker exec boris node /app/backend/db/migrate.js
+# Restart container (rquired after new tables created in migrations)
+- name: Restart boris so massive-js will pick up new DB tables
+  command: docker restart boris
+
+- name: Allow access on port 80 (until we set up a load balancer with HTTPS etc.)
+  ufw:
+    rule: allow
+    port: 80
+    proto: tcp
