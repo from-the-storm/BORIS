@@ -50,12 +50,16 @@ export abstract class Step {
 
     public abstract getUiState(): AnyUiState;
 
+    /** 
+     * Return true if the step is complete, and the team should advance to the next step of the script.
+     * The result of this method should only ever be change during run() or handleResponse().
+     * If it changes outside of one of those methods, the game may get "stuck" and never advance
+     * to the next step.
+     **/
+    public abstract get isComplete(): boolean;
+
     public async handleResponse(data: StepResponseRequest) {
         throw new SafeError("Cannot submit data to this step.");
-    }
-
-    protected advanceToNextstep(): Promise<void> {
-        return this.manager.advanceToNextstep();
     }
 
     /**
@@ -109,7 +113,6 @@ class MessageStep extends Step {
             await this.setVar(MessageStep.numMessagesShown, n => n + 1);
             this.pushUiUpdate();
         }
-        this.advanceToNextstep();
     }
 
     protected parseConfig(config: any): any {
@@ -135,6 +138,10 @@ class MessageStep extends Step {
             ...(this.settings.character ? {character: this.settings.character} : {})
         };
     }
+
+    public get isComplete() {
+        return this.numMessagesShown >= this.settings.messages.length;
+    }
 }
 
 
@@ -142,9 +149,7 @@ class FreeResponseStep extends Step {
     public static readonly stepType: StepType = StepType.FreeResponse;
     readonly settings: {key: string};
 
-    async run() {
-        //this.pushUiUpdate();
-    }
+    async run() {}
 
     protected parseConfig(config: any): any {
         if (typeof config.key !== 'string' || !config.key) {
@@ -167,6 +172,10 @@ class FreeResponseStep extends Step {
             value,
         };
     }
+
+    public get isComplete() {
+        return this.getVar(this.valueVar) !== '';
+    }
 }
 
 
@@ -179,14 +188,7 @@ class MultipleChoiceStep extends Step {
     public static readonly stepType: StepType = StepType.FreeResponse;
     readonly settings: MultipleChoiceStepSettings;
 
-    async run() {
-        if (this.choiceHasBeenMade) {
-            // This shouldn't happen, but if somehow this step gets initialized
-            // after a choice has been made but without advancing to the next step
-            // (i.e. the server crashed while handling a choice event), proceed.
-            this.advanceToNextstep();
-        }
-    }
+    async run() {}
 
     protected parseConfig(config: any): MultipleChoiceStepSettings {
         // Parse yaml config like:
@@ -219,11 +221,6 @@ class MultipleChoiceStep extends Step {
         return {key: `mc:${this.settings.id}`, scope: GameVarScope.Game, default: ''};
     }
 
-    get choiceHasBeenMade(): boolean {
-        const choiceId = this.getVar(this.choiceVar);
-        return choiceId && this.isChoiceIdValid(choiceId);
-    }
-
     isChoiceIdValid(choiceId: string): boolean {
         for (const choice of this.settings.choices) {
             if (choice.id == choiceId) {
@@ -235,7 +232,7 @@ class MultipleChoiceStep extends Step {
 
     getUiState(): MultipleChoiceStepUiState {
         const choiceId = this.getVar(this.choiceVar);
-        const choiceMade = this.choiceHasBeenMade;
+        const choiceMade = this.isComplete;
         return {
             type: StepType.MultipleChoice,
             stepId: this.id,
@@ -259,11 +256,16 @@ class MultipleChoiceStep extends Step {
         if (!this.isChoiceIdValid(data.choiceId)) {
             throw new SafeError("Invalid choice.");
         }
-        if (this.choiceHasBeenMade) {
+        if (this.isComplete) {
             throw new SafeError("Choice already made.");
         }
         await this.setVar(this.choiceVar, data.choiceId);
         await this.pushUiUpdate();
-        this.advanceToNextstep();
+    }
+
+    /** Has the user selected a choice yet? */
+    public get isComplete() {
+        const choiceId = this.getVar(this.choiceVar);
+        return choiceId && this.isChoiceIdValid(choiceId);
     }
 }

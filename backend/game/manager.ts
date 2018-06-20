@@ -8,7 +8,7 @@ import { publishEvent } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
 import { loadScriptFile } from "./script-loader";
 import { SafeError } from "../routes/api-utils";
-import { GameStatus } from "../../common/api";
+import { GameStatus, StepResponseRequest } from "../../common/api";
 
 /** External services that the GameManager needs to run */
 interface GameManagerContext {
@@ -64,16 +64,27 @@ export class GameManager {
         // Since this GameManager is only initialized once per game,
         // we are either starting a new game or the server has restarted
         // while this game was active. In either case, run the current step:
-        this.currentStep.run();
+        this.runCurrentStep();
     }
 
-    get currentStep(): Step {
+    private get currentStep(): Step {
         const currentStepId = this.getVar(currentStepVar);
         if (currentStepId === -1) {
             // Return the first step, whatever it is:
             return this.steps.values().next().value;
         }
         return this.steps.get(currentStepId);
+    }
+
+    private runCurrentStep() {
+        // This is not an async fnuction because run() may take
+        // many minutes (or even longer) to complete, by design,
+        // so we don't want the caller to ever await this result.
+        this.currentStep.run().then(() => {
+            if (this.currentStep.isComplete) {
+                this.advanceToNextstep();
+            }
+        });
     }
 
     public getUiState(): AnyUiState[] {
@@ -86,6 +97,17 @@ export class GameManager {
             }
         }
         return uiState;
+    }
+
+    public async callStepHandler(data: StepResponseRequest) {
+        if (this.currentStep.id !== data.stepId) {
+            console.error(`Step ${data.stepId} is no longer the current step in this game's script.`);
+            throw new SafeError("Cannot submit answer: game has moved on.");
+        }
+        await this.currentStep.handleResponse(data);
+        if (this.currentStep.isComplete) {
+            this.advanceToNextstep(); // We don't need to wait for this result though.
+        }
     }
 
     /**
@@ -149,7 +171,7 @@ export class GameManager {
                 // The previous step was the current step, so this is the next step:
                 await this.setVar(currentStepVar, () => step.id);
                 // And run the next step:
-                this.steps.get(step.id).run();
+                this.runCurrentStep();
                 if (step.getUiState() !== null) {
                     this.pushUiUpdate(step.id);
                 }

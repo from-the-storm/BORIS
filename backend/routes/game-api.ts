@@ -80,10 +80,6 @@ apiMethod(STEP_RESPONSE, async (data, app, user) => {
     if (gameManager === noActiveGame) {
         throw new SafeError("No game is currently active.");
     }
-    if (gameManager.currentStep.id !== data.stepId) {
-        console.error(`Step ${data.stepId} is no longer the current step in this game's script.`);
-        throw new SafeError("Cannot submit answer: game has moved on.");
-    }
-    await gameManager.currentStep.handleResponse(data);
+    await gameManager.callStepHandler(data);
     return {result: 'ok'};
 });
