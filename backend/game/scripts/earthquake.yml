@@ -1,0 +1,14 @@
+---
+- step: message
+  messages:
+    - "Please read aloud and press DONE when you’re finished:"
+    - "Begin imagination: you wake up and your bed is shaking. The dysmorphic painting of your family that your small daughter made falls to the ground. Your window shatters."
+    - Your best guess at what’s happening is that several cars are crashing into the side of your house at the same time.
+    - But your best guess is wrong. It’s an earthquake. Your house collapses and you perish.
+    - "If that seems bleak, don’t worry. It wasn’t real. And there’s more good news: in a mere $$average_completion_time$$ minutes, you and your team will have the basic know-how to prepare for and respond to just such a situation."
+    - "Unless an actual earthquake strikes <em>while</em> you’re completing this training scenario. That would be unlucky. Nobody would believe you if you told them that."
+- step: choice
+  id: doneintro
+  choices:
+    - done: Done
+- include: dev-script

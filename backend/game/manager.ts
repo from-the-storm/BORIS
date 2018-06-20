@@ -229,7 +229,7 @@ export class GameManager implements GameManagerStepInterface {
             }
 
             const scenario = await context.db.scenarios.findOne({id: game.scenario_id, is_active: true});
-            const scriptSteps = await loadScriptFile('dev-script'); // TODO: let the scenario specify the script
+            const scriptSteps = await loadScriptFile(scenario.script);
 
             const team = await context.db.teams.findOne(game.team_id);
 
