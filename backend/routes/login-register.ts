@@ -17,6 +17,10 @@ import { JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from
 import { UserType } from '../express-extended';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { notifyTeamStatusChanged } from '../websocket/team-changed';
+import { readFile } from 'fs';
+import { promisify } from 'util';
+
+const readFileAsync = promisify(readFile);
 
 export const router = express.Router();
 const mountPoint = /^\/auth/;
@@ -34,11 +38,17 @@ async function sendLoginLinkToUser(app: express.Application, email: string) {
     // Generate a random code:
     const result = await db.login_requests.insert({user_id: user.id});
     const code = result.code;
+    // Load the template file:
+    const htmlTemplate = String(await readFileAsync('backend/routes/login-template.html'));
+    const html = (htmlTemplate
+        .replace('{{login_url}}', `${config.app_url}/auth/login/${code}`)
+        .replace('{{first_name}}', user.first_name)
+    );
     // And send it out via email:
     await sendMail({
-        to: email,
-        subject: 'Login to Apocalypse Made Easy',
-        text: `Click here to login:\n${config.app_url}/auth/login/${code}`,
+        html,
+        to: `${user.first_name} <${email}>`,
+        subject: 'Log in to Apocalypse Made Easy',
     });
 }
 

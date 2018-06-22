@@ -8,7 +8,7 @@ export const config = (() => {
         listen_port: 3333,
         resource_url: '/s',
         sparkpost_api_key: null as string|null, // Not required for development
-        system_emails_from: "BORIS <dev-no-reply@apocalypsemadeeasy.com>",
+        system_emails_from: "BORIS <no-reply@apocalypsemadeeasy.com>",
         redis_host: 'localhost',
         redis_port: 3331,
         redis_password: 'devpassword',
