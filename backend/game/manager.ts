@@ -24,7 +24,8 @@ interface GameManagerInitData {
     scriptSteps: any[];
 }
 
-const currentStepVar: GameVar<number> = {key: 'step#', scope: GameVarScope.Game, default: -1};
+/** List of a ll the step IDs that the user has seen. */
+const stepsSeenVar: GameVar<number[]> = {key: 'stepsSeen', scope: GameVarScope.Game, default: []};
 // Next UI update sequence ID. This is incremented and sent with any UI update
 // so that clients can ensure the UI update sequence has continuous IDs in order
 // to know that they didn't miss any updates.
@@ -56,6 +57,7 @@ export class GameManager implements GameManagerStepInterface {
     gameVars: any;
     pendingTeamVars: any; // team vars that will be saved to the team.game_vars when the game is completed.
     readonly teamVars: any;
+    /** List of all the possible steps in this script, in order and also keyed by ID */
     readonly steps: ReadonlyMap<number, Step>;
 
     private constructor(data: GameManagerInitData) {
@@ -76,33 +78,34 @@ export class GameManager implements GameManagerStepInterface {
         // Since this GameManager is only initialized once per game,
         // we are either starting a new game or the server has restarted
         // while this game was active. In either case, run the current step:
-        this.runCurrentStep();
+        if (this.stepIdsSeen.length === 0) {
+            // We're starting a new game. Advance to the first step:
+            const firstStepId = this.steps.keys().next().value;
+            this.advanceToStep(firstStepId);
+        } else {
+            // We're resuming a game:
+            this.runCurrentStep();
+        }
     }
 
-    private get currentStep(): Step {
-        const currentStepId = this.getVar(currentStepVar);
-        if (currentStepId === -1) {
-            // Return the first step, whatever it is:
-            return this.steps.values().next().value;
+    private get currentStep(): Step|undefined {
+        const stepsSeen = this.stepIdsSeen;
+        if (stepsSeen.length === 0) {
+            return undefined;
         }
+        const currentStepId = stepsSeen[stepsSeen.length - 1];
         return this.steps.get(currentStepId);
+    }
+
+    private get stepIdsSeen(): number[] {
+        return this.getVar(stepsSeenVar);
     }
 
     private runCurrentStep() {
         // This is not an async fnuction because run() may take
         // many minutes (or even longer) to complete, by design,
         // so we don't want the caller to ever await this result.
-
-        // First check if the current step has an 'if' condition:
         const currentStep = this.currentStep;
-        if (currentStep.ifCondition !== undefined) {
-            const result = !!this.safeEvalScriptExpression(currentStep.ifCondition);
-            if (result == false) {
-                this.advanceToNextstep();
-                return;
-            }
-        }
-
         currentStep.run().then(() => {
             if (currentStep.isComplete) {
                 this.advanceToNextstep();
@@ -112,12 +115,9 @@ export class GameManager implements GameManagerStepInterface {
 
     public getUiState(): AnyUiState[] {
         const uiState: AnyUiState[] = [];
-        const currentStepId = this.currentStep.id;
-        for (const step of this.steps.values()) {
+        for (const stepId of this.stepIdsSeen) {
+            const step = this.steps.get(stepId);
             uiState.push(step.getUiState());
-            if (step.id === currentStepId) {
-                break; // Don't bother returning a whole bunch of 'null' values beyond the current step.
-            }
         }
         return uiState;
     }
@@ -133,39 +133,16 @@ export class GameManager implements GameManagerStepInterface {
         }
     }
 
-    /**
-     * Steps are primarily keyed by their numeric ID, but sometimes (e.g. for UI)
-     * updates, we want to know their index in the flattened list of steps.
-     * @param stepId 
-     */
-    private getStepIndex(stepId: number): number {
-        let stepIndex: number;
-        let i = 0;
-        for (const step of this.steps.values()) {
-            if (step.id === stepId) {
-                stepIndex = i;
-                break;
-            }
-            i++;
-        }
-        if (stepIndex === undefined) {
-            throw new Error(`Step with ID ${stepId} not found in GameManager's step list.`);
-        }
-        return stepIndex;
-    }
-
     public async pushUiUpdate(stepId: number) {
-        // Find the index of the step
-        const stepIndex = this.getStepIndex(stepId);
         const step = this.steps.get(stepId);
-        console.log(`Notifying players that step ${stepIndex} has changed its UI.`);
+        console.log(`Notifying players that step ${stepId} has changed its UI.`);
         // Generate an ID for this notification
         const uiUpdateSeqId: number = await this.setVar(lastUiUpdateSeqId, oldVal => oldVal + 1);
         // Push out a websocket notification:
         const event: GameUiChangedNotification = {
             type: NotificationType.GAME_UI_UPDATE,
             uiUpdateSeqId,
-            stepIndex,
+            stepIndex: this.stepIdsSeen.indexOf(stepId),
             newStepUi: step.getUiState(),
         };
         publishEvent(this.teamId, event);
@@ -181,30 +158,55 @@ export class GameManager implements GameManagerStepInterface {
         return this.getVar(lastUiUpdateSeqId);
     }
 
+    public async advanceToStep(stepId: number|undefined) {
+        if (stepId === undefined) {
+            // We assume undefined means past the last step in the game,
+            // so this game/script has been completed.
+            await this.finish();
+        }
+        if (this.stepIdsSeen.indexOf(stepId) !== -1) {
+            throw new Error("Cannot revisit a step that has already been seen.");
+        }
+        const step = this.steps.get(stepId);
+        // First check if the next step has an 'if' condition:
+        if (step.ifCondition !== undefined) {
+            const result = !!this.safeEvalScriptExpression(step.ifCondition);
+            if (result == false) {
+                await this.advanceToStep(this.stepIdFollowing(stepId));
+                return;
+            }
+        }
+
+        // Save the fact that we're about to see this step, then display it:
+        await this.setVar(stepsSeenVar, (ss) => ss.concat([step.id]));
+        // And run the new step:
+        this.runCurrentStep();
+        if (step.getUiState() !== null) {
+            this.pushUiUpdate(step.id);
+        }
+    }
+
     /**
      * Advance to the next step, or mark the game as complete if we're already
      * on the last step.
      */
     public async advanceToNextstep() {
-        const currentStepId = this.currentStep.id;
+        const nextStepId = this.stepIdFollowing(this.currentStep.id);
+        await this.advanceToStep(nextStepId);
+    }
+    /** Get the step ID that follows the given step, or undefined */
+    public stepIdFollowing(stepId: number): number|undefined {
         // Figure out the ID of the step after the current one:
         let found = false;
-        for (const step of this.steps.values()) {
+        for (const nextStepId of this.steps.keys()) {
             if (found) {
-                // The previous step was the current step, so this is the next step:
-                await this.setVar(currentStepVar, () => step.id);
-                // And run the next step:
-                this.runCurrentStep();
-                if (step.getUiState() !== null) {
-                    this.pushUiUpdate(step.id);
-                }
-                return;
-            } else if (step.id === currentStepId) {
+                // The previous step was the current step, so this is the next step.
+                return nextStepId;
+            } else if (nextStepId === stepId) {
                 found = true;
             }
         }
-        // If we get here, we must be at/past the last step. So end the game:
-        await this.finish();
+        return undefined; // There is no next step; perhaps we've completed the game.
     }
 
     /**
