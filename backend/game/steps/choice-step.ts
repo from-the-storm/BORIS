@@ -5,7 +5,7 @@ import { Step } from "../step";
 import { GameVar, GameVarScope } from "../vars";
 
 interface MultipleChoiceStepSettings {
-    id: string,
+    key: string,
     choices: {id: string, choiceText: string}[],
     correctChoice?: string,
 };
@@ -24,8 +24,8 @@ export class MultipleChoiceStep extends Step {
         //   choices:
         //     - halfway: Halfway there
         //     - alone: You said survive alone
-        if (typeof config.id !== 'string') {
-            throw new Error("Multiple step must have an 'id' defined to store the user's choice.");
+        if (typeof config.key !== 'string') {
+            throw new Error("Multiple step must have an 'key' defined to store the user's choice.");
         }
         if (!Array.isArray(config.choices)) {
             throw new Error("Multiple choice step should have an array of choices called 'choices'.");
@@ -37,14 +37,14 @@ export class MultipleChoiceStep extends Step {
             choices.push({id: keys[0], choiceText: entry[keys[0]]});
         }
         return {
-            id: config.id,
+            key: config.key,
             choices,
             correctChoice: (config.correct && (choices.map(c => c.id).indexOf(config.correct) !== -1)) ? config.correct : undefined,
         }
     }
 
     get choiceVar(): GameVar<string> {
-        return {key: `mc:${this.settings.id}`, scope: GameVarScope.Game, default: ''};
+        return {key: this.settings.key, scope: GameVarScope.Game, default: ''};
     }
 
     isChoiceIdValid(choiceId: string): boolean {

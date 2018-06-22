@@ -5,7 +5,7 @@
     - "Begin imagination: it is the post-apocalypse. You are part of a group of 40 survivors whose main water supply has become tainted by an unknown pathogen… possibly all of that pigeon blood."
     - Your team is tasked with investigating nearby water sources, locating what is rumoured to be a suitable reservoir, and testing filtration techniques that don’t involve dumping in a bucket of pigeon blood and hoping for the best.
 - step: choice
-  id: doneintro
+  key: doneintro
   choices:
     - done: Done
 - include: dev-script

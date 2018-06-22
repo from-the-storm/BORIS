@@ -4,7 +4,7 @@ import { StepType } from '../../../common/game';
 
 const stepWithCorrectAnswerYaml = `---
 - step: choice
-  id: randomsaying
+  key: randomsaying
   correct: again
   choices:
     - where: Where's he get it all from?
@@ -18,7 +18,7 @@ const getStepWithCorrectAnswer = () => MockGameManager.loadStepFromYaml(stepWith
 // In this type of multiple choice question, all answers are valid and there is no "right answer"
 const stepWithEquallyValidChoicesYaml = `---
 - step: choice
-  id: example2
+  key: example2
   choices:
     - first: Option 1
     - second: Option 2
