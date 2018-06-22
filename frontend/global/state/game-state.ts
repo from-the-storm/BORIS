@@ -49,6 +49,11 @@ export function gameStateReducer(state?: GameState, action?: AnyAction): GameSta
         })
     case Actions.UPDATE_STEP_UI_STATE:
         // Always call this action via the updateStepUiState() action creator, so it can verify that uiUpdateSeqId is continuous
+        for (let i = state.uiState.size; i < action.stepIndex; i++) {
+            // If we're jumping ahead in the script, the server will fill in the missing entries with NULL but we'll fill them in with UNDEFINED.
+            // Fix that by filling them with NULL now.
+            state = state.setIn(['uiState', i], null);
+        }
         return state.setIn(['uiState', action.stepIndex], action.state).set('uiUpdateSeqId', action.uiUpdateSeqId);
     case Actions.ABANDON_GAME:
         // The team has abandoned the game:

@@ -8,19 +8,27 @@ import { SafeError } from "../routes/api-utils";
 export interface StepParams {
     id: number;
     manager: GameManagerStepInterface;
-    settings: Readonly<any>; // settings that define how this step works (immutable)
+    config: Readonly<any>; // settings that define how this step works (immutable)
 }
 
 export abstract class Step {
     readonly id: number;
     private readonly manager: GameManagerStepInterface;
     readonly settings: any;
+    /** If this is set, it's a JavaScript expression, and this step should be ignored if it evaluates to false. */
+    readonly ifCondition: string|undefined;
     public static readonly stepType: StepType = StepType.Unknown;
 
     constructor(args: StepParams) {
         this.id = args.id;
         this.manager = args.manager;
-        this.settings = this.parseConfig(args.settings);
+
+        let config = {...args.config};
+        if (config.if !== undefined) {
+            this.ifCondition = config.if;
+            delete config.if;
+        }
+        this.settings = this.parseConfig(config);
     }
 
     protected getVar<T>(variable: GameVar<T>): T {

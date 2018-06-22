@@ -1,6 +1,6 @@
+import * as JsInterpreter from "js-interpreter";
 import { BorisDatabase, getDB } from "../db/db";
-import { Game, scenarioFromDbScenario } from "../db/models";
-import { Scenario } from "../../common/models";
+import { Game } from "../db/models";
 import { GameVar, GameVarScope } from "./vars";
 import { Step } from "./step";
 import { loadStepFromData } from "./steps/loader";
@@ -92,8 +92,19 @@ export class GameManager implements GameManagerStepInterface {
         // This is not an async fnuction because run() may take
         // many minutes (or even longer) to complete, by design,
         // so we don't want the caller to ever await this result.
-        this.currentStep.run().then(() => {
-            if (this.currentStep.isComplete) {
+
+        // First check if the current step has an 'if' condition:
+        const currentStep = this.currentStep;
+        if (currentStep.ifCondition !== undefined) {
+            const result = !!this.safeEvalScriptExpression(currentStep.ifCondition);
+            if (result == false) {
+                this.advanceToNextstep();
+                return;
+            }
+        }
+
+        currentStep.run().then(() => {
+            if (currentStep.isComplete) {
                 this.advanceToNextstep();
             }
         });
@@ -194,6 +205,30 @@ export class GameManager implements GameManagerStepInterface {
         }
         // If we get here, we must be at/past the last step. So end the game:
         await this.finish();
+    }
+
+    /**
+     * Safely evaluate a JavaScript expression and return the result (synchronously)
+     * The JavaScript in question can load any Game or Team-scoped variable using
+     * the VAR(key: string) function, which will return undefined if the var has
+     * never been set.
+     * @param jsExpression 
+     */
+    public safeEvalScriptExpression(jsExpression: string): any {
+        const jsInterpreter = new JsInterpreter(jsExpression, (interpreter, scope) => {
+            const getVariable = (name: string) => {
+                const notSet = Symbol();
+                let result = this._getGameVar({key: name, scope: GameVarScope.Game, default: notSet});
+                if (result === notSet) {
+                    result = this._getTeamVar({key: name, scope: GameVarScope.Team, default: undefined});
+                }
+                return interpreter.nativeToPseudo(result);
+            };
+            interpreter.setProperty(scope, 'VAR', interpreter.createNativeFunction(getVariable));
+        });
+        let maxSteps = 200, running = true;
+        do { let running = jsInterpreter.step() } while (running && maxSteps-- > 0);
+        return jsInterpreter.pseudoToNative(jsInterpreter.value);
     }
 
     static async loadGame(gameId: number, context?: GameManagerContext): Promise<GameManager> {
