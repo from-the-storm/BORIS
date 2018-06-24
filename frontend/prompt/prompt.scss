@@ -37,6 +37,7 @@
                     margin-top: 1.5rem;
                 }
                 a.small {
+                    margin-top: 1rem;
                     color: $red;
                     padding-top: 0.75rem;
                 }
@@ -51,6 +52,9 @@
             right: 0;
             background: $red;
             padding: 0.5rem 0.75rem;
+        }
+        #prompt-description button {
+            margin-top: 1rem;
         }
         
 }

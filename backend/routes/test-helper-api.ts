@@ -12,12 +12,12 @@ export const router = express.Router();
  */
 router.get('/emails/:toAddress([^/]+)', async (req, res) => {
     const transport: any = req.app.get('mailTransport');
-    const sentMail = transport.sentMail.filter((mail: any) => mail.data.to === req.params.toAddress);
+    const sentMail = transport.sentMail.filter((mail: any) => mail.data.to.indexOf(`<${req.params.toAddress}>`) !== -1);
     res.json(sentMail.map((obj: any) => ({
         from: obj.data.from,
         to: obj.data.to,
         subject: obj.data.subject,
-        text: obj.data.text,
+        html: obj.data.html,
         date: obj.message.date,
     })));
 });

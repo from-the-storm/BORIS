@@ -96,8 +96,8 @@ describe("BORIS Integration tests", () => {
         const emailCountAfterRegistering = emails.length;
         expect(emailCountAfterRegistering - emailCountBeforeRegistering).toBe(1);
         const registrationEmail = emails[emails.length - 1];
-        expect(registrationEmail.subject).toBe("Login to Apocalypse Made Easy");
-        const loginLink = registrationEmail.text.split('\n')[1];
+        expect(registrationEmail.subject).toBe("Log in to Apocalypse Made Easy");
+        const loginLink = registrationEmail.html.match(/href="([^"]+)"/)[1];
         expect(loginLink).toMatch(/^http.*/);
 
 

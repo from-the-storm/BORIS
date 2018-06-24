@@ -91,9 +91,9 @@ export class TestClient {
         await this.callApi(REQUEST_LOGIN, {email: userData.email});
 
         const transport: any = app.get('mailTransport');
-        const mailWithLink = transport.sentMail.filter((mail: any) => mail.data.to === userData.email)[0];
-        const mailText: string = mailWithLink.data.text;
-        const code = mailText.match(/login\/(.*)$/)[1]
+        const mailWithLink = transport.sentMail.filter((mail: any) => mail.data.to.indexOf(`<${userData.email}>`) !== -1)[0];
+        const mailText: string = mailWithLink.data.html;
+        const code = mailText.match(/login\/([\w\-]*)/)[1]
         await this.httpClient.get(`/auth/login/${code}`);
         return userData;
     }
