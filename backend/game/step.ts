@@ -38,6 +38,9 @@ export abstract class Step {
         const updater = (typeof updaterOrValue === 'function') ? updaterOrValue : () => updaterOrValue;
         return this.manager.setVar(variable, updater, this.id);
     }
+    protected getPlayerIds(): number[] {
+        return this.manager.playerIds;
+    }
 
     protected parseConfig(config: any) {
         return config;

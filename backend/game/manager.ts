@@ -20,6 +20,7 @@ interface GameManagerContext {
 interface GameManagerInitData {
     context: GameManagerContext;
     game: Game;
+    players: {id: number}[];
     teamVars: any;
     scriptSteps: any[];
 }
@@ -48,12 +49,14 @@ export interface GameManagerStepInterface {
     pushUiUpdate(stepId: number): Promise<void>;
     getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T;
     setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T>;
+    readonly playerIds: number[];
 }
 
 export class GameManager implements GameManagerStepInterface {
     private readonly db: BorisDatabase;
     readonly gameId: number;
     readonly teamId: number;
+    readonly playerIds: number[];
     gameVars: any;
     pendingTeamVars: any; // team vars that will be saved to the team.game_vars when the game is completed.
     readonly teamVars: any;
@@ -64,6 +67,7 @@ export class GameManager implements GameManagerStepInterface {
         this.db = data.context.db;
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
+        this.playerIds = data.players.map(entry => entry.id);
         this.gameVars = data.game.game_vars;
         this.teamVars = data.teamVars;
         this.pendingTeamVars = data.game.pending_team_vars;
@@ -269,8 +273,9 @@ export class GameManager implements GameManagerStepInterface {
             const scriptSteps = await loadScriptFile(scenario.script);
 
             const team = await context.db.teams.findOne(game.team_id);
+            const teamMembers = await context.db.team_members.find({team_id: team.id, is_active: true}, {columns: ['id']});
 
-            return new GameManager({context, game, teamVars: team.game_vars, scriptSteps});
+            return new GameManager({context, game, players: teamMembers, teamVars: team.game_vars, scriptSteps});
         })();
         gameManagerCache.set(gameId, newGameManagerPromise);
         return await newGameManagerPromise;

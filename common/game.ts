@@ -13,6 +13,7 @@ export type RoleSet = GameUserRole[]|'all';
 
 export enum StepType {
     Unknown = '?',
+    Internal = 'i', // Any step type that should never visibly appear in the UI
     MessageStep = 'm',
     FreeResponse = 'fr',
     MultipleChoice = 'mc',
