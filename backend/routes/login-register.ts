@@ -39,7 +39,7 @@ async function sendLoginLinkToUser(app: express.Application, email: string) {
     const result = await db.login_requests.insert({user_id: user.id});
     const code = result.code;
     // Load the template file:
-    const htmlTemplate = String(await readFileAsync('backend/routes/login-template.html'));
+    const htmlTemplate = String(await readFileAsync(`${__dirname}/login-template.html`));
     const html = (htmlTemplate
         .replace('{{login_url}}', `${config.app_url}/auth/login/${code}`)
         .replace('{{first_name}}', user.first_name)
