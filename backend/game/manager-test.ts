@@ -28,7 +28,7 @@ describe("GameManager tests", () => {
         await db.games.update({id: gameId}, {is_active: false});
     });
 
-    describe("finish()", async () => {
+    describe("finish()", () => {
         it("throws an error if the game was abandoned.", async () => {
             await gameManager.abandon();
             await expect(gameManager.finish()).rejects.toHaveProperty('message', "Game was not active.");
@@ -39,9 +39,9 @@ describe("GameManager tests", () => {
         });
     });
 
-    describe("GameVars", async () => {
+    describe("GameVars", () => {
 
-        describe("Team Scope", async () => {
+        describe("Team Scope", () => {
 
             it("Returns the default value when it hasn't been set", async () => {
                 expect(gameManager.getVar(teamVarNumber)).toEqual(teamVarNumber.default);
@@ -74,7 +74,7 @@ describe("GameManager tests", () => {
 
         });
 
-        describe("Game Scope", async () => {
+        describe("Game Scope", () => {
 
             it("Returns the default value when it hasn't been set", async () => {
                 expect(gameManager.getVar(gameVarNumber)).toEqual(gameVarNumber.default);
@@ -90,7 +90,7 @@ describe("GameManager tests", () => {
 
         });
 
-        describe("Step Scope", async () => {
+        describe("Step Scope", () => {
 
             it("Returns the default value when it hasn't been set", async () => {
                 expect(gameManager.getVar(stepVarString, 1)).toEqual(stepVarString.default);
@@ -107,6 +107,34 @@ describe("GameManager tests", () => {
 
         });
 
+        describe("In JS Expressions", () => {
+            it("Gets 'undefined' when requesting a variable that's not set", () => {
+                expect(gameManager.safeEvalScriptExpression("VAR('foobar')")).toBe(undefined);
+            });
+            it("Can do conditionals on team vars", async () => {
+                await gameManager.setVar(teamVarNumber, val => 123456);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') === 123456")).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') === 567890")).toBe(false);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') > 120000")).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') > 567890")).toBe(false);
+            });
+            it("Can do conditionals on game vars", async () => {
+                await gameManager.setVar(gameVarNumber, val => 500);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') === 500")).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') === 200")).toBe(false);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') > 250")).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') > 600")).toBe(false);
+            });
+        });
+
+    });
+
+    describe("safeEvalScriptExpression", () => {
+        it("Can do basic calculations", () => {
+            expect(gameManager.safeEvalScriptExpression("1 + 1")).toBe(2);
+            expect(gameManager.safeEvalScriptExpression("true === true")).toBe(true);
+            expect(gameManager.safeEvalScriptExpression("'hello' === 'goobye'")).toBe(false);
+        });
     });
 
 });

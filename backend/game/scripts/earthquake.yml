@@ -8,7 +8,7 @@
     - "If that seems bleak, don’t worry. It wasn’t real. And there’s more good news: in a mere $$average_completion_time$$ minutes, you and your team will have the basic know-how to prepare for and respond to just such a situation."
     - "Unless an actual earthquake strikes <em>while</em> you’re completing this training scenario. That would be unlucky. Nobody would believe you if you told them that."
 - step: choice
-  id: doneintro
+  key: doneintro
   choices:
     - done: Done
 - include: dev-script

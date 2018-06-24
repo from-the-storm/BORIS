@@ -8,7 +8,7 @@
     - If you perform, you’ll get the chance to face off against the mysterious NEGOTIATOR, THE POWER OF WHOM CANNOT BE SUFFICIENTLY STATED WITHOUT SHOUTING.
     - Generally speaking, earning favor with the Negotiator yields some sort of**7a0_positiveConsequence();?
 - step: choice
-  id: doneintro
+  key: doneintro
   choices:
     - done: Done
 - include: dev-script

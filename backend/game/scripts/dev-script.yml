@@ -9,7 +9,7 @@
   messages:
     - How far do we have to stretch the truth to fit the lifestyles borrowed and overdue?
 - step: choice
-  id: howfar
+  key: howfar
   choices:
     - halfway: Halfway there
     - alone: You said survive alone
@@ -19,7 +19,7 @@
     - Funny how music put times in perspective
     - Add a soundtrack to your life and perfect it. Whenever you are feeling blue keep walking and we can get far.
 - step: choice
-  id: randomsaying
+  key: randomsaying
   correct: again
   choices:
     - where: Where's he get it all from?
