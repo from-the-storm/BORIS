@@ -14,6 +14,8 @@ import { AnyAction } from '../global/actions';
 interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {
+    firstName: string;
+    userId: number;
 }
 interface State {
     showEnterCode: boolean;
@@ -55,6 +57,8 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
                     <button onClick={this.handleJoinTeam}>Join a Team</button>
                     <button onClick={this.handleCreateTeam}>Create a Team</button>
                 </div>
+                <p><code>Your Propel Survey Test Link is <a target="_blank" rel="noopener noreferrer" href={'http://dev.propelsurveysolutions.ca/registration/en/activity/197/1605/?foreignid=' + this.props.userId + '&firstname=' + this.props.firstName + '&consent_field_1=1&consent_field_2=0'}>here</a>.</code></p>
+                <p><code>Your UBC Survey Test Link is <a href={'https://ubc.ca1.qualtrics.com/jfe/form/SV_4OuvXI07vLS4xz7?userID=' + this.props.userId }>here</a>.</code></p>
             </div>;
         }
     }
@@ -103,4 +107,6 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
 }
 
 export const JoinTeamComponent = connect((state: RootState, ownProps: OwnProps) => ({
+    firstName: state.userState.firstName,
+    userId: state.userState.id
 }))(_JoinTeamComponent);
