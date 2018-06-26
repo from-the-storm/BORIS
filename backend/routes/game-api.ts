@@ -66,8 +66,8 @@ apiMethod(GET_UI_STATE, async (data, app, user) => {
         throw new SafeError("No game is currently active.");
     }
     return {
-        uiUpdateSeqId: gameManager.uiUpdateSeqId,
-        state: gameManager.getUiState(),
+        uiUpdateSeqId: gameManager.lastUiUpdateSeqIdsByUserId[user.id],
+        state: gameManager.getUiStateForUser(user.id),
     };
 });
 

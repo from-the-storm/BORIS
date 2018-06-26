@@ -10,9 +10,11 @@ import { loadStepFromData } from '../game/steps/loader';
  */
 export class MockGameManager implements GameManagerStepInterface {
     playerIds: number[];
+    gameActive: boolean;
     vars: Map<string, any>;
     constructor() {
         this.vars = new Map();
+        this.gameActive = true;
         this.pushUiUpdate = jest.fn();
         this.playerIds = [15, 16, 17, 18, 19]; // 5 mock player IDs
     }

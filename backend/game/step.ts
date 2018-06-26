@@ -1,5 +1,5 @@
 import { AnyUiState, StepType } from "../../common/game";
-import { GameManagerStepInterface } from "./manager";
+import { GameManagerStepInterface, GameManager } from "./manager";
 import { GameVar, GameVarScope } from "./vars";
 import { StepResponseRequest } from "../../common/api";
 import { SafeError } from "../routes/api-utils";
@@ -104,6 +104,9 @@ export abstract class Step {
         const timeLeft = this.getVar(resumeAt) - (+new Date());
         if (timeLeft > 0) {
             await new Promise(resolve => setTimeout(resolve, timeLeft));
+        }
+        if (!this.manager.gameActive) {
+            throw new Error("Skipping rest of step run() - game is over.");
         }
     }
 }

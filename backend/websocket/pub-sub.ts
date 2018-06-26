@@ -27,7 +27,7 @@ export function getPubSubClient() {
 ////////////////////////////////////////////////////////////////////////////////
 // Redis pub/sub notifications (used to know when to send notifications to websocket clients)
 interface PubSubMessageData {
-    teamId: number;
+    userIds: number[];
     event: AnyNotification;
 }
 
@@ -49,15 +49,18 @@ export function subscribeToRedis() {
         }
         console.log("pubsub message: ", message);
         // Get the list of relevant users:
-        const teamId: number = data.teamId;
-        const db: BorisDatabase = await getDB();
-        const userIds = (await db.team_members.find({team_id: teamId, is_active: true})).map(tm => tm.user_id);
-        notifyConnectedUsers(userIds, data.event);
+        notifyConnectedUsers(data.userIds, data.event);
     });
 }
 
-export function publishEvent(teamId: number, event: AnyNotification) {
+export function publishEventToUsers(userIds: number[], event: AnyNotification) {
     const redisClient = getRedisClient();
-    const data: PubSubMessageData = {teamId, event};
+    const data: PubSubMessageData = {userIds, event};
     redisClient.publish(eventsChannel, JSON.stringify(data));
+}
+
+export async function publishEventToTeam(teamId: number, event: AnyNotification) {
+    const db: BorisDatabase = await getDB();
+    const userIds = (await db.team_members.find({team_id: teamId, is_active: true})).map(tm => tm.user_id);
+    publishEventToUsers(userIds, event);
 }

@@ -1,5 +1,5 @@
 import 'jest';
-import { TEST_SCENARIO_ID, TEST_TEAM_ID } from '../test-lib/test-data';
+import { TEST_SCENARIO_ID, TEST_TEAM_ID, TESTER1_ID } from '../test-lib/test-data';
 import { BorisDatabase, getDB } from '../db/db';
 import { GameVar, GameVarScope } from "./vars";
 import { GameManager } from './manager';
@@ -21,11 +21,11 @@ describe("GameManager tests", () => {
             scenario_id: TEST_SCENARIO_ID,
             is_active: true,
         })).id;
-        const testContext = {db, publishEvent: () => {}};
+        const testContext = {db, publishEventToUsers: () => {}};
         gameManager = await GameManager.loadGame(gameId, testContext);
     });
     afterEach(async () => {
-        await db.games.update({id: gameId}, {is_active: false});
+        await gameManager.abandon();
     });
 
     describe("finish()", () => {
@@ -109,21 +109,21 @@ describe("GameManager tests", () => {
 
         describe("In JS Expressions", () => {
             it("Gets 'undefined' when requesting a variable that's not set", () => {
-                expect(gameManager.safeEvalScriptExpression("VAR('foobar')")).toBe(undefined);
+                expect(gameManager.safeEvalScriptExpression("VAR('foobar')", TESTER1_ID)).toBe(undefined);
             });
             it("Can do conditionals on team vars", async () => {
                 await gameManager.setVar(teamVarNumber, val => 123456);
-                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') === 123456")).toBe(true);
-                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') === 567890")).toBe(false);
-                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') > 120000")).toBe(true);
-                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') > 567890")).toBe(false);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') === 123456", TESTER1_ID)).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') === 567890", TESTER1_ID)).toBe(false);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') > 120000", TESTER1_ID)).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('teamVarNumber') > 567890", TESTER1_ID)).toBe(false);
             });
             it("Can do conditionals on game vars", async () => {
                 await gameManager.setVar(gameVarNumber, val => 500);
-                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') === 500")).toBe(true);
-                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') === 200")).toBe(false);
-                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') > 250")).toBe(true);
-                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') > 600")).toBe(false);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') === 500", TESTER1_ID)).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') === 200", TESTER1_ID)).toBe(false);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') > 250", TESTER1_ID)).toBe(true);
+                expect(gameManager.safeEvalScriptExpression("VAR('gameVarNumber') > 600", TESTER1_ID)).toBe(false);
             });
         });
 
@@ -131,9 +131,9 @@ describe("GameManager tests", () => {
 
     describe("safeEvalScriptExpression", () => {
         it("Can do basic calculations", () => {
-            expect(gameManager.safeEvalScriptExpression("1 + 1")).toBe(2);
-            expect(gameManager.safeEvalScriptExpression("true === true")).toBe(true);
-            expect(gameManager.safeEvalScriptExpression("'hello' === 'goobye'")).toBe(false);
+            expect(gameManager.safeEvalScriptExpression("1 + 1", TESTER1_ID)).toBe(2);
+            expect(gameManager.safeEvalScriptExpression("true === true", TESTER1_ID)).toBe(true);
+            expect(gameManager.safeEvalScriptExpression("'hello' === 'goobye'", TESTER1_ID)).toBe(false);
         });
     });
 

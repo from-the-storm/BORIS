@@ -1,7 +1,7 @@
 import * as express from 'express';
 
 import { BorisDatabase } from '../db/db';
-import { publishEvent } from './pub-sub';
+import { publishEventToTeam } from './pub-sub';
 import { NotificationType } from '../../common/notifications';
 import { OtherTeamMember } from '../../common/models';
 import { isUserOnline } from './online-users';
@@ -25,7 +25,7 @@ export async function notifyTeamStatusChanged(app: express.Application, teamId: 
             isAdmin: row.is_admin,
         });
     }
-    publishEvent(teamId, {type: NotificationType.TEAM_CHANGED, teamMembers});
+    publishEventToTeam(teamId, {type: NotificationType.TEAM_CHANGED, teamMembers});
 }
 
 /**
