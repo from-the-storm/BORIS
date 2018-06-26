@@ -26,6 +26,8 @@ interface GameManagerInitData {
     scriptSteps: any[];
 }
 
+const EndOfScript = Symbol();
+
 /**
  * Instances of GameManager, one cached per game.
  * Always access GameManager via GameManager.loadGame()
@@ -77,6 +79,13 @@ export class GameManager implements GameManagerStepInterface {
      * map.
      */
     stepRunPromisesByStepId: Map<number, Promise<void>>;
+    /**
+     * We don't want to run two separate instances of this.advanceUsersToNextStep()
+     * simultaneously, nor do we want to terminate the game while it's running,
+     * so this promise is used to avoid that by being unresolved while
+     * advanceUsersToNextStep() runs.
+     */
+    _updateInProgressPromise: Promise<void>;
 
     private constructor(data: GameManagerInitData) {
         this.db = data.context.db;
@@ -99,18 +108,16 @@ export class GameManager implements GameManagerStepInterface {
         });
         this.steps = steps;
         this.stepRunPromisesByStepId = new Map();
+        this._updateInProgressPromise = new Promise(resolve => { resolve(); });
         // Since this GameManager is only initialized once per game,
         // we are either starting a new game or the server has restarted
         // while this game was active. In either case, run the current step:
-        this.playerIds.forEach(userId => {
-            if (this.getStepsSeenByUser(userId).length === 0) {
-                // We're starting a new game. Advance to the first step:
-                const firstStepId = this.steps.keys().next().value;
-                this.advanceUserToStep(userId, firstStepId);
-            } else {
-                // We're resuming a game:
-                this.runCurrentStepForUser(userId);
-            }
+        this.advanceUsersToNextStep().then(() => {
+            this.runCurrentSteps();
+            // Normally advanceUsersToNextStep() calls runCurrentSteps(), but we must explicitly call it
+            // in the case where the server was restarted and we're resuming a game in progress, because
+            // advanceUsersToNextStep() will only call runCurrentSteps() if it changed the current step
+            // for any user.
         });
     }
 
@@ -125,24 +132,36 @@ export class GameManager implements GameManagerStepInterface {
         return this.steps.get(currentStepId);
     }
 
-    private runCurrentStepForUser(userId: number) {
-        // This is not an async fnuction because run() may take
-        // many minutes (or even longer) to complete, by design,
-        // so we don't want the caller to ever await this result.
-        const currentStep = this.getCurrentStepForUser(userId);
-        if (this.stepRunPromisesByStepId.get(currentStep.id) === undefined) {
-            this.stepRunPromisesByStepId.set(currentStep.id, currentStep.run().then(() => {
-                if (currentStep.isComplete && this._gameActive) {
-                    for (const userId of this.getUserIdsWhoAreOnStep(currentStep.id)) {
-                        this.advanceUserToNextstep(userId); // We don't need to wait for this result though.
+    /**
+     * Call the run() method of any steps that any users are currently
+     * on whose run() method has never been called.
+     *
+     * This is not an async function because run() may take
+     * many minutes (or even longer) to complete, by design,
+     * so we don't want the caller to ever await this result.
+     */
+    private runCurrentSteps() {
+        const activeStepIds: Set<number> = new Set();
+        this.playerIds.forEach(userId => { activeStepIds.add(this.getCurrentStepForUser(userId).id); });
+
+        for (const stepId of activeStepIds) {
+            if (this.stepRunPromisesByStepId.get(stepId) === undefined) {
+                const step = this.steps.get(stepId);
+                this.stepRunPromisesByStepId.set(stepId, step.run().then(() => {
+                    if (step.isComplete && this._gameActive) {
+                        this.advanceUsersToNextStep(); // We don't need to wait for this result though.
                     }
+                }, () => {
+                    // The step failed to run.
+                    if (this.gameActive) {
+                        console.error(`Unable to finish running step ${stepId}`);
+                    }
+                }));
+                // And push a UI update for this step:
+                if (step.getUiState() !== null) {
+                    this.pushUiUpdate(step.id);
                 }
-            }, () => {
-                // The step failed to run.
-                if (this.gameActive) {
-                    console.error(`Unable to finish running step ${currentStep.id}`);
-                }
-            }));
+            }
         }
     }
 
@@ -181,9 +200,7 @@ export class GameManager implements GameManagerStepInterface {
         const step = this.steps.get(data.stepId);
         await step.handleResponse(data);
         if (step.isComplete) {
-            for (const userId of usersOnStep) {
-                this.advanceUserToNextstep(userId); // We don't need to wait for this result though.
-            }
+            this.advanceUsersToNextStep(); // We don't need to wait for this result though.
         }
     }
 
@@ -216,62 +233,141 @@ export class GameManager implements GameManagerStepInterface {
         await this.setVar(this._stepsSeenVarForUser(userId), (ss) => ss.concat([stepId]));
     }
 
-    public async advanceUserToStep(userId: number, stepId: number|undefined) {
-        if (stepId === undefined) {
-            // We assume undefined means past the last step in the game,
-            // so this game/script has been completed.
-            await this.finish();
+    /**
+     * For every user, check whether or not they're ready to proceed to the next
+     * step in the script, and then if so, advance them to the next step.
+     * 
+     * Generally if a step is shown to only one user, the rest of the team
+     * must wait until that user has completed the step before they will be
+     * able to proceed. The only exception are steps marked with 'parallel: yes'
+     * in which case the rest of the team can proceed even while the user finishes
+     * that step.
+     */
+    public async advanceUsersToNextStep() {
+        // use a promise to make sure this only runs once at any given time,
+        // and to allow us to fait for it in abandon() or finish()
+        await this._updateInProgressPromise;
+        this._updateInProgressPromise = this._advanceUsersToNextStep();
+        await this._updateInProgressPromise;
+    }
+
+    // Don't call this directly; call advanceUsersToNextStep()
+    private async _advanceUsersToNextStep() {
+        if (!this.gameActive) {
+            return;
         }
-        if (this.getStepsSeenByUser(userId).indexOf(stepId) !== -1) {
-            throw new Error("Cannot revisit a step that has already been seen.");
+
+        let usersWhoseCurrentStepIsComplete: Set<number> = new Set();
+        for (const userId of this.playerIds) {
+            const currentStep = this.getCurrentStepForUser(userId);
+            if (currentStep !== undefined) {
+                if (currentStep.isComplete) {
+                    usersWhoseCurrentStepIsComplete.add(userId);
+                }
+            } else {
+                // Special case - just starting the game, so there is no current step per user:
+                usersWhoseCurrentStepIsComplete.add(userId);
+            }
         }
-        const step = this.steps.get(stepId);
-        // First check if the next step has an 'if' condition:
-        if (step.ifCondition !== undefined) {
-            const result = !!this.safeEvalScriptExpression(step.ifCondition, userId);
-            if (result == false) {
-                await this.advanceUserToStep(userId, this.stepIdFollowing(stepId));
-                return;
+        // Are there any users currently on a step that they haven't yet completed?
+        const anyUserIsSeeingAnIncompleteStep = this.playerIds.length > usersWhoseCurrentStepIsComplete.size;
+
+        // Now, all the users in usersWhoseCurrentStepIsComplete should be
+        // advanced to the next step, if that step isn't blocked. The step
+        // is "blocked" if it is not marked as 'parallel' and there are any
+        // users still on a lower step.
+
+        let newStepIdPushed: number;
+        let moreStepsToConsider = false;
+        for (const userId of usersWhoseCurrentStepIsComplete) {
+            const nextStep = this.computeNextStepForUser(userId);
+            if (nextStep !== EndOfScript) {
+                if (this.getStepsSeenByUser(userId).indexOf(nextStep.id) !== -1) {
+                    throw new Error("Cannot revisit a step that has already been seen.");
+                }
+                // Is that step blocked?
+                const blocked = anyUserIsSeeingAnIncompleteStep && nextStep.isParallel === false;
+                if (!blocked) {
+                    // Advance the user to this step:
+                    if (newStepIdPushed === undefined || newStepIdPushed === nextStep.id) {
+                        await this.pushStepSeenByUser(userId, nextStep.id);
+                        newStepIdPushed = nextStep.id;
+                    } else {
+                        // Otherwise, we'll have to wait, because we already pushed another step
+                        // for some other user, and in doing so, this step may have become blocked.
+                        moreStepsToConsider = true;
+                    }
+                }
+            } else {
+                // This user has completed the game. Has everyone?
+                if (!anyUserIsSeeingAnIncompleteStep) {
+                    // Yep, so the game is done!
+                    await this.finish();
+                    return;
+                }
             }
         }
 
-        // Save the fact that we're about to see this step, then display it:
-        await this.pushStepSeenByUser(userId, step.id);
-        // And run the new step:
-        this.runCurrentStepForUser(userId);
-        if (step.getUiState() !== null) {
-            this.pushUiUpdate(step.id);
+        if (moreStepsToConsider) {
+            await this._advanceUsersToNextStep();
+        }
+        if (newStepIdPushed !== undefined) {
+            // At least one user got moved on to a new step:
+            this.runCurrentSteps();
         }
     }
 
     /**
-     * Advance to the next step, or mark the game as complete if we're already
-     * on the last step.
+     * Recursively compute the next step for the user who is currently on
+     * currentStepId (optional). Will take into account 'if' conditions.
+     * Returns EndOfScript if the user has completed the game.
+     * @param userId 
+     * @param currentStepId 
      */
-    public async advanceUserToNextstep(userId: number) {
-        const nextStepId = this.stepIdFollowing(this.getCurrentStepForUser(userId).id);
-        await this.advanceUserToStep(userId, nextStepId);
-    }
-    /** Get the step ID that follows the given step, or undefined */
-    public stepIdFollowing(stepId: number): number|undefined {
-        // Figure out the ID of the step after the current one:
+    private computeNextStepForUser(userId: number, currentStepId?: number): Step|(typeof EndOfScript) {
         let found = false;
-        for (const nextStepId of this.steps.keys()) {
-            if (found) {
-                // The previous step was the current step, so this is the next step.
-                return nextStepId;
-            } else if (nextStepId === stepId) {
+
+        if (currentStepId === undefined) {
+            const currentStep = this.getCurrentStepForUser(userId);
+            if (currentStep !== undefined) {
+                currentStepId = currentStep.id;
+            } else {
+                // This user is just starting, and hasn't seen any steps yet,
+                // so choose the very first step.
                 found = true;
             }
         }
-        return undefined; // There is no next step; perhaps we've completed the game.
+
+        // Figure out the ID of the step after the current one:
+        for (const nextStepId of this.steps.keys()) {
+            if (found) {
+                // The previous step was the current step, so this is the next step.
+                const step = this.steps.get(nextStepId);
+
+                if (step.ifCondition !== undefined) {
+                    const result = !!this.safeEvalScriptExpression(step.ifCondition, userId);
+                    if (!result) {
+                        // That step can't be the next one because its if condition failed.
+                        // Keep looking, recursively:
+                        return this.computeNextStepForUser(userId, step.id);
+                    }
+                }
+
+                return step;
+
+            } else if (nextStepId === currentStepId) {
+                found = true;
+            }
+        }
+        return EndOfScript; // There is no next step; perhaps we've completed the game.
     }
 
     /**
      * Safely evaluate a JavaScript expression and return the result (synchronously)
      * The JavaScript in question can load any Game or Team-scoped variable using
      * the VAR(key: string) function, which will return undefined if the var has
-     * never been set.
+     * never been set. It can also use the ROLE() function to see if the current
+     * user has been assigned to the role in question.
      * @param jsExpression 
      */
     public safeEvalScriptExpression(jsExpression: string, userId: number): any {
@@ -475,6 +571,7 @@ export class GameManager implements GameManagerStepInterface {
      * Discard any pending changes to the team vars (like # of saltines earned).
      */
     public async abandon() {
+        await this._updateInProgressPromise;
         this._gameActive = false;
         await this.db.games.update({id: this.gameId}, {is_active: false});
         this.publishEventToUsers(this.playerIds, {
@@ -490,6 +587,7 @@ export class GameManager implements GameManagerStepInterface {
      */
     public async finish() {
         // Mark the game as finished, but check that it wasn't already finished or abandoned
+        await this._updateInProgressPromise;
         await this.db.instance.tx('update_team_var', async (task) => {
             let result: any;
             await task.none('START TRANSACTION');

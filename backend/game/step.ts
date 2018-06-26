@@ -17,6 +17,8 @@ export abstract class Step {
     readonly settings: any;
     /** If this is set, it's a JavaScript expression, and this step should be ignored if it evaluates to false. */
     readonly ifCondition: string|undefined;
+    /** If this is true, the rest of the team can proceed on further into the script, while one person responds to this step. */
+    readonly isParallel: boolean;
     public static readonly stepType: StepType = StepType.Unknown;
 
     constructor(args: StepParams) {
@@ -27,6 +29,12 @@ export abstract class Step {
         if (config.if !== undefined) {
             this.ifCondition = config.if;
             delete config.if;
+        }
+        if (config.parallel !== undefined) {
+            this.isParallel = !!config.parallel;
+            delete config.parallel;
+        } else {
+            this.isParallel = false;
         }
         this.settings = this.parseConfig(config);
     }
