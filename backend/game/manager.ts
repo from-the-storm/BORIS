@@ -459,9 +459,10 @@ export class GameManager implements GameManagerStepInterface {
             const scriptSteps = await loadScriptFile(scenario.script);
 
             const team = await context.db.teams.findOne(game.team_id);
-            const teamMembers = await context.db.team_members.find({team_id: team.id, is_active: true}, {columns: ['id']});
+            const teamMembers = await context.db.team_members.find({team_id: team.id, is_active: true}, {columns: ['user_id']});
+            const players = teamMembers.map(entry => ({id: entry.user_id}));
 
-            return new GameManager({context, game, players: teamMembers, teamVars: team.game_vars, scriptSteps});
+            return new GameManager({context, game, players, teamVars: team.game_vars, scriptSteps});
         })();
         gameManagerCache.set(gameId, newGameManagerPromise);
         return await newGameManagerPromise;
