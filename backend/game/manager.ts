@@ -490,7 +490,7 @@ export class GameManager implements GameManagerStepInterface {
      */
     public async finish() {
         // Mark the game as finished, but check that it wasn't already finished or abandoned
-        return this.db.instance.tx('update_team_var', async (task) => {
+        await this.db.instance.tx('update_team_var', async (task) => {
             let result: any;
             await task.none('START TRANSACTION');
             try {
@@ -511,7 +511,13 @@ export class GameManager implements GameManagerStepInterface {
                 [this.teamId, combinedTeamVars]
             );
             await task.none('COMMIT');
-            this._gameActive = false;
+        });
+        this._gameActive = false;
+        this.publishEventToUsers(this.playerIds, {
+            type: NotificationType.GAME_STATUS_CHANGED,
+            scenarioId: 0,
+            scenarioName: "",
+            isActive: false,
         });
     }
 }
