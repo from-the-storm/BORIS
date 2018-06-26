@@ -269,49 +269,77 @@ export class GameManager implements GameManagerStepInterface {
                 usersWhoseCurrentStepIsComplete.add(userId);
             }
         }
-        // Are there any users currently on a step that they haven't yet completed?
-        const anyUserIsSeeingAnIncompleteStep = this.playerIds.length > usersWhoseCurrentStepIsComplete.size;
 
-        // Now, all the users in usersWhoseCurrentStepIsComplete should be
-        // advanced to the next step, if that step isn't blocked. The step
-        // is "blocked" if it is not marked as 'parallel' and there are any
-        // users still on a lower step.
-
-        let newStepIdPushed: number;
         let moreStepsToConsider = false;
-        for (const userId of usersWhoseCurrentStepIsComplete) {
-            const nextStep = this.computeNextStepForUser(userId);
-            if (nextStep !== EndOfScript) {
-                if (this.getStepsSeenByUser(userId).indexOf(nextStep.id) !== -1) {
-                    throw new Error("Cannot revisit a step that has already been seen.");
-                }
-                // Is that step blocked?
-                const blocked = anyUserIsSeeingAnIncompleteStep && nextStep.isParallel === false;
-                if (!blocked) {
-                    // Advance the user to this step:
-                    if (newStepIdPushed === undefined || newStepIdPushed === nextStep.id) {
-                        await this.pushStepSeenByUser(userId, nextStep.id);
-                        newStepIdPushed = nextStep.id;
-                    } else {
-                        // Otherwise, we'll have to wait, because we already pushed another step
-                        // for some other user, and in doing so, this step may have become blocked.
-                        moreStepsToConsider = true;
+        let newStepsPushed = false;
+        do {
+            // Are there any users currently on a step that they haven't yet completed?
+            const anyUserIsSeeingAnIncompleteStep = this.playerIds.length > usersWhoseCurrentStepIsComplete.size;
+
+            // Now, all the users in usersWhoseCurrentStepIsComplete should be
+            // advanced to the next step, if that step isn't blocked. The step
+            // is "blocked" if it is not marked as 'parallel' and there are any
+            // users still on a lower step.
+
+            // However, as soon as we advance some of the users to a new step,
+            // others may not be eligible to advance anymore.
+            // 'toAdvance' stores the pairs of [stepId, userIds] that are
+            // potentially eligible to advance.
+            const toAdvance: {[stepId: number]: number[]} = {}; 
+            for (const userId of usersWhoseCurrentStepIsComplete) {
+                const nextStep = this.computeNextStepForUser(userId);
+                if (nextStep !== EndOfScript) {
+                    if (this.getStepsSeenByUser(userId).indexOf(nextStep.id) !== -1) {
+                        throw new Error("Cannot revisit a step that has already been seen.");
+                    }
+                    // Is that step blocked?
+                    const blocked = anyUserIsSeeingAnIncompleteStep && nextStep.isParallel === false;
+                    if (!blocked) {
+                        // Plan to move this user to this step:
+                        if (toAdvance[nextStep.id] === undefined) {
+                            toAdvance[nextStep.id] = [];
+                        }
+                        toAdvance[nextStep.id].push(userId);
+                    }
+                } else {
+                    // This user has completed the game. Has everyone?
+                    if (!anyUserIsSeeingAnIncompleteStep) {
+                        // Yep, so the game is done!
+                        await this.finish();
+                        return;
                     }
                 }
-            } else {
-                // This user has completed the game. Has everyone?
-                if (!anyUserIsSeeingAnIncompleteStep) {
-                    // Yep, so the game is done!
-                    await this.finish();
-                    return;
-                }
             }
-        }
 
-        if (moreStepsToConsider) {
-            await this._advanceUsersToNextStep();
-        }
-        if (newStepIdPushed !== undefined) {
+            const numStepsCurrentlyReadyToAdvance = Object.keys(toAdvance).length;
+
+            if (numStepsCurrentlyReadyToAdvance > 0) {
+
+                // The big problem is that 'toAdvance' is not sorted... we need to find the first
+                // step (coming easrliest in the script), and advance all eligible users to that
+                // step, then re-evaluate everything in light of that change.
+                let earliestStepId: number;
+                let userIdsForEarliestStep: number[];
+                for (const stepId of this.steps.keys()) {
+                    if (stepId in toAdvance) {
+                        earliestStepId = stepId;
+                        userIdsForEarliestStep = toAdvance[stepId];
+                        break;
+                    }
+                }
+
+                for (const userId of userIdsForEarliestStep) {
+                    await this.pushStepSeenByUser(userId, earliestStepId);
+                    usersWhoseCurrentStepIsComplete.delete(userId);
+                }
+                newStepsPushed = true;
+            }
+
+            moreStepsToConsider = numStepsCurrentlyReadyToAdvance > 1;
+
+        } while (moreStepsToConsider);
+
+        if (newStepsPushed) {
             // At least one user got moved on to a new step:
             this.runCurrentSteps();
         }
