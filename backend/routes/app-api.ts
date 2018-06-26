@@ -4,7 +4,6 @@
 import * as express from 'express';
 
 import '../express-extended';
-import {config} from '../config';
 import {BorisDatabase} from '../db/db';
 import { InitialStateResponse, GET_INITIAL_STATE } from '../../common/api';
 import { makeApiHelper, RequireUser } from './api-utils';
@@ -48,6 +47,7 @@ getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
         result.user = {
             first_name: user.first_name,
             id: user.id,
+            email: user.email,
         };
         const activeTeamMembership = await db.team_members.findOne({user_id: user.id, is_active: true});
         if (activeTeamMembership !== null) {

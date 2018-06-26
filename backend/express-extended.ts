@@ -4,6 +4,7 @@ import * as WebSocket from 'ws';
 export interface UserType {
     first_name: string;
     id: number;
+    email: string;
 }
 
 // Declare our additions to the Express API:

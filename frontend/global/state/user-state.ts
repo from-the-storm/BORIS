@@ -1,5 +1,4 @@
 import {Record} from 'immutable';
-import {Dispatch} from 'redux';
 import {UserStateActions as Actions} from './user-state-actions';
 import { AnyAction } from '../actions';
 
@@ -11,6 +10,7 @@ export class UserState extends Record({
     isLoggedIn: false,
     firstName: "Jamie",
     id: 0,
+    email: "",
 }) {
     // ...
 }
@@ -32,6 +32,7 @@ export function userStateReducer(state?: UserState, action?: AnyAction): UserSta
             isLoggedIn: true,
             firstName: action.firstName,
             id: action.id,
+            email: action.email,
         });
     case Actions.LOGOUT:
         // User has logged out:

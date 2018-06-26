@@ -90,6 +90,9 @@
 }
 
 .game {
+    .content {
+        float: left;
+    }
     header {
         h1 {
             color: darken($white, 20%);

@@ -162,7 +162,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <tbody>
                             <tr>
                                 <td>1</td>
-                                <td>Jellied Jimmies<span>Organization</span></td>
+                                <td>Jellied Cranberries<span>Organization</span></td>
                                 <td>568</td>
                             </tr>
                         </tbody>
