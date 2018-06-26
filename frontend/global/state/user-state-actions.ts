@@ -13,6 +13,7 @@ interface LoginActionType {
     type: UserStateActions.LOGIN;
     firstName: string;
     id: number;
+    email: string;
 }
 interface LogoutActionType {
     type: UserStateActions.LOGOUT;

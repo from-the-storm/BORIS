@@ -120,7 +120,7 @@ describe("BORIS Integration tests", () => {
         // Now we should see the "Choose Scenario" page:
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
         // Go back to the home area:
-        await driver.findElement(buttonWithText("◀")).then(btn => btn.click());
+        await driver.findElement({css: 'img[alt*=Back]'}).then(btn => btn.click());
         const getTeamCodeFromheader = async () => {
             const loggedInheader = await driver.findElement({css: 'header .loggedin'});
             const text = (await loggedInheader.getText()).replace('\n', ' ');
