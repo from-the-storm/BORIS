@@ -1,5 +1,5 @@
 import { AnyUiState, StepType } from "../../common/game";
-import { GameManagerStepInterface } from "./manager";
+import { GameManagerStepInterface, GameManager } from "./manager";
 import { GameVar, GameVarScope } from "./vars";
 import { StepResponseRequest } from "../../common/api";
 import { SafeError } from "../routes/api-utils";
@@ -17,6 +17,8 @@ export abstract class Step {
     readonly settings: any;
     /** If this is set, it's a JavaScript expression, and this step should be ignored if it evaluates to false. */
     readonly ifCondition: string|undefined;
+    /** If this is true, the rest of the team can proceed on further into the script, while one person responds to this step. */
+    readonly isParallel: boolean;
     public static readonly stepType: StepType = StepType.Unknown;
 
     constructor(args: StepParams) {
@@ -28,6 +30,12 @@ export abstract class Step {
             this.ifCondition = config.if;
             delete config.if;
         }
+        if (config.parallel !== undefined) {
+            this.isParallel = !!config.parallel;
+            delete config.parallel;
+        } else {
+            this.isParallel = false;
+        }
         this.settings = this.parseConfig(config);
     }
 
@@ -37,6 +45,9 @@ export abstract class Step {
     protected async setVar<T>(variable: GameVar<T>, updaterOrValue: ((val: T) => T)|T): Promise<T> {
         const updater = (typeof updaterOrValue === 'function') ? updaterOrValue : () => updaterOrValue;
         return this.manager.setVar(variable, updater, this.id);
+    }
+    protected getPlayerIds(): number[] {
+        return this.manager.playerIds;
     }
 
     protected parseConfig(config: any) {
@@ -101,6 +112,9 @@ export abstract class Step {
         const timeLeft = this.getVar(resumeAt) - (+new Date());
         if (timeLeft > 0) {
             await new Promise(resolve => setTimeout(resolve, timeLeft));
+        }
+        if (!this.manager.gameActive) {
+            throw new Error("Skipping rest of step run() - game is over.");
         }
     }
 }

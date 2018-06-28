@@ -9,10 +9,14 @@ import { loadStepFromData } from '../game/steps/loader';
  * A mock for GameManager that can be used for testing steps.
  */
 export class MockGameManager implements GameManagerStepInterface {
+    playerIds: number[];
+    gameActive: boolean;
     vars: Map<string, any>;
     constructor() {
         this.vars = new Map();
+        this.gameActive = true;
         this.pushUiUpdate = jest.fn();
+        this.playerIds = [15, 16, 17, 18, 19]; // 5 mock player IDs
     }
     public async pushUiUpdate(stepId: number) { /* This will get replaced with a Jest mock in the constructor */ }
     private keyForVar(variable: GameVar<any>, stepId?: number): string {
@@ -32,8 +36,8 @@ export class MockGameManager implements GameManagerStepInterface {
     }
 
     /** A helper method for test cases to use to load Steps from YAML strings */
-    static loadStepFromYaml(yamlData: string): Step {
+    static loadStepFromYaml(yamlData: string, manager = new MockGameManager()): Step {
         const data = yaml.safeLoad(yamlData);
-        return loadStepFromData(data[0], 1, new MockGameManager() as any as GameManager);
+        return loadStepFromData(data[0], 1, manager);
     }
 }
