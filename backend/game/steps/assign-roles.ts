@@ -2,6 +2,8 @@ import { StepType } from "../../../common/game";
 import { Step } from "../step";
 import { GameVar, GameVarScope } from "../vars";
 import { GameManagerStepInterface } from "../manager";
+import { getTeamVar } from "../team-vars";
+import { BorisDatabase } from "../../db/db";
 
 // For now roles are hard-coded:
 const roleAssignmentsByNumPlayers: {[idx: number]: string[]} = Object.freeze({
@@ -99,10 +101,21 @@ export class AssignRolesStep extends Step {
 }
 
 /**
- * Given a role ID (like 'B'), return the ID of the player that has that role.
+ * Given a role ID (like 'B'), return the ID of the player that has that role in the given game
  * @param gameManager The GameManager
  * @param roleId The role letter, like 'B' for The Burdened
  */
 export function getPlayerIdWithRole(gameManager: GameManagerStepInterface, roleId: string): number|undefined {
     return gameManager.getVar(AssignRolesStep.roleVarFor(roleId));
+}
+
+/**
+ * Given a role ID, return the ID of the player who has that role on a given team, as of the last game
+ * that they played.
+ * @param roleId The role in question, e.g. 'D'
+ * @param teamId The ID of the team in question
+ * @param db the Boris Database
+ */
+export async function getUserIdWithRoleForTeam(roleId: string, teamId: number, db: BorisDatabase): Promise<number|undefined> {
+    return await getTeamVar(AssignRolesStep.roleVarFor(roleId), teamId, db);
 }

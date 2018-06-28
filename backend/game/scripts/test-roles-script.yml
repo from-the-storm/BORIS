@@ -1,0 +1,19 @@
+- step: assignroles
+- step: message
+  messages:
+    - "This should always be the first message. Sent to all but Doomsayer"
+  if: "!ROLE('D')"
+  parallel: yes
+- step: message
+  messages:
+    - "This is sent to the Doomsayer only."
+  if: ROLE('D')
+# Then the script should pause until the Doomsayer chooses 'done':
+- step: choice
+  key: d-donegreeting
+  choices:
+    - x: Done
+  if: ROLE('D')
+- step: message
+  messages:
+    - "This is sent to everyone"

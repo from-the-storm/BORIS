@@ -79,13 +79,15 @@ export class GameManager implements GameManagerStepInterface {
      * map.
      */
     stepRunPromisesByStepId: Map<number, Promise<void>>;
+    _stepRunPendingCount: number;
     /**
      * We don't want to run two separate instances of this.advanceUsersToNextStep()
      * simultaneously, nor do we want to terminate the game while it's running,
      * so this promise is used to avoid that by being unresolved while
      * advanceUsersToNextStep() runs.
      */
-    _updateInProgressPromise: Promise<void>;
+    _advanceUsersToNextStepPromise: Promise<void>;
+    _advanceUsersToNextStepPendingCount: number;
 
     private constructor(data: GameManagerInitData) {
         this.db = data.context.db;
@@ -108,7 +110,9 @@ export class GameManager implements GameManagerStepInterface {
         });
         this.steps = steps;
         this.stepRunPromisesByStepId = new Map();
-        this._updateInProgressPromise = new Promise(resolve => { resolve(); });
+        this._stepRunPendingCount = 0;
+        this._advanceUsersToNextStepPromise = new Promise(resolve => { resolve(); });
+        this._advanceUsersToNextStepPendingCount = 0;
         // Since this GameManager is only initialized once per game,
         // we are either starting a new game or the server has restarted
         // while this game was active. In either case, run the current step:
@@ -147,15 +151,18 @@ export class GameManager implements GameManagerStepInterface {
         for (const stepId of activeStepIds) {
             if (this.stepRunPromisesByStepId.get(stepId) === undefined) {
                 const step = this.steps.get(stepId);
+                this._stepRunPendingCount++;
                 this.stepRunPromisesByStepId.set(stepId, step.run().then(() => {
                     if (step.isComplete && this._gameActive) {
                         this.advanceUsersToNextStep(); // We don't need to wait for this result though.
                     }
+                    this._stepRunPendingCount--;
                 }, () => {
                     // The step failed to run.
                     if (this.gameActive) {
                         console.error(`Unable to finish running step ${stepId}`);
                     }
+                    this._stepRunPendingCount--;
                 }));
                 // And push a UI update for this step:
                 if (step.getUiState() !== null) {
@@ -243,12 +250,19 @@ export class GameManager implements GameManagerStepInterface {
      * in which case the rest of the team can proceed even while the user finishes
      * that step.
      */
-    public async advanceUsersToNextStep() {
+    public advanceUsersToNextStep() {
         // use a promise to make sure this only runs once at any given time,
-        // and to allow us to fait for it in abandon() or finish()
-        await this._updateInProgressPromise;
-        this._updateInProgressPromise = this._advanceUsersToNextStep();
-        await this._updateInProgressPromise;
+        // and to allow us to wait for it in abandon() or finish()
+        if (this._advanceUsersToNextStepPendingCount++ === 0) {
+            this._advanceUsersToNextStepPromise = new Promise(async (resolve) => {
+                while (this._advanceUsersToNextStepPendingCount > 0) {
+                    await this._advanceUsersToNextStep();
+                    this._advanceUsersToNextStepPendingCount--;
+                }
+                resolve();
+            });
+        }
+        return this._advanceUsersToNextStepPromise;
     }
 
     // Don't call this directly; call advanceUsersToNextStep()
@@ -600,7 +614,7 @@ export class GameManager implements GameManagerStepInterface {
      * Discard any pending changes to the team vars (like # of saltines earned).
      */
     public async abandon() {
-        await this._updateInProgressPromise;
+        await this._advanceUsersToNextStepPromise;
         this._gameActive = false;
         await this.db.games.update({id: this.gameId}, {is_active: false});
         this.publishEventToUsers(this.playerIds, {
@@ -616,7 +630,7 @@ export class GameManager implements GameManagerStepInterface {
      */
     public async finish() {
         // Mark the game as finished, but check that it wasn't already finished or abandoned
-        await this._updateInProgressPromise;
+        await this._advanceUsersToNextStepPromise;
         await this.db.instance.tx('update_team_var', async (task) => {
             let result: any;
             await task.none('START TRANSACTION');
@@ -646,5 +660,16 @@ export class GameManager implements GameManagerStepInterface {
             scenarioName: "",
             isActive: false,
         });
+    }
+
+    /**
+     * Wait for all pending steps that can be run to be run.
+     * This is *** only for use in tests ***
+     */
+    public async allPendingStepsFlushed() {
+        while(this._stepRunPendingCount + this._advanceUsersToNextStepPendingCount > 0) {
+            await Promise.all(this.stepRunPromisesByStepId.values());
+            await this._advanceUsersToNextStepPromise;
+        }
     }
 }
