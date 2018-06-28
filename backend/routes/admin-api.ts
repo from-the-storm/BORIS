@@ -9,7 +9,7 @@ import { config } from '../config';
 import { BorisDatabase } from '../db/db';
 import { BasicUser, Team, scenarioFromDbScenario, Game } from '../db/models';
 import { ApiMethod } from '../../common/api';
-import { makeApiHelper, RequireUser } from './api-utils';
+import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { OtherTeamMember, Scenario } from '../../common/models';
 import { isUserOnline } from '../websocket/online-users';
 
@@ -81,11 +81,32 @@ export const LIST_TEAMS = defineListMethod<Team>('teams', async (criteria, query
     return queryWithCount(db.teams, criteria, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
 });
 
-export const LIST_SCENARIOS = defineListMethod<Scenario>('scenarios', async (criteria, queryOptions, db, app, user) => {
-    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'description_html', 'start_point', ];
+interface ScenarioWithScript extends Scenario {
+    script: string;
+}
+
+export const LIST_SCENARIOS = defineListMethod<ScenarioWithScript>('scenarios', async (criteria, queryOptions, db, app, user) => {
+    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'script', 'description_html', 'start_point', ];
     const {data, count} = await queryWithCount(db.scenarios, {...criteria, is_active: true}, {...queryOptions, fields});
-    const scenarios = data.map( scenarioFromDbScenario );
+    const scenarios = data.map( s => ({...s, start_point: {lat: s.start_point.x, lng: s.start_point.y}}) );
     return { data: scenarios, count, };
+});
+
+export const LIST_SCRIPTS = defineListMethod<{name: string}>('scripts', async (criteria, queryOptions, db, app, user) => {
+    return queryWithCount(db.scripts, criteria, {...queryOptions, fields: ['name']});
+});
+
+export const GET_SCRIPT: ApiMethod<{id: string}, {name: string, script_yaml: string}> = {path: `/api/admin/scripts/:id`, type: 'GET'};
+defineMethod(GET_SCRIPT, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const script = await db.scripts.findOne({name: data.id});
+    if (script === null) {
+        throw new SafeError(`Script "${data.id}" not found.`, 404);
+    }
+    return {
+        name: script.name,
+        script_yaml: script.script_yaml,
+    };
 });
 
 export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {

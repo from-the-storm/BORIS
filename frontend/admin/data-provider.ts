@@ -78,6 +78,18 @@ const convertDataProviderRequestToHTTP = (type: string, resource: string, params
  */
 async function convertHTTPResponseToDataProvider(response: Response, type: string, resource: string, params: any) {
     const json = await response.json();
+
+    // Hack: Our 'scripts' resources have a custom ID field.
+    // https://marmelab.com/react-admin/FAQ.html#can-i-have-custom-identifiersprimary-keys-for-my-resources
+    if (resource === 'scripts') {
+        if (Array.isArray(json.data)) {
+            json.data.forEach((script: any) => { script.id = script.name; });
+        } else {
+            json.id = json.name;
+        }
+    }
+
+
     switch (type) {
     case GET_LIST:
         return {

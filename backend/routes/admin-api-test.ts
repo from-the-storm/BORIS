@@ -1,7 +1,7 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES } from './admin-api';
+import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS } from './admin-api';
 import { ApiMethod } from '../../common/api';
 import { createTeam } from '../test-lib/test-data';
 
@@ -72,6 +72,14 @@ describe("Admin API tests", () => {
         describe("List Scenarios (GET /api/admin/scenarios)", async () => {
 
             checkSecurity(LIST_SCENARIOS);
+
+        });
+    });
+
+    describe("Scripts", async () => {
+        describe("List Scripts (GET /api/admin/scripts)", async () => {
+
+            checkSecurity(LIST_SCRIPTS);
 
         });
     });

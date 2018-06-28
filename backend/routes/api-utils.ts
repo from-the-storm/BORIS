@@ -67,14 +67,14 @@ export function makeApiHelper(router: express.Router, mountPath: RegExp, require
                 if (!req.body) {
                     throw new SafeError("Missing JSON body.");
                 }
-                const data: RequestType = req.body;
+                const data: RequestType = {...req.body, ...req.params};
                 const result = await fn(data, req.app, req.user);
                 res.json(result);
             }));
         } else if (def.type === 'GET') {
             router.get(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
                 await checkUserLoggedIn(req);
-                const data: RequestType = req.query;
+                const data: RequestType = {...req.query, ...req.params};
                 const result = await fn(data, req.app, req.user);
                 res.json(result);
             }));
