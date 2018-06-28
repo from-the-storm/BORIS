@@ -17,6 +17,7 @@ export async function migrate() {
         console.log("Applying main migrations");
         const migrations = [
             '001-initial-up',
+            '002-admin-users',
         ];
         for (const migrationId of migrations) {
             const filePath = path.join(__dirname, 'schema', `${migrationId}.sql`);

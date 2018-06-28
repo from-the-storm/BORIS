@@ -28,6 +28,7 @@ import { rpcHandler } from './websocket/connections';
 
 // Declare our additions to the Express API:
 import {UserType} from './express-extended';
+import { isAdminUser } from './routes/api-utils';
 
 const app = express();
 const {getWss} = expressWebsocket(app);
@@ -176,7 +177,12 @@ app.use('/api/app', appAPIRouter);
 
 // The Admin single page React app:
 app.use('/api/admin', appAdminRouter);
-app.get(/\/admin(\/.*)?/, (req, res) => { res.render('react-admin-app'); });
+app.get(/\/admin(\/.*)?/, async (req, res, next) => {
+    if (!await isAdminUser(req)) {
+        return next();
+    }
+    res.render('react-admin-app');
+});
 
 if (environment === 'test') {
     app.use('/test-utils', testHelperRouter);

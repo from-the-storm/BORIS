@@ -2,9 +2,15 @@ import * as express from 'express';
 
 import { ApiMethod } from '../../common/api';
 import { UserType } from '../express-extended';
+import { BorisDatabase } from '../db/db';
 
 /** An error whose message is safe to show to the user */
 export class SafeError extends Error {
+    httpStatusCode?: number;
+    constructor(message: string, httpStatusCode?: number) {
+        super(message);
+        this.httpStatusCode = httpStatusCode;
+    }
 }
 
 /**
@@ -21,23 +27,32 @@ function apiErrorWrapper(fn: (req: express.Request, res: express.Response) => Pr
             await fn(req, res);
         } catch (err) {
             console.error(err);
-            res.status(400).json({ error: err instanceof SafeError ? err.message : "An internal error occurred handling this API method." });
-            return;
+            if (err instanceof SafeError) {
+                res.status(err.httpStatusCode || 400).json({ error: err.message });
+            } else {
+                res.status(400).json({ error: "An internal error occurred handling this API method." });
+            }
         }
     };
 }
 
 export enum RequireUser { Required, AnonymousOnly, UserOptional, AdminUserRequired };
 
+export async function isAdminUser(req: express.Request) {
+    const db: BorisDatabase = req.app.get('db');
+    const isAdminResult = await db.admin_users.findOne({user_id: req.user.id});
+    return (isAdminResult !== null && isAdminResult.user_id === req.user.id);
+}
+
 export function makeApiHelper(router: express.Router, mountPath: RegExp, requireUser: RequireUser = RequireUser.Required) {
 
-    function checkUserLoggedIn(req: express.Request) {
+    async function checkUserLoggedIn(req: express.Request) {
         if (requireUser === RequireUser.Required || requireUser == RequireUser.AdminUserRequired) {
             if (!req.user) {
-                throw new SafeError("You are not logged in.");
+                throw new SafeError("You are not logged in.", 401);
             }
-            if (requireUser == RequireUser.AdminUserRequired && req.user.id !== 1) {
-                throw new SafeError("You are not an admin user.");
+            if (requireUser == RequireUser.AdminUserRequired && !(await isAdminUser(req))) {
+                throw new SafeError("You are not an admin user.", 403);
             }
         } else if (requireUser === RequireUser.AnonymousOnly && req.user) {
             throw new SafeError("You are already logged in.");
@@ -48,7 +63,7 @@ export function makeApiHelper(router: express.Router, mountPath: RegExp, require
         const path = def.path.replace(mountPath, '');
         if (def.type === 'POST') {
             router.post(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
-                checkUserLoggedIn(req);
+                await checkUserLoggedIn(req);
                 if (!req.body) {
                     throw new SafeError("Missing JSON body.");
                 }
@@ -58,7 +73,7 @@ export function makeApiHelper(router: express.Router, mountPath: RegExp, require
             }));
         } else if (def.type === 'GET') {
             router.get(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {
-                checkUserLoggedIn(req);
+                await checkUserLoggedIn(req);
                 const data: RequestType = req.query;
                 const result = await fn(data, req.app, req.user);
                 res.json(result);
