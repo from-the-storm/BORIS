@@ -2,7 +2,7 @@ import 'jest';
 import { getUserIdWithRoleForTeam } from './assign-roles';
 import { BorisDatabase, getDB } from '../../db/db';
 import { GameManager } from '../manager';
-import { TEST_TEAM_ID, TESTER1_ID, TESTER2_ID, TESTER3_ID } from '../../test-lib/test-data';
+import { createTeam } from '../../test-lib/test-data';
 import { DBScenario } from '../../db/models';
 import { AnyNotification, NotificationType } from '../../../common/notifications';
 import { AnyUiState, StepType } from '../../../common/game';
@@ -41,24 +41,26 @@ describe("Assign Roles Integration tests", () => {
 
     describe("Role assignments", () => {
         it("If the team completes the mission, the assigned roles are remembered so that they can affect the Market etc.", async () => {
-            expect(await getUserIdWithRoleForTeam('D', TEST_TEAM_ID, db)).toBeUndefined(); // If this is not the case, we need better test isolation. Use new users + teams for this test instead of a shared user.
-            const {manager, status} = await GameManager.startGame(TEST_TEAM_ID, scenario.id, testContext);
+            const {teamId, user1, user2, user3} = await createTeam(db, 3);
+            expect(await getUserIdWithRoleForTeam('D', teamId, db)).toBeUndefined();
+            const {manager, status} = await GameManager.startGame(teamId, scenario.id, testContext);
             await manager.allPendingStepsFlushed();
             // Now one of the three users should be the doomSayer
-            const doomsayerUserId = await getUserIdWithRoleForTeam('D', TEST_TEAM_ID, db);
+            const doomsayerUserId = await getUserIdWithRoleForTeam('D', teamId, db);
             expect(doomsayerUserId).not.toBeUndefined();
-            expect([TESTER1_ID, TESTER2_ID, TESTER3_ID]).toContain(doomsayerUserId);
+            expect([user1.id, user2.id, user3.id]).toContain(doomsayerUserId);
             // And that should persist after the game:
             await manager.finish();
-            expect(await getUserIdWithRoleForTeam('D', TEST_TEAM_ID, db)).toBe(doomsayerUserId);
+            expect(await getUserIdWithRoleForTeam('D', teamId, db)).toBe(doomsayerUserId);
         });
     });
 
     describe("Role-specific messages", () => {
         it("Sends the first few steps to the correct roles in the correct order", async () =>{
-            const {manager} = await GameManager.startGame(TEST_TEAM_ID, scenario.id, testContext);
+            const {teamId} = await createTeam(db, 3);
+            const {manager} = await GameManager.startGame(teamId, scenario.id, testContext);
             await manager.allPendingStepsFlushed();
-            const doomsayerUserId = await getUserIdWithRoleForTeam('D', TEST_TEAM_ID, db);
+            const doomsayerUserId = await getUserIdWithRoleForTeam('D', teamId, db);
             expect(doomsayerUserId).not.toBeUndefined();
             // Check that the first message was the one sent to the two non-doomsayers:
             for (let i = 0; i < 2; i++) {
