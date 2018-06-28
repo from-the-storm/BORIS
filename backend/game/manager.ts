@@ -7,7 +7,7 @@ import { loadStepFromData } from "./steps/loader";
 import { AnyUiState } from "../../common/game";
 import { publishEventToUsers } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
-import { loadScriptFile } from "./script-loader";
+import { loadScript } from "./script-loader";
 import { SafeError } from "../routes/api-utils";
 import { GameStatus, StepResponseRequest } from "../../common/api";
 import { getPlayerIdWithRole } from "./steps/assign-roles";
@@ -470,7 +470,7 @@ export class GameManager implements GameManagerStepInterface {
             }
 
             const scenario = await context.db.scenarios.findOne({id: game.scenario_id, is_active: true});
-            const scriptSteps = await loadScriptFile(scenario.script);
+            const scriptSteps = await loadScript(context.db, scenario.script);
 
             const team = await context.db.teams.findOne(game.team_id);
             const teamMembers = await context.db.team_members.find({team_id: team.id, is_active: true}, {columns: ['user_id']});
