@@ -18,6 +18,7 @@ export const router = express.Router();
 const defineMethod = makeApiHelper(router, /^\/api\/admin/, RequireUser.AdminUserRequired);
 
 interface ListRequest {
+    // Since these are query params, everything is typed as a string.
     sort?: string;
     page?: string;
     perPage?: string;
@@ -38,12 +39,13 @@ function defineListMethod<T>(path: string, fn: (criteria: any, queryOptions: mas
     defineMethod(methodDefinition, async(data, app, user) => {
         const db: BorisDatabase = app.get("db");
         const limit = Math.max(1, data.perPage ? parseInt(data.perPage, 10) : 100);
-        const offset = Math.min(data.page ? (parseInt(data.page, 10) - 1) * limit : 0, 0);
+        const offset = Math.max(0, data.page ? (parseInt(data.page, 10) - 1) * limit : 0);
         const criteria = {};
         const queryOptions = {offset, limit};
         const result: ListResponse<T> = await fn(criteria, queryOptions, db, user, app);
         return result;
     });
+    return methodDefinition;
 }
 /**
  * Find all mathing obects from a PostgreSQL/MassiveJS table, also returning the total
@@ -71,22 +73,22 @@ async function queryWithCount<T>(table: massive.Table<T>, criteria: any, _option
     }
 }
 
-defineListMethod<BasicUser>('users', async (criteria, queryOptions, db, app, user) => {
+export const LIST_USERS = defineListMethod<BasicUser>('users', async (criteria, queryOptions, db, app, user) => {
     return queryWithCount(db.users, criteria, {...queryOptions, fields: ['id', 'first_name', 'email', 'created']});
 });
 
-defineListMethod<Team>('teams', async (criteria, queryOptions, db, app, user) => {
+export const LIST_TEAMS = defineListMethod<Team>('teams', async (criteria, queryOptions, db, app, user) => {
     return queryWithCount(db.teams, criteria, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
 });
 
-defineListMethod<Scenario>('scenarios', async (criteria, queryOptions, db, app, user) => {
+export const LIST_SCENARIOS = defineListMethod<Scenario>('scenarios', async (criteria, queryOptions, db, app, user) => {
     const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'description_html', 'start_point', ];
     const {data, count} = await queryWithCount(db.scenarios, {...criteria, is_active: true}, {...queryOptions, fields});
     const scenarios = data.map( scenarioFromDbScenario );
     return { data: scenarios, count, };
 });
 
-defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {
+export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {
     const fields = ['id', 'team_id', 'scenario_id', 'started', 'is_active', 'finished'];
     const {data, count} = await queryWithCount(db.games, {...criteria}, {...queryOptions, fields});
     return { data, count, };

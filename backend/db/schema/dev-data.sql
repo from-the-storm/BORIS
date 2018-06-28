@@ -35,6 +35,8 @@ INSERT INTO users (first_name, email, survey_data) VALUES
         }'::jsonb
     );
 
+INSERT INTO admin_users (user_id) SELECT id AS user_id FROM users WHERE email = 'alice@example.com';
+
 INSERT INTO scenarios (id, name, script, duration_min, difficulty, start_point_name, start_point, description_html) VALUES 
     (1, 'Earthquake Preparedness', 'earthquake', 30, 'easy', 'SE False Creek', '(49.273373, -123.102657)', '<p>Conquer your fears of a quaking earth with the EARTHQUAKE PREP scenario.</p><p>This scenario is around 1 km long and starts in front of Science World.</p>'),
     (2, 'Finding Water', 'water', 90, 'hard', 'NW Marine Drive, UBC', '(49.277565, -123.226386)', '<p>When the world ends, what will you do about water? By the end of the FINDING WATER scenario, that question will be sort of answered.</p><p>This scenario is around 4.5 km long, has some fairly steep uphill sections, and starts at UBC off NW Marine Drive.</p>'),
