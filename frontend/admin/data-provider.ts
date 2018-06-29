@@ -6,7 +6,6 @@ import {
     CREATE,
     UPDATE,
     DELETE,
-    fetchUtils,
 } from 'react-admin';
 import { makeQueryString } from '../api';
 
@@ -110,11 +109,19 @@ async function convertHTTPResponseToDataProvider(response: Response, type: strin
  * @returns {Promise} the Promise for response
  */
 export async function dataProvider(type: string, resource: string, params: any): Promise<any> {
-    const { fetchJson } = fetchUtils;
     const { url, options } = convertDataProviderRequestToHTTP(type, resource, params);
     const response = await fetch(url, {
         credentials: 'include',
         ...options
     });
+    if (!response.ok) {
+        let jsonData: any;
+        try {
+            jsonData = await response.json();
+        } catch (error) {
+            throw new Error("Unable to get a valid JSON response from the API.");
+        }
+        throw new Error(jsonData.error || "Unknown error");
+    }
     return convertHTTPResponseToDataProvider(response, type, resource, params);
 };

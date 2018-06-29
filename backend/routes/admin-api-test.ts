@@ -1,7 +1,7 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS } from './admin-api';
+import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT } from './admin-api';
 import { ApiMethod } from '../../common/api';
 import { createTeam } from '../test-lib/test-data';
 
@@ -35,7 +35,12 @@ describe("Admin API tests", () => {
         it("Cannot be called by a regular user", async () => {
             const call = clientRegularUser.callApi(apiMethod, {});
             await expect(call).rejects.toHaveProperty('statusCode', 403);
-            await expect(call).rejects.toHaveProperty('response.body', JSON.stringify({error: "You are not an admin user." }));
+            if (apiMethod.type === 'GET') {
+                // TODO: Why does GET not decode the JSON body?
+                await expect(call).rejects.toHaveProperty('response.body', JSON.stringify({error: "You are not an admin user." }));
+            } else {
+                await expect(call).rejects.toHaveProperty('response.body', {error: "You are not an admin user." });
+            }
         });
     };
 
@@ -80,6 +85,11 @@ describe("Admin API tests", () => {
         describe("List Scripts (GET /api/admin/scripts)", async () => {
 
             checkSecurity(LIST_SCRIPTS);
+
+        });
+        describe("Create Script (POST /api/admin/scripts)", async () => {
+
+            checkSecurity(CREATE_SCRIPT);
 
         });
     });

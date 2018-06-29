@@ -673,3 +673,20 @@ export class GameManager implements GameManagerStepInterface {
         }
     }
 }
+
+/**
+ * A fake GameManager that doesn't do anything; useful when
+ * validating steps outside of a game context.
+ */
+export class VoidGameManager implements GameManagerStepInterface {
+    get gameActive(): boolean { return false; }
+    get playerIds(): number[] { return []; }
+    public async pushUiUpdate(stepId: number) {}
+    private keyForVar(variable: GameVar<any>, stepId?: number): string {
+        return String(variable.scope) + (variable.scope === GameVarScope.Step ? stepId : '') + variable.key;
+    }
+    public getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T { return variable.default; }
+    public async setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T> {
+        return updater(this.getVar(variable));
+    }
+}

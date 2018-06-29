@@ -25,15 +25,15 @@ export class MultipleChoiceStep extends Step {
         //     - halfway: Halfway there
         //     - alone: You said survive alone
         if (typeof config.key !== 'string') {
-            throw new Error("Multiple step must have an 'key' defined to store the user's choice.");
+            throw new SafeError("Multiple step must have an 'key' defined to store the user's choice.");
         }
         if (!Array.isArray(config.choices)) {
-            throw new Error("Multiple choice step should have an array of choices called 'choices'.");
+            throw new SafeError("Multiple choice step should have an array of choices called 'choices'.");
         }
         let choices: {id: string, choiceText: string}[] = [];
         for (const entry of config.choices) {
             const keys = Object.keys(entry); // Should only be one, e.g. 'halfway'
-            if (keys.length != 1) { throw new Error("Invalid choice in Multiple Choice step"); }
+            if (keys.length != 1) { throw new SafeError("Invalid choice in Multiple Choice step"); }
             choices.push({id: keys[0], choiceText: entry[keys[0]]});
         }
         return {

@@ -5,13 +5,12 @@ import * as express from 'express';
 import * as massive from 'massive';
 
 import { UserType } from '../express-extended';
-import { config } from '../config';
 import { BorisDatabase } from '../db/db';
 import { BasicUser, Team, scenarioFromDbScenario, Game } from '../db/models';
 import { ApiMethod } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
-import { OtherTeamMember, Scenario } from '../../common/models';
-import { isUserOnline } from '../websocket/online-users';
+import { Scenario } from '../../common/models';
+import { validateScriptYaml } from '../game/script-loader';
 
 export const router = express.Router();
 
@@ -106,6 +105,25 @@ defineMethod(GET_SCRIPT, async (data, app, user) => {
     return {
         name: script.name,
         script_yaml: script.script_yaml,
+    };
+});
+
+export const CREATE_SCRIPT: ApiMethod<{name: string, script_yaml: string}, {name: string}> = {path: `/api/admin/scripts`, type: 'POST'};
+defineMethod(CREATE_SCRIPT, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const name = (data.name || "").trim().toLowerCase();
+    if (!name) {
+        throw new SafeError(`Bad script name: "${name}".`);
+    }
+    await validateScriptYaml(db, data.script_yaml);
+
+    try {
+        await db.scripts.insert({name, script_yaml: data.script_yaml});
+    } catch (err) {
+        throw new SafeError(`Unable to save script "${name}". Does a script with that name already exist?`, 400);
+    }
+    return {
+        name,
     };
 });
 

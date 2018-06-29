@@ -1,6 +1,7 @@
 import { MessageStepUiState, StepType, GameUserRole } from "../../../common/game";
 import { Step } from "../step";
 import { GameVar, GameVarScope } from "../vars";
+import { SafeError } from "../../routes/api-utils";
 
 export class MessageStep extends Step {
     public static readonly stepType: StepType = StepType.MessageStep;
@@ -21,10 +22,10 @@ export class MessageStep extends Step {
 
     protected parseConfig(config: any): any {
         if (!Array.isArray(config.messages)) {
-            throw new Error("Message step must have a list of messages defined.");
+            throw new SafeError("Message step must have a list of messages defined.");
         }
         if (config.character && typeof config.character !== 'string') {
-            throw new Error(`Invalid character: ${config.character}`);
+            throw new SafeError(`Invalid character: ${config.character}`);
         }
         return config;
     }
