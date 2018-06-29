@@ -70,7 +70,7 @@
     "node-fetch": "^2.1.2",
     "node-sass": "~4.6.0",
     "react": "~16.0.0",
-    "react-admin": "^2.0.0-RC3",
+    "react-admin": "^2.0.4",
     "react-dom": "~16.0.0",
     "react-modal": "^3.4.4",
     "react-redux": "^5.0.7",

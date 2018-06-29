@@ -12,7 +12,7 @@ export const ScriptsList = (props: any) => (
 
 export const ScriptCreate = (props: any) => (
     <div>
-        <Create title={"Create Script"} {...props}>
+        <Create title={"Create Script"} undoable={false} {...props}>
             <SimpleForm>
                 <TextInput source="name" />
                 <LongTextInput source="script_yaml" defaultValue={"---\n- step: message\n  messages:\n  - Hello from BORIS!"} />
@@ -25,7 +25,7 @@ export const ScriptCreate = (props: any) => (
 
 export const ScriptEdit = (props: any) => (
     <div>
-        <Edit title={"Edit Script"} {...props}>
+        <Edit title={"Edit Script"} undoable={false} {...props}>
             <SimpleForm redirect={false}>
                 <TextField source="name" />
                 <LongTextInput source="script_yaml" />

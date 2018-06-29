@@ -127,7 +127,7 @@ defineMethod(CREATE_SCRIPT, async (data, app, user) => {
     };
 });
 
-export const EDIT_SCRIPT: ApiMethod<{id: string, script_yaml: string}, {name: string}> = {path: `/api/admin/scripts/:id`, type: 'PUT'};
+export const EDIT_SCRIPT: ApiMethod<{id: string, script_yaml: string}, {name: string, script_yaml: string}> = {path: `/api/admin/scripts/:id`, type: 'PUT'};
 defineMethod(EDIT_SCRIPT, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
     const name = data.id;
@@ -138,7 +138,7 @@ defineMethod(EDIT_SCRIPT, async (data, app, user) => {
     } catch (err) {
         throw new SafeError(`Unable to save script "${data.id}".`, 400);
     }
-    return { name, };
+    return { name, script_yaml: data.script_yaml};
 });
 
 export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {
