@@ -26,8 +26,8 @@ export const ScriptCreate = (props: any) => (
 export const ScriptEdit = (props: any) => (
     <div>
         <Edit title={"Edit Script"} {...props}>
-            <SimpleForm>
-                <TextInput source="name" />
+            <SimpleForm redirect={false}>
+                <TextField source="name" />
                 <LongTextInput source="script_yaml" />
             </SimpleForm>
         </Edit>

@@ -127,6 +127,20 @@ defineMethod(CREATE_SCRIPT, async (data, app, user) => {
     };
 });
 
+export const EDIT_SCRIPT: ApiMethod<{id: string, script_yaml: string}, {name: string}> = {path: `/api/admin/scripts/:id`, type: 'PUT'};
+defineMethod(EDIT_SCRIPT, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const name = data.id;
+    await validateScriptYaml(db, data.script_yaml);
+
+    try {
+        await db.scripts.update({name,}, {script_yaml: data.script_yaml});
+    } catch (err) {
+        throw new SafeError(`Unable to save script "${data.id}".`, 400);
+    }
+    return { name, };
+});
+
 export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {
     const fields = ['id', 'team_id', 'scenario_id', 'started', 'is_active', 'finished'];
     const {data, count} = await queryWithCount(db.games, {...criteria}, {...queryOptions, fields});

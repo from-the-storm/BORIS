@@ -116,12 +116,15 @@ export async function dataProvider(type: string, resource: string, params: any):
     });
     if (!response.ok) {
         let jsonData: any;
+        let error: any;
         try {
             jsonData = await response.json();
         } catch (error) {
-            throw new Error("Unable to get a valid JSON response from the API.");
+            error = new Error("Unable to get a valid JSON response from the API.");
         }
-        throw new Error(jsonData.error || "Unknown error");
+        error = new Error(jsonData.error || "Unknown error");
+        error.status = response.status;
+        throw error;
     }
     return convertHTTPResponseToDataProvider(response, type, resource, params);
 };

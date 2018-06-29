@@ -1,7 +1,7 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT } from './admin-api';
+import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT } from './admin-api';
 import { ApiMethod } from '../../common/api';
 import { createTeam } from '../test-lib/test-data';
 
@@ -31,9 +31,9 @@ describe("Admin API tests", () => {
         await server.close();
     });
 
-    const checkSecurity = <A, B>(apiMethod: ApiMethod<A, B>) => {
+    const checkSecurity = <A, B>(apiMethod: ApiMethod<A, B>, args: A = {} as A) => {
         it("Cannot be called by a regular user", async () => {
-            const call = clientRegularUser.callApi(apiMethod, {});
+            const call = clientRegularUser.callApi(apiMethod, args);
             await expect(call).rejects.toHaveProperty('statusCode', 403);
             if (apiMethod.type === 'GET') {
                 // TODO: Why does GET not decode the JSON body?
@@ -87,9 +87,19 @@ describe("Admin API tests", () => {
             checkSecurity(LIST_SCRIPTS);
 
         });
+        describe("Get Script (GET /api/admin/scripts/:id)", async () => {
+
+            checkSecurity(GET_SCRIPT, {id: 'test-script'});
+
+        });
         describe("Create Script (POST /api/admin/scripts)", async () => {
 
             checkSecurity(CREATE_SCRIPT);
+
+        });
+        describe("Update Script (PUT /api/admin/scripts/:id)", async () => {
+
+            checkSecurity(EDIT_SCRIPT, {id: 'test-script'});
 
         });
     });

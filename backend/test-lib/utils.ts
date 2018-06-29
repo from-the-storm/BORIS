@@ -61,13 +61,16 @@ export class TestClient {
     async callApi<RequestType, ResponseType>(method: ApiMethod<RequestType, ResponseType>, data: RequestType): Promise<ResponseType> {
         let response: request.FullResponse;
         let body: ResponseType;
-        if (method.type === 'POST') {
-            response = await this.httpClient.post(method.path, {json: data});
-            body = response.body;
-        } else if (method.type === 'GET') {
+        if (method.type === 'GET') {
             const paramsStr = Object.keys(data).map(k => encodeURIComponent(k) + '=' + encodeURIComponent((data as any)[k])).join('&');
             response = await this.httpClient.get(method.path + (paramsStr ? `?${paramsStr}` : ''), {});
             body = JSON.parse(response.body);
+        } else if (method.type === 'POST') {
+            response = await this.httpClient.post(method.path, {json: data});
+            body = response.body;
+        } else if (method.type === 'PUT') {
+            response = await this.httpClient.put(method.path, {json: data});
+            body = response.body;
         }
         return body;
     }
