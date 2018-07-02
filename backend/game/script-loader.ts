@@ -2,6 +2,7 @@ import * as yaml from "js-yaml";
 import { BorisDatabase } from "../db/db";
 import { loadStepFromData } from "./steps/loader";
 import { VoidGameManager } from "./manager";
+import { SafeError } from "../routes/api-utils";
 
 
 /**
@@ -16,7 +17,7 @@ async function _loadScript(db: BorisDatabase, scriptName: string, scriptYamlStri
     if (scriptYamlString === undefined) {
         const script = await db.scripts.findOne({name: scriptName});
         if (script === null) {
-            throw new Error(`Script "${scriptName}" not found.`);
+            throw new SafeError(`Script "${scriptName}" not found.`);
         }
         scriptYamlString = script.script_yaml;
     }
@@ -25,10 +26,11 @@ async function _loadScript(db: BorisDatabase, scriptName: string, scriptYamlStri
         parsedData = yaml.safeLoad(scriptYamlString);
     } catch (err) {
         console.error(`Error when parsing script "${scriptName}":\n\n${err.message}`);
-        throw new Error(`Error when parsing script "${scriptName}".`);
+        throw new SafeError(`Error when parsing script "${scriptName}".`);
     }
     if (!Array.isArray(parsedData)) {
-        throw new Error(`Script ${scriptName} format is invalid. Expected root object to be an array.`);
+        console.error(`Script ${scriptName} format is invalid: Expected root object to be an array.`);
+        throw new SafeError(`Script ${scriptName} format is invalid.`);
     }
     // Now generate our result by collecting each entry in the script file, and recursively
     // loading any 'include: otherFile' entries.
@@ -42,7 +44,7 @@ async function _loadScript(db: BorisDatabase, scriptName: string, scriptYamlStri
         // into this one.
         if ('include' in entry) {
             if (Object.keys(entry).length !== 1) {
-                throw new Error("Unexpected 'include' keyword in step.");
+                throw new SafeError("Unexpected 'include' keyword in step.");
             }
             const includedScriptEntries = await loadScript(db, entry.include);
             Array.prototype.push.apply(result, includedScriptEntries);
