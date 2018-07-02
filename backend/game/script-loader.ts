@@ -72,9 +72,10 @@ export async function loadScript(db: BorisDatabase, scriptName: string) {
  * there are any issues.
  * @param db The database, required to validate 'include' steps
  * @param scriptYamlString The script to validate, as a string in YAML format
+ * @param scriptName The script name, used only to render better error messages
  */
-export async function validateScriptYaml(db: BorisDatabase, scriptYamlString: string) {
-    const scriptData = await _loadScript(db, '_temp', scriptYamlString);
+export async function validateScriptYaml(db: BorisDatabase, scriptYamlString: string, scriptName: string = '_temp') {
+    const scriptData = await _loadScript(db, scriptName, scriptYamlString);
     const gameManager = new VoidGameManager();
     scriptData.forEach((stepData, idx) => {
         const stepId: number = idx * 10; // For now use index*10; in the future, these IDs may be database row IDs etc.

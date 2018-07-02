@@ -82,24 +82,97 @@ describe("Admin API tests", () => {
     });
 
     describe("Scripts", async () => {
+
+        const EXISTING_SCRIPT_ID = 'test-script2';
+
+        const MINIMAL_SCRIPT = `---\n- step: message\n  messages:\n  - Hello`; // A short (valid!) example script we can use in tests.
+
         describe("List Scripts (GET /api/admin/scripts)", async () => {
 
             checkSecurity(LIST_SCRIPTS);
+
+            it("Lists the scripts loaded as test fixtures", async () => {
+                // See backend/db/schema/test-data.sql for where these scripts are defined.
+                const response = await client.callApi(LIST_SCRIPTS, {});
+                expect(response.count).toBeGreaterThanOrEqual(3);
+                for (const scriptName of ['test-script', 'test-script2', 'test-roles-script']) {
+                    expect(response.data).toContainEqual({name: scriptName});
+                }
+            });
 
         });
         describe("Get Script (GET /api/admin/scripts/:id)", async () => {
 
             checkSecurity(GET_SCRIPT, {id: 'test-script'});
 
+            it("Gives a 404 when trying to load a non-existent script", async () => {
+                const promise = client.callApi(GET_SCRIPT, {id: "foobar"});
+                await expect(promise).rejects.toHaveProperty('statusCode', 404);
+                await expect(promise).rejects.toHaveProperty('response.body', JSON.stringify({error: "Script \"foobar\" not found." }));
+            });
+
+            it("Can load a script", async () => {
+                const response = await client.callApi(GET_SCRIPT, {id: 'test-script2'});
+                expect(response).toEqual({
+                    name: 'test-script2',
+                    script_yaml: '---\n- step: message\n  messages:\n  - Hello! This is a message from the second script file.\n',
+                });
+            });
+
         });
         describe("Create Script (POST /api/admin/scripts)", async () => {
 
             checkSecurity(CREATE_SCRIPT);
 
+            it("Gives a 400 error when trying to overwrite an existing script", async () => {
+                await client.callApi(GET_SCRIPT, {id: EXISTING_SCRIPT_ID}); // Verify that the script exists; this will throw if not.
+                const promise = client.callApi(CREATE_SCRIPT, {name: EXISTING_SCRIPT_ID, script_yaml: MINIMAL_SCRIPT});
+                await expect(promise).rejects.toHaveProperty('statusCode', 400);
+                await expect(promise).rejects.toHaveProperty('response.body', {
+                    error: "Unable to save script \"test-script2\". Does a script with that name already exist?"
+                });
+            });
+
+            it("Gives a 400 error when trying to create a script with invalid YAML", async () => {
+                const promise = client.callApi(CREATE_SCRIPT, {name: 'new-script900', script_yaml: 'yeehaw!'});
+                await expect(promise).rejects.toHaveProperty('statusCode', 400);
+                await expect(promise).rejects.toHaveProperty('response.body', {error: "Script new-script900 format is invalid." });
+            });
+
+            it("Can create a new script", async () => {
+                const newScriptId = 'new-script15';
+                await expect(client.callApi(GET_SCRIPT, {id: newScriptId})).rejects.toHaveProperty('statusCode', 404);
+                // Create the script:
+                const createResponse = await client.callApi(CREATE_SCRIPT, {name: newScriptId, script_yaml: MINIMAL_SCRIPT});
+                expect(createResponse.name).toEqual(newScriptId);
+                const result = await client.callApi(GET_SCRIPT, {id: newScriptId});
+                expect(result.name).toEqual(newScriptId);
+                expect(result.script_yaml).toEqual(MINIMAL_SCRIPT);
+            });
+
         });
         describe("Update Script (PUT /api/admin/scripts/:id)", async () => {
 
             checkSecurity(EDIT_SCRIPT, {id: 'test-script'});
+
+            it("Gives a 400 error when trying to update a script with invalid YAML", async () => {
+                await client.callApi(GET_SCRIPT, {id: EXISTING_SCRIPT_ID}); // Verify that the script exists; this will throw if not.
+                const promise = client.callApi(EDIT_SCRIPT, {id: EXISTING_SCRIPT_ID, script_yaml: 'yeehaw!'});
+                await expect(promise).rejects.toHaveProperty('statusCode', 400);
+                await expect(promise).rejects.toHaveProperty('response.body', {error: `Script ${EXISTING_SCRIPT_ID} format is invalid.` });
+            });
+
+            it("Can edit an existing script", async () => {
+                const oldYaml = (await client.callApi(GET_SCRIPT, {id: EXISTING_SCRIPT_ID})).script_yaml;
+                expect(oldYaml).not.toEqual(MINIMAL_SCRIPT);
+                const response = await client.callApi(EDIT_SCRIPT, {id: EXISTING_SCRIPT_ID, script_yaml: MINIMAL_SCRIPT});
+                expect(response).toEqual({
+                    name: EXISTING_SCRIPT_ID,
+                    script_yaml: MINIMAL_SCRIPT,
+                });
+                const newYaml = (await client.callApi(GET_SCRIPT, {id: EXISTING_SCRIPT_ID})).script_yaml;
+                expect(newYaml).toEqual(MINIMAL_SCRIPT);
+            });
 
         });
     });

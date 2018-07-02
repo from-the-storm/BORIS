@@ -111,11 +111,11 @@ defineMethod(GET_SCRIPT, async (data, app, user) => {
 export const CREATE_SCRIPT: ApiMethod<{name: string, script_yaml: string}, {name: string}> = {path: `/api/admin/scripts`, type: 'POST'};
 defineMethod(CREATE_SCRIPT, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
-    const name = (data.name || "").trim().toLowerCase();
+    const name = (data.name || "").trim();
     if (!name) {
         throw new SafeError(`Bad script name: "${name}".`);
     }
-    await validateScriptYaml(db, data.script_yaml);
+    await validateScriptYaml(db, data.script_yaml, name);
 
     try {
         await db.scripts.insert({name, script_yaml: data.script_yaml});
@@ -131,7 +131,7 @@ export const EDIT_SCRIPT: ApiMethod<{id: string, script_yaml: string}, {name: st
 defineMethod(EDIT_SCRIPT, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
     const name = data.id;
-    await validateScriptYaml(db, data.script_yaml);
+    await validateScriptYaml(db, data.script_yaml, name);
 
     try {
         await db.scripts.update({name,}, {script_yaml: data.script_yaml});
