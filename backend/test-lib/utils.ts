@@ -61,13 +61,28 @@ export class TestClient {
     async callApi<RequestType, ResponseType>(method: ApiMethod<RequestType, ResponseType>, data: RequestType): Promise<ResponseType> {
         let response: request.FullResponse;
         let body: ResponseType;
-        if (method.type === 'POST') {
-            response = await this.httpClient.post(method.path, {json: data});
-            body = response.body;
-        } else if (method.type === 'GET') {
+        let path: string = method.path;
+        if (path.includes(':')) {
+            // If the path contains a param like 'GET /widgets/:widgetId' then the data param 'widgetId'
+            // needs to be put into the path, not passed via query string or JSON body.
+            for (let key in data) {
+                const value = data[key];
+                path = path.replace(`:${key}`, () => {
+                    delete data[key];
+                    return String(value);
+                });
+            }
+        }
+        if (method.type === 'GET') {
             const paramsStr = Object.keys(data).map(k => encodeURIComponent(k) + '=' + encodeURIComponent((data as any)[k])).join('&');
-            response = await this.httpClient.get(method.path + (paramsStr ? `?${paramsStr}` : ''), {});
+            response = await this.httpClient.get(path + (paramsStr ? `?${paramsStr}` : ''), {});
             body = JSON.parse(response.body);
+        } else if (method.type === 'POST') {
+            response = await this.httpClient.post(path, {json: data});
+            body = response.body;
+        } else if (method.type === 'PUT') {
+            response = await this.httpClient.put(path, {json: data});
+            body = response.body;
         }
         return body;
     }

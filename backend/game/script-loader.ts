@@ -1,28 +1,36 @@
-import {promisify} from "util";
-import * as fs from "fs";
 import * as yaml from "js-yaml";
+import { BorisDatabase } from "../db/db";
+import { loadStepFromData } from "./steps/loader";
+import { VoidGameManager } from "./manager";
+import { SafeError } from "../routes/api-utils";
 
-const readFileAsync = promisify(fs.readFile);
 
-
-export async function loadScriptFile(scriptName: string) {
-    scriptName = scriptName.replace('/', ''); // Avoid reading files from parent directories etc.
-    const fullPath = `${__dirname}/scripts/${scriptName}.yml`;
-    let fileData: string;
-    try {
-        fileData = await readFileAsync(fullPath, 'utf8');
-    } catch (err) {
-        throw new Error(`Script "${scriptName}" not found.`);
+/**
+ * Load a script by name. Loads from the database unless a YAML string is passed.
+ * Parses and evaluates 'include' directives, but doesn't actually validate or
+ * parse/load the normal script steps.
+ * @param db The database
+ * @param scriptName The name of the script to load
+ * @param scriptYamlString If a script YAML string is passed, use that instead of loading from the DB
+ */
+async function _loadScript(db: BorisDatabase, scriptName: string, scriptYamlString?: string) {
+    if (scriptYamlString === undefined) {
+        const script = await db.scripts.findOne({name: scriptName});
+        if (script === null) {
+            throw new SafeError(`Script "${scriptName}" not found.`);
+        }
+        scriptYamlString = script.script_yaml;
     }
     let parsedData: any;
     try {
-        parsedData = yaml.safeLoad(fileData);
+        parsedData = yaml.safeLoad(scriptYamlString);
     } catch (err) {
         console.error(`Error when parsing script "${scriptName}":\n\n${err.message}`);
-        throw new Error(`Error when parsing script "${scriptName}".`);
+        throw new SafeError(`Error when parsing script "${scriptName}".`);
     }
     if (!Array.isArray(parsedData)) {
-        throw new Error(`Script ${scriptName} format is invalid. Expected root object to be an array.`);
+        console.error(`Script ${scriptName} format is invalid: Expected root object to be an array.`);
+        throw new SafeError(`Script ${scriptName} format is invalid.`);
     }
     // Now generate our result by collecting each entry in the script file, and recursively
     // loading any 'include: otherFile' entries.
@@ -36,13 +44,41 @@ export async function loadScriptFile(scriptName: string) {
         // into this one.
         if ('include' in entry) {
             if (Object.keys(entry).length !== 1) {
-                throw new Error("Unexpected 'include' keyword in step.");
+                throw new SafeError("Unexpected 'include' keyword in step.");
             }
-            const includedScriptEntries = await loadScriptFile(entry.include);
+            const includedScriptEntries = await loadScript(db, entry.include);
             Array.prototype.push.apply(result, includedScriptEntries);
         } else {
             result.push(entry);
         }
     }
     return result;
+}
+
+/**
+ * Load a script by name.
+ * Parses and evaluates 'include' directives, but doesn't actually validate or
+ * parse/load the normal script steps.
+ * @param db The database
+ * @param scriptName The name of the script to load
+ */
+export async function loadScript(db: BorisDatabase, scriptName: string) {
+    return await _loadScript(db, scriptName);
+}
+
+/**
+ * Validate that a script is valid.
+ * Will do nothing if the script is valid or raise a SafeError if
+ * there are any issues.
+ * @param db The database, required to validate 'include' steps
+ * @param scriptYamlString The script to validate, as a string in YAML format
+ * @param scriptName The script name, used only to render better error messages
+ */
+export async function validateScriptYaml(db: BorisDatabase, scriptYamlString: string, scriptName: string = '_temp') {
+    const scriptData = await _loadScript(db, scriptName, scriptYamlString);
+    const gameManager = new VoidGameManager();
+    scriptData.forEach((stepData, idx) => {
+        const stepId: number = idx * 10; // For now use index*10; in the future, these IDs may be database row IDs etc.
+        loadStepFromData(stepData, stepId, gameManager);
+    });
 }

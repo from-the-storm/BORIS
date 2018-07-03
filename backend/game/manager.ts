@@ -7,7 +7,7 @@ import { loadStepFromData } from "./steps/loader";
 import { AnyUiState } from "../../common/game";
 import { publishEventToUsers } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
-import { loadScriptFile } from "./script-loader";
+import { loadScript } from "./script-loader";
 import { SafeError } from "../routes/api-utils";
 import { GameStatus, StepResponseRequest } from "../../common/api";
 import { getPlayerIdWithRole } from "./steps/assign-roles";
@@ -470,7 +470,7 @@ export class GameManager implements GameManagerStepInterface {
             }
 
             const scenario = await context.db.scenarios.findOne({id: game.scenario_id, is_active: true});
-            const scriptSteps = await loadScriptFile(scenario.script);
+            const scriptSteps = await loadScript(context.db, scenario.script);
 
             const team = await context.db.teams.findOne(game.team_id);
             const teamMembers = await context.db.team_members.find({team_id: team.id, is_active: true}, {columns: ['user_id']});
@@ -671,5 +671,22 @@ export class GameManager implements GameManagerStepInterface {
             await Promise.all(this.stepRunPromisesByStepId.values());
             await this._advanceUsersToNextStepPromise;
         }
+    }
+}
+
+/**
+ * A fake GameManager that doesn't do anything; useful when
+ * validating steps outside of a game context.
+ */
+export class VoidGameManager implements GameManagerStepInterface {
+    get gameActive(): boolean { return false; }
+    get playerIds(): number[] { return []; }
+    public async pushUiUpdate(stepId: number) {}
+    private keyForVar(variable: GameVar<any>, stepId?: number): string {
+        return String(variable.scope) + (variable.scope === GameVarScope.Step ? stepId : '') + variable.key;
+    }
+    public getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T { return variable.default; }
+    public async setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T> {
+        return updater(this.getVar(variable));
     }
 }

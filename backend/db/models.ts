@@ -35,6 +35,11 @@ export interface DBScenario extends BaseScenario {
     start_point: {x: number, y: number};
 }
 
+export interface Script {
+    name: string;
+    script_yaml: string;
+}
+
 /**
  * Remove the 'is_active' field and convert start_point to the more useful format
  * @param s A scenario as loaded from the database

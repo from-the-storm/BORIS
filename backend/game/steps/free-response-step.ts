@@ -12,7 +12,7 @@ export class FreeResponseStep extends Step {
 
     protected parseConfig(config: any): any {
         if (typeof config.key !== 'string' || !config.key) {
-            throw new Error("Free Response step must have a key defined (e.g. 'key: userGuess').");
+            throw new SafeError("Free Response step must have a key defined (e.g. 'key: userGuess').");
         }
         return config;
     }

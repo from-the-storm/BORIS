@@ -6,7 +6,6 @@ import {
     CREATE,
     UPDATE,
     DELETE,
-    fetchUtils,
 } from 'react-admin';
 import { makeQueryString } from '../api';
 
@@ -78,6 +77,18 @@ const convertDataProviderRequestToHTTP = (type: string, resource: string, params
  */
 async function convertHTTPResponseToDataProvider(response: Response, type: string, resource: string, params: any) {
     const json = await response.json();
+
+    // Hack: Our 'scripts' resources have a custom ID field.
+    // https://marmelab.com/react-admin/FAQ.html#can-i-have-custom-identifiersprimary-keys-for-my-resources
+    if (resource === 'scripts') {
+        if (Array.isArray(json.data)) {
+            json.data.forEach((script: any) => { script.id = script.name; });
+        } else {
+            json.id = json.name;
+        }
+    }
+
+
     switch (type) {
     case GET_LIST:
         return {
@@ -98,11 +109,22 @@ async function convertHTTPResponseToDataProvider(response: Response, type: strin
  * @returns {Promise} the Promise for response
  */
 export async function dataProvider(type: string, resource: string, params: any): Promise<any> {
-    const { fetchJson } = fetchUtils;
     const { url, options } = convertDataProviderRequestToHTTP(type, resource, params);
     const response = await fetch(url, {
         credentials: 'include',
         ...options
     });
+    if (!response.ok) {
+        let jsonData: any;
+        let error: any;
+        try {
+            jsonData = await response.json();
+        } catch (error) {
+            error = new Error("Unable to get a valid JSON response from the API.");
+        }
+        error = new Error(jsonData.error || "Unknown error");
+        error.status = response.status;
+        throw error;
+    }
     return convertHTTPResponseToDataProvider(response, type, resource, params);
 };

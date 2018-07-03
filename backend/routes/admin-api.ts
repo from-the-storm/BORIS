@@ -5,13 +5,12 @@ import * as express from 'express';
 import * as massive from 'massive';
 
 import { UserType } from '../express-extended';
-import { config } from '../config';
 import { BorisDatabase } from '../db/db';
 import { BasicUser, Team, scenarioFromDbScenario, Game } from '../db/models';
 import { ApiMethod } from '../../common/api';
-import { makeApiHelper, RequireUser } from './api-utils';
-import { OtherTeamMember, Scenario } from '../../common/models';
-import { isUserOnline } from '../websocket/online-users';
+import { makeApiHelper, RequireUser, SafeError } from './api-utils';
+import { Scenario } from '../../common/models';
+import { validateScriptYaml } from '../game/script-loader';
 
 export const router = express.Router();
 
@@ -81,11 +80,65 @@ export const LIST_TEAMS = defineListMethod<Team>('teams', async (criteria, query
     return queryWithCount(db.teams, criteria, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
 });
 
-export const LIST_SCENARIOS = defineListMethod<Scenario>('scenarios', async (criteria, queryOptions, db, app, user) => {
-    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'description_html', 'start_point', ];
+interface ScenarioWithScript extends Scenario {
+    script: string;
+}
+
+export const LIST_SCENARIOS = defineListMethod<ScenarioWithScript>('scenarios', async (criteria, queryOptions, db, app, user) => {
+    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'script', 'description_html', 'start_point', ];
     const {data, count} = await queryWithCount(db.scenarios, {...criteria, is_active: true}, {...queryOptions, fields});
-    const scenarios = data.map( scenarioFromDbScenario );
+    const scenarios = data.map( s => ({...s, start_point: {lat: s.start_point.x, lng: s.start_point.y}}) );
     return { data: scenarios, count, };
+});
+
+export const LIST_SCRIPTS = defineListMethod<{name: string}>('scripts', async (criteria, queryOptions, db, app, user) => {
+    return queryWithCount(db.scripts, criteria, {...queryOptions, fields: ['name']});
+});
+
+export const GET_SCRIPT: ApiMethod<{id: string}, {name: string, script_yaml: string}> = {path: `/api/admin/scripts/:id`, type: 'GET'};
+defineMethod(GET_SCRIPT, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const script = await db.scripts.findOne({name: data.id});
+    if (script === null) {
+        throw new SafeError(`Script "${data.id}" not found.`, 404);
+    }
+    return {
+        name: script.name,
+        script_yaml: script.script_yaml,
+    };
+});
+
+export const CREATE_SCRIPT: ApiMethod<{name: string, script_yaml: string}, {name: string}> = {path: `/api/admin/scripts`, type: 'POST'};
+defineMethod(CREATE_SCRIPT, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const name = (data.name || "").trim();
+    if (!name) {
+        throw new SafeError(`Bad script name: "${name}".`);
+    }
+    await validateScriptYaml(db, data.script_yaml, name);
+
+    try {
+        await db.scripts.insert({name, script_yaml: data.script_yaml});
+    } catch (err) {
+        throw new SafeError(`Unable to save script "${name}". Does a script with that name already exist?`, 400);
+    }
+    return {
+        name,
+    };
+});
+
+export const EDIT_SCRIPT: ApiMethod<{id: string, script_yaml: string}, {name: string, script_yaml: string}> = {path: `/api/admin/scripts/:id`, type: 'PUT'};
+defineMethod(EDIT_SCRIPT, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const name = data.id;
+    await validateScriptYaml(db, data.script_yaml, name);
+
+    try {
+        await db.scripts.update({name,}, {script_yaml: data.script_yaml});
+    } catch (err) {
+        throw new SafeError(`Unable to save script "${data.id}".`, 400);
+    }
+    return { name, script_yaml: data.script_yaml};
 });
 
 export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {
