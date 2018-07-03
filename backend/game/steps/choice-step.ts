@@ -19,7 +19,7 @@ export class MultipleChoiceStep extends Step {
     protected parseConfig(config: any): MultipleChoiceStepSettings {
         // Parse yaml config like:
         // - step: choice
-        //   id: howfar
+        //   key: howfar
         //   correct: halfway
         //   choices:
         //     - halfway: Halfway there
