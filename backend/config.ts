@@ -1,4 +1,7 @@
 // Environment and configuration
+import * as yaml from "js-yaml";
+import * as fs from "fs";
+
 export const environment: ('production'|'development'|'test') = (process.env.NODE_ENV as any) || 'development';
 export const config = (() => {
     let config = {
@@ -27,6 +30,12 @@ export const config = (() => {
             listen_port: 4444,
             db_name: 'boris_test',
         });
+    } else if (environment === 'development') {
+        // Allow overriding some config settings from a file (easier in dev environments)
+        const configOverridesPath = `${__dirname}/../../boris-private/dev-config.yml`;
+        if (fs.existsSync(configOverridesPath)) {
+            Object.assign(config, yaml.safeLoad(fs.readFileSync(configOverridesPath, 'utf8')));
+        }
     }
     if (process.env.BORIS_CONFIG) {
         Object.assign(config, JSON.parse(process.env.BORIS_CONFIG)[environment]);
