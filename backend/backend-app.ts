@@ -87,7 +87,10 @@ app.set('sendMail', (function() {
         transport = nodemailerMockTransport();
         app.set('mailTransport', transport);
     } else if (config.sparkpost_api_key) {
-        transport = nodemailerSparkPostTransport({sparkPostApiKey: config.sparkpost_api_key});
+        transport = nodemailerSparkPostTransport({
+            sparkPostApiKey: config.sparkpost_api_key,
+            options: {click_tracking: false},
+        });
     } else {
         // Default: output to stdout only, don't actually send.
         logMessage = true;
