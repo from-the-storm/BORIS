@@ -103,14 +103,17 @@ export class TestClient {
     }
     async registerAndLogin() {
         const userData = await this.registerUser();
-        await this.callApi(REQUEST_LOGIN, {email: userData.email});
+        await this.loginAs(userData.email);
+        return userData;
+    }
+    async loginAs(email: string) {
+        await this.callApi(REQUEST_LOGIN, {email});
 
         const transport: any = app.get('mailTransport');
-        const mailWithLink = transport.sentMail.filter((mail: any) => mail.data.to.indexOf(`<${userData.email}>`) !== -1)[0];
+        const mailWithLink = transport.sentMail.filter((mail: any) => mail.data.to.indexOf(`<${email}>`) !== -1)[0];
         const mailText: string = mailWithLink.data.html;
         const code = mailText.match(/login\/([\w\-]*)/)[1]
         await this.httpClient.get(`/auth/login/${code}`);
-        return userData;
     }
     /** Open an RPC Client connection to the server. You must close this afterward with client.close() */
     async openWebsocket(): Promise<any> {

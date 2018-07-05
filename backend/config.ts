@@ -29,6 +29,7 @@ export const config = (() => {
             app_domain: 'localhost:4444',
             listen_port: 4444,
             db_name: 'boris_test',
+            redis_prefix: 'boris_test:',
         });
     } else if (environment === 'development') {
         // Allow overriding some config settings from a file (easier in dev environments)
