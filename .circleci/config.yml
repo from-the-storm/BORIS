@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  test:
     docker:
       - image: circleci/node:8.11.1-browsers
       - image: redis:4.0-alpine
@@ -37,3 +37,40 @@ jobs:
 
       # run tests!
       - run: npm test
+  build:
+    docker:
+      - image: circleci/node:8.11.1-browsers
+    environment:
+      NODE_ENV: production
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Transpile TypeScript
+          command: ./node_modules/.bin/tsc -p . --skipLibCheck
+      - run:
+          name: Build static assets using webpack
+          command: npm run build
+      - setup_remote_docker
+      - run:
+          name: Create image and push to Docker Hub
+          command: |
+            docker build -t fromthestorm/boris:$CIRCLE_BRANCH .
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push fromthestorm/boris:$CIRCLE_BRANCH
+
+
+workflows:
+  version: 2
+  test_and_build:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - beta
