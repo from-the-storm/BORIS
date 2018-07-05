@@ -6,3 +6,6 @@
 - name: Install docker python package
   pip:
     name: docker
+- name: Install docker-compose python package
+  pip:
+    name: docker-compose

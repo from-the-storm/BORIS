@@ -1,0 +1,5 @@
+---
+dependencies:
+  - { role: common }
+  - { role: geerlingguy-docker }
+  - { role: docker-ansible }

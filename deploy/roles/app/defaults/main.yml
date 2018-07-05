@@ -2,7 +2,7 @@ boris_app_mode: production
 boris_app_domain: "something.apocalypsemadeeasy.com"
 boris_image_tag: "latest"
 boris_sparkpost_api_key: "{{ lookup('file', boris_deploy_private_dir + 'credentials/sparkpost_api_key') }}"
-boris_app_db_host: "{{boris_docker_network_host_ip}}"  # In order to be accessible to docker containers, spiped for the DB listens on this IP instead of 127.0.0.1
+boris_app_db_host: "{{traefik_docker_apps_network_host_ip}}"  # In order to be accessible to docker containers, spiped for the DB listens on this IP instead of 127.0.0.1
 boris_app_db_name: "boris_{{boris_instance_name}}"
 boris_app_db_user: "boris_{{boris_instance_name}}"
 boris_app_db_password: "{{ lookup('password', boris_deploy_private_dir + 'credentials/app_pgpassword length=15') }}"
@@ -10,9 +10,6 @@ boris_app_secret: "{{ lookup('password', boris_deploy_private_dir + 'credentials
 boris_app_environ_dir: "/etc/boris"
 boris_app_environ_file: "{{boris_app_environ_dir}}/{{boris_instance_name}}.env"
 
-boris_docker_network_name: boris-net
-boris_docker_network_subnet: 192.168.0.0/24
-boris_docker_network_host_ip: 192.168.0.1
 
 boris_config_base:
   app_domain: '{{ boris_app_domain }}'
@@ -21,11 +18,11 @@ boris_config_base:
   resource_url: '/s'
   sparkpost_api_key: "{{ boris_sparkpost_api_key }}"
   system_emails_from: "BORIS <info@apocalypsemadeeasy.com>"
-  redis_host: "{{ boris_docker_network_host_ip }}"
+  redis_host: "{{ traefik_docker_apps_network_host_ip }}"
   redis_port: "{{redis_secure_port}}"
   redis_password: "{{redis_password}}"
   redis_prefix: "boris:{{boris_instance_name}}:"
-  db_host: "{{ boris_docker_network_host_ip }}"
+  db_host: "{{ boris_app_db_host }}"
   db_port: "{{ postgres_secure_port }}"
   db_name: "{{ boris_app_db_name }}"
   db_user: "{{ boris_app_db_user }}"
