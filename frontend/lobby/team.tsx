@@ -41,7 +41,7 @@ class TeamMemberRow extends React.PureComponent<TeamRowProps, TeamRowState> {
                 {this.props.editable &&
                     <span>
                         <button aria-label="Remove team member" onClick={this.handleRemove}>X</button>
-                        <button onClick={this.handleMakeAdmin}>Make Admin</button>
+                        {/* <button onClick={this.handleMakeAdmin}>Make Admin</button> */}
                     </span>
                 }
                 {this.state.showRemovePrompt &&
@@ -131,11 +131,11 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.totalPoints}</span>(current balance)</p>
                         <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.totalPointsAllTime}</span>(earned all-time)</p>
                     </div>
-                    <div className="rankings-snapshot">
+                    {/* <div className="rankings-snapshot">
                         <h3>Rank</h3>
                         <button onClick={this.switchTab}><sup>#</sup>2<span>in Vancouver</span></button>
                         <button onClick={this.switchTab}><sup>#</sup>78<span>in Canada</span></button>
-                    </div>
+                    </div> */}
                     <h3>Your team {this.props.isTeamAdmin && <button onClick={this.editTeam}>{this.state.editingTeam ? 'Done Editing' : 'Edit Team'}</button>}</h3>
                     <ul className="team">
                         <TeamMemberRow isMe={true} details={{name: this.props.myName, id: 0, online: this.props.isOnline, isAdmin: this.props.isTeamAdmin}} editable={false} />
@@ -151,7 +151,8 @@ class _TeamComponent extends React.PureComponent<Props, State> {
             { !teamView &&
                 <div>
                     <h1>Vancouver</h1>
-                    <table className="leaderboards">
+                    <p>Leaderboards will be activated when the beta is over!</p>
+                    {/* <table className="leaderboards">
                         <thead>
                             <tr>
                                 <th>Rank</th>
@@ -166,7 +167,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                                 <td>568</td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table> */}
                 </div>
             }
         </div>;

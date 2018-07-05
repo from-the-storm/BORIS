@@ -15,6 +15,8 @@ import { MessageStep } from './ui-steps/message-step';
 import { FreeResponseStep } from './ui-steps/free-response-step';
 import { MultipleChoiceStep } from './ui-steps/choice-step';
 
+import * as back from './images/back.svg';
+
 // Include our SCSS (via webpack magic)
 import './game.scss';
 
@@ -35,7 +37,6 @@ class _GameComponent extends React.PureComponent<Props, State> {
         super(props);
         this.state = {showHelpPrompt: false, showQuitPrompt: false, hasSeenSplash: false};
     }
-
     public render() {
         const uiElements: JSX.Element[] = [];
         this.props.uiState.forEach(step => {
@@ -51,7 +52,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
             {!this.state.hasSeenSplash && <SplashBorisInit onDone={this.onSplashDone} />}
             <div className="game">
                 <header className="fixed">
-                    <button onClick={this.handleQuitButton}>◀</button>
+                    <button onClick={this.handleQuitButton}><img height="22" width="22" src={back} alt="Back" /></button>
                     <h1>{this.props.scenarioName.replace(/[aeiouy]/ig,'')}</h1>
                     <button className="help" onClick={this.handleHelpButton}>?</button>
                 </header>
