@@ -72,9 +72,19 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
         sharedWebSocketClientState.allConnections.delete(connectionState);
         clearInterval(connectionState.pingTimer);
         connectionState.pingTimer = null;
-        setUserOffline(connectionState.user.id).then(() => {
-            notifyTeamStatusChangedForUser(app, req.user.id);
-        });
+        const userHasOtherActiveConnections = () => {
+            for (const otherConnection of sharedWebSocketClientState.allConnections.values()) {
+                if (otherConnection.user.id === connectionState.user.id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (!userHasOtherActiveConnections()) {
+            setUserOffline(connectionState.user.id).then(() => {
+                notifyTeamStatusChangedForUser(app, req.user.id);
+            });
+        }
         console.log(`${connectionState.user.first_name} has disconnected from the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
     });
     console.log(`${connectionState.user.first_name} has connected to the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
