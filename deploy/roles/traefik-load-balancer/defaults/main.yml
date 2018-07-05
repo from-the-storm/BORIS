@@ -1,0 +1,11 @@
+---
+# Set these:
+#traefik_default_domain: myapp.com
+#traefik_acme_email: name@example.com
+traefik_use_lets_encrypt: yes
+traefik_docker_apps_network_name: web
+traefik_docker_apps_network_subnet: 192.168.0.0/24
+traefik_docker_apps_network_host_ip: 192.168.0.1
+
+traefik_config_dir: /etc/traefik
+traefik_version: 1.6.4

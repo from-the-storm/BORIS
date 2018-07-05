@@ -1,0 +1,57 @@
+---
+- name: Create Docker network for apps
+  docker_network:
+    name: "{{ traefik_docker_apps_network_name }}"
+    driver: bridge
+    ipam_options:
+      subnet: "{{ traefik_docker_apps_network_subnet }}"
+      gateway: "{{ traefik_docker_apps_network_host_ip }}"
+# Allow access from containers to services on the host's virtual IP
+- name: Allow access from containers to services on the host's virtual IP
+  ufw:
+    rule: allow
+    proto: tcp
+    from: "{{ traefik_docker_apps_network_subnet }}"
+
+- name: Create Traefik configuration directory
+  file:
+    path: "{{ traefik_config_dir }}"
+    state: directory
+    owner: root
+    mode: 0700
+
+- name: Install docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{traefik_config_dir}}/docker-compose.yml"
+    owner: root
+
+- name: Ensure ACME status file exists
+  file:
+    path: "{{ traefik_config_dir }}/acme.json"
+    state: touch
+    owner: root
+    mode: 0600
+
+- name: Install Traefik configuration file
+  template:
+    src: traefik.toml.j2
+    dest: "{{traefik_config_dir}}/traefik.toml"
+    owner: root
+
+- name: Enable the Traefik Docker service
+  docker_service:
+    project_src: "{{traefik_config_dir}}"
+    state: present
+
+- name: Allow access on port 80
+  ufw:
+    rule: allow
+    port: 80
+    proto: tcp
+
+- name: Allow access on port 443
+  ufw:
+    rule: allow
+    port: 443
+    proto: tcp

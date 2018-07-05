@@ -12,29 +12,6 @@
     owner: root
     mode: 600
 
-# Create docker network, so the containers can access each other and the host
-- name: Create Boris Docker network
-  docker_network:
-    name: "{{ boris_docker_network_name }}"
-    driver: bridge
-    ipam_options:
-      subnet: "{{ boris_docker_network_subnet }}"
-      gateway: "{{ boris_docker_network_host_ip }}"
-
-# Allow access from containers to spiped services on the host's virtual IP
-- name: Allow Docker containers to access redis on host's virtual IP
-  ufw:
-    rule: allow
-    port: "{{ redis_secure_port }}"
-    proto: tcp
-    from: "{{ boris_docker_network_subnet }}"
-- name: Allow Docker containers to access Postgres on host's virtual IP
-  ufw:
-    rule: allow
-    port: "{{ postgres_secure_port }}"
-    proto: tcp
-    from: "{{ boris_docker_network_subnet }}"
-
 # Postgresql Database
 - name: Configure database user for the app
   postgresql_user:
@@ -63,28 +40,25 @@
     login_password: "{{ database_postgres_admin_password }}"
     port: "{{ postgres_secure_port }}"
 
-# Create the boris container:
-- name: Configure Boris docker container
-  docker_container:
-    name: boris
-    image: "fromthestorm/boris:{{ boris_image_tag }}"
-    state: started
-    restart: yes
-    ports:
-      - "80:3333"
-    networks:
-        - name: "{{ boris_docker_network_name }}"
-    env_file: "{{ boris_app_environ_file }}"
+- name: Install docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{boris_app_environ_dir}}/docker-compose.yml"
+    owner: root
+
+- name: Enable the BORIS Docker service
+  docker_service:
+    project_src: "{{boris_app_environ_dir}}"
+    project_name: boris
+    state: present
 
 # Run migrations
 - name: Run migrations
   command: docker exec boris node /app/backend/db/migrate.js
 # Restart container (rquired after new tables created in migrations)
 - name: Restart boris so massive-js will pick up new DB tables
-  command: docker restart boris
-
-- name: Allow access on port 80 (until we set up a load balancer with HTTPS etc.)
-  ufw:
-    rule: allow
-    port: 80
-    proto: tcp
+  docker_service:
+    project_src: "{{boris_app_environ_dir}}"
+    project_name: boris
+    state: present
+    restarted: yes
