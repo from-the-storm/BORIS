@@ -56,7 +56,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                     <span>{selectedScenario.duration_min} mins</span><br />
                     <span>Start at {selectedScenario.start_point_name}. <a title="View on map" onClick={this.handleShowMap}>(View on Map)</a></span>
                     {this.state.showMap &&
-                        <AutoWayfinder lat={selectedScenario.start_point.lat} lng={selectedScenario.start_point.lng} zoom={16} />
+                        <AutoWayfinder lat={selectedScenario.start_point.lat} lng={selectedScenario.start_point.lng} zoom={14} />
                     }
                 </div>
                 <button onClick={() => { this.startScenario(selectedScenario.id); }}>Start!</button>

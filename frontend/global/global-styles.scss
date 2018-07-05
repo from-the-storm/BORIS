@@ -5,16 +5,20 @@
 body {
     font-family: $textfont;
     font-size: 16px;
+    background: lighten($black, 5%);
 }
 #app-container {
-    max-width: 64em;
+    max-width: 32em;
     margin: 0 auto;
+    background: $white;
+    min-height: 100vh;
 }
 header {
     text-align: center;
 }
 .content {
     padding: 1rem;
+    overflow: auto;
         p:first-of-type {
             margin-top: 0;
         }
@@ -29,7 +33,7 @@ header.fixed {
     top: 0;
     left: 0;
     right: 0;
-    max-width: 64em;
+    max-width: 32em;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -51,6 +55,7 @@ p {
         &.callout {
             background: $grey;
             padding: 0.5rem 0.75rem;
+            margin-top: 2rem !important;
         }
 }
 h1, h2, h3, h4, h5 {
