@@ -167,6 +167,17 @@ export const DocumentationAndStyles = (props: {}) => (
   key: teamname
 `}</pre></code>
 
+
+            <h2>Pause Step</h2>
+            <p>
+                A pause step pauses for the specified number of seconds.
+            </p>
+            <h3>Example - pauses for 3 seconds:</h3>
+            <code><pre>{`
+- step: pause
+  for: 3
+`}</pre></code>
+
             <h2>Assign Roles Step</h2>
             <p>
                 If a script is going to use the roles, it should have <code>- step: assignroles</code> as early as
