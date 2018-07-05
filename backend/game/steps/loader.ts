@@ -4,6 +4,7 @@ import { Step, StepParams } from "../step";
 import { MessageStep } from "./message-step";
 import { FreeResponseStep } from "./free-response-step";
 import { MultipleChoiceStep } from "./choice-step";
+import { PauseStep } from "./pause-step";
 import { AssignRolesStep } from "./assign-roles";
 
 export function loadStepFromData(data: any, id: number, manager: GameManagerStepInterface): Step {
@@ -13,6 +14,7 @@ export function loadStepFromData(data: any, id: number, manager: GameManagerStep
         case 'message': return new MessageStep(args);
         case 'free response': return new FreeResponseStep(args);
         case 'choice': return new MultipleChoiceStep(args);
+        case 'pause': return new PauseStep(args);
         case 'assignroles': return new AssignRolesStep(args);
         default: throw new Error(`Unable to load type with step type "${step}".`);
     }

@@ -1,4 +1,4 @@
-import { MessageStepUiState, StepType, GameUserRole } from "../../../common/game";
+import { MessageStepUiState, StepType } from "../../../common/game";
 import { Step } from "../step";
 import { GameVar, GameVarScope } from "../vars";
 import { SafeError } from "../../routes/api-utils";
