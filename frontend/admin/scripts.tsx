@@ -165,7 +165,7 @@ export const DocumentationAndStyles = (props: {}) => (
   - What's your team's code word?
 - step: free response
   key: teamname
-`}</pre></code>
+`.trim()}</pre></code>
 
 
             <h2>Pause Step</h2>
@@ -176,7 +176,19 @@ export const DocumentationAndStyles = (props: {}) => (
             <code><pre>{`
 - step: pause
   for: 3
-`}</pre></code>
+`.trim()}</pre></code>
+
+            <h2>Bulletin Step</h2>
+            <p>
+                A bulletin step displays a bulletin.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- step: bulletin
+  html: |
+    <p>Greetings from Citizens for a Friendlier Post-Apocalypse.</p>
+    <p>Your training starts now, and will be delivered by BORIS.</p>
+`.trim()}</pre></code>
 
             <h2>Assign Roles Step</h2>
             <p>

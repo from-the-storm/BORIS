@@ -5,7 +5,6 @@ import { List } from 'immutable';
 
 import { AnyUiState, StepType } from '../../common/game';
 import { RootState } from '../global/state';
-import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
 import { Prompt } from '../prompt/prompt';
 import { abandonGame } from '../global/state/game-state-actions';
@@ -14,6 +13,7 @@ import { SplashBorisInit } from './splash-boris-init';
 import { MessageStep } from './ui-steps/message-step';
 import { FreeResponseStep } from './ui-steps/free-response-step';
 import { MultipleChoiceStep } from './ui-steps/choice-step';
+import { BulletinStep } from './ui-steps/bulletin-step';
 
 import * as back from './images/back.svg';
 
@@ -45,6 +45,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
                 step.type === StepType.MessageStep ? <MessageStep key={step.stepId} {...step} /> :
                 step.type === StepType.FreeResponse ? <FreeResponseStep key={step.stepId} {...step} /> :
                 step.type === StepType.MultipleChoice ? <MultipleChoiceStep key={step.stepId} {...step} /> :
+                step.type === StepType.BulletinStep ? <BulletinStep key={step.stepId} {...step} /> :
                 <div className="chat-segment"><strong>Unsupported step type</strong></div>
             );
         });
