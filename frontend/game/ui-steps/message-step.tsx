@@ -8,8 +8,14 @@ interface Props extends MessageStepUiState {
 
 export class MessageStep extends React.PureComponent<Props> {
     public render() {
+        let classes = 'chat-segment';
+        if (this.props.character === 'nameless') {
+            classes = 'no-segment';
+        } else if (this.props.character) {
+            classes += ` ${this.props.character}`;
+        }
         return (
-            <div className={"chat-segment" + (this.props.character ? ` ${this.props.character}` : '')}>
+            <div className={classes}>
                 {this.props.messages.map((msg, idx) => <p key={idx} dangerouslySetInnerHTML={{__html: msg}}></p>)}
             </div>
         );

@@ -92,7 +92,7 @@ export const DocumentationAndStyles = (props: {}) => (
             </p>
             <p>
                 The character is optional and defaults to <code>boris</code>.
-                It can also be set to <code>backfeed</code> or <code>clarence</code>
+                It can also be set to <code>backfeed</code>, <code>clarence</code>, or <code>nameless</code> (for the nameless organization).
             </p>
             <h3>Example:</h3>
             <code><pre>{`
