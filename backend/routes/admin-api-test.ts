@@ -1,9 +1,9 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT } from './admin-api';
+import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO } from './admin-api';
 import { ApiMethod } from '../../common/api';
-import { createTeam } from '../test-lib/test-data';
+import { createTeam, TEST_SCENARIO_ID } from '../test-lib/test-data';
 
 describe("Admin API tests", () => {
     let server: TestServer;
@@ -77,6 +77,26 @@ describe("Admin API tests", () => {
         describe("List Scenarios (GET /api/admin/scenarios)", async () => {
 
             checkSecurity(LIST_SCENARIOS);
+
+        });
+        describe("Get Scenario (GET /api/admin/scenarios/:id)", async () => {
+
+            checkSecurity(GET_SCENARIO, {id: "1"});
+
+            it("Returns scenario data", async () => {
+                const response = await client.callApi(GET_SCENARIO, {id: String(TEST_SCENARIO_ID)});
+                expect(response).toEqual({
+                    id: 123,
+                    name: "Test Scenario",
+                    is_active: true,
+                    description_html: "<p>This route (approximately 700m) starts in front of Science World and follows the Seawall to the plaza area in front of Craft Beer Market.</p>",
+                    difficulty: 'easy',
+                    duration_min: 30,
+                    script: "test-script",
+                    start_point: {lat: 49.273373, lng: -123.102657},
+                    start_point_name: "SE False Creek",
+                });
+            });
 
         });
     });

@@ -85,10 +85,29 @@ interface ScenarioWithScript extends Scenario {
 }
 
 export const LIST_SCENARIOS = defineListMethod<ScenarioWithScript>('scenarios', async (criteria, queryOptions, db, app, user) => {
-    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'script', 'description_html', 'start_point', ];
+    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'is_active', 'script', 'description_html', 'start_point', ];
     const {data, count} = await queryWithCount(db.scenarios, {...criteria, is_active: true}, {...queryOptions, fields});
     const scenarios = data.map( s => ({...s, start_point: {lat: s.start_point.x, lng: s.start_point.y}}) );
     return { data: scenarios, count, };
+});
+
+interface AdminScenario extends Scenario {
+    is_active: boolean;
+    script: string;
+}
+export const GET_SCENARIO: ApiMethod<{id: string}, AdminScenario> = {path: `/api/admin/scenarios/:id`, type: 'GET'};
+defineMethod(GET_SCENARIO, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const id = parseInt(data.id, 10);
+    const scenario = await db.scenarios.findOne(id);
+    if (scenario === null) {
+        throw new SafeError(`Scenario ${id} not found.`, 404);
+    }
+    return {
+        ...scenarioFromDbScenario(scenario),
+        is_active: scenario.is_active,
+        script: scenario.script,
+    };
 });
 
 export const LIST_SCRIPTS = defineListMethod<{name: string}>('scripts', async (criteria, queryOptions, db, app, user) => {
