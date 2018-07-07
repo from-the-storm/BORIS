@@ -32,6 +32,7 @@ describe("Free Response Step tests", () => {
         expect(step.getUiState()).toEqual({
             stepId: 1,
             type: StepType.FreeResponse,
+            multiline: false,
             complete: false,
             value: "",
         });
@@ -44,6 +45,7 @@ describe("Free Response Step tests", () => {
         expect(step.getUiState()).toEqual({
             stepId: 1,
             type: StepType.FreeResponse,
+            multiline: false,
             complete: true,
             //        ^^^^
             value: "hello world",

@@ -6,7 +6,7 @@ import { GameVar, GameVarScope } from "../vars";
 
 export class FreeResponseStep extends Step {
     public static readonly stepType: StepType = StepType.FreeResponse;
-    readonly settings: {key: string};
+    readonly settings: {key: string, multiline: boolean};
 
     async run() {}
 
@@ -14,6 +14,7 @@ export class FreeResponseStep extends Step {
         if (typeof config.key !== 'string' || !config.key) {
             throw new SafeError("Free Response step must have a key defined (e.g. 'key: userGuess').");
         }
+        config.multiline = Boolean(config.multiline); // Default to false if undefined
         return config;
     }
 
@@ -27,6 +28,7 @@ export class FreeResponseStep extends Step {
             type: StepType.FreeResponse,
             stepId: this.id,
             complete: value !== '',
+            multiline: this.settings.multiline,
             value,
         };
     }

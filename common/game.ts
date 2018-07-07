@@ -21,7 +21,7 @@ export interface MessageStepUiState extends UiState {
 }
 export interface FreeResponseStepUiState extends UiState {
     type: StepType.FreeResponse;
-    //multiline: boolean; // Do we need multiline support in the future?
+    multiline: boolean;
     complete: boolean; // Has a value been entered by the user already?
     value: string; // The value the user entered, if any
 }
