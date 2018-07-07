@@ -19,7 +19,7 @@ export class FreeResponseStep extends Step {
     }
 
     get valueVar(): GameVar<string> {
-        return {key: this.settings.key, scope: GameVarScope.Step, default: ''};
+        return {key: this.settings.key, scope: GameVarScope.Game, default: ''};
     }
 
     getUiState(): FreeResponseStepUiState {
