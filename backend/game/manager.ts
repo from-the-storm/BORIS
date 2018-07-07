@@ -6,7 +6,7 @@ import { Step } from "./step";
 import { loadStepFromData } from "./steps/loader";
 import { AnyUiState } from "../../common/game";
 import { publishEventToUsers } from "../websocket/pub-sub";
-import { GameUiChangedNotification, NotificationType } from "../../common/notifications";
+import { GameUiChangedNotification, NotificationType, GameErrorNotification } from "../../common/notifications";
 import { loadScript } from "./script-loader";
 import { SafeError } from "../routes/api-utils";
 import { GameStatus, StepResponseRequest } from "../../common/api";
@@ -387,7 +387,17 @@ export class GameManager implements GameManagerStepInterface {
                 const step = this.steps.get(nextStepId);
 
                 if (step.ifCondition !== undefined) {
-                    const result = !!this.safeEvalScriptExpression(step.ifCondition, userId);
+                    let result: boolean;
+                    try {
+                        result = !!this.safeEvalScriptExpression(step.ifCondition, userId);
+                    } catch (err) {
+                        const errorNotification: GameErrorNotification = {
+                            type: NotificationType.GAME_ERROR,
+                            friendlyErrorMessage: "An error ocurred on the server while processing this step of the scenario. Sorry!",
+                            debuggingInfoForConsole: `Error evaluating if condition: ${err.message}`,
+                        };
+                        publishEventToUsers([userId], errorNotification);
+                    }
                     if (!result) {
                         // That step can't be the next one because its if condition failed.
                         // Keep looking, recursively:

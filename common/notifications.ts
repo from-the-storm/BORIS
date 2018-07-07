@@ -9,6 +9,7 @@ export enum NotificationType {
     TEAM_CHANGED = 'TC',
     GAME_UI_UPDATE = 'GUU',
     GAME_STATUS_CHANGED = 'GSC',
+    GAME_ERROR = 'GE',
 }
 
 /**
@@ -36,8 +37,18 @@ export interface GameUiChangedNotification {
     newStepUi: AnyUiState;
 }
 
+/**
+ * This notification is sent when a UI step has changed in the game UI
+ */
+export interface GameErrorNotification {
+    type: NotificationType.GAME_ERROR;
+    friendlyErrorMessage: string;
+    debuggingInfoForConsole: any;
+}
+
 export type AnyNotification = (
     |TeamChangedNotification
     |GameStatusChangedNotification
     |GameUiChangedNotification
+    |GameErrorNotification
 );

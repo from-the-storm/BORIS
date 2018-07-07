@@ -5,6 +5,7 @@ import { OtherTeamMember } from "../../common/models";
 import { AnyAction } from "../global/actions";
 import { TeamStateActions } from "../global/state/team-state-actions";
 import { updateStepUiState, GameStateActions, refreshGameUiState } from "../global/state/game-state-actions";
+import { MessagesStateActions } from "../global/state/messages-state-actions";
 
 
 export function handleNotification(store: Store<RootState>, event: AnyNotification) {
@@ -36,5 +37,13 @@ export function handleNotification(store: Store<RootState>, event: AnyNotificati
             // We are stopping the game
             store.dispatch<AnyAction>({type: GameStateActions.ABANDON_GAME});
         }
+    } else if (event.type === NotificationType.GAME_ERROR) {
+        console.error("Game error:");
+        console.error(event.debuggingInfoForConsole);
+        store.dispatch<AnyAction>({
+            type: MessagesStateActions.SHOW_ERROR,
+            title: "Error",
+            errorHtml: event.friendlyErrorMessage,
+        });
     }
 }
