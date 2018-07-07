@@ -68,7 +68,7 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
         } catch (err) {
             this.props.dispatch<AnyAction>({
                 type: MessagesStateActions.SHOW_ERROR,
-                title: "Unable to submti answer",
+                title: "Unable to submit answer",
                 errorHtml: err.message,
             });
         }
