@@ -36,10 +36,16 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
             );
         } else {
             // Show a form for the user to enter their answer:
+            let inputControl: JSX.Element;
+            if (this.props.multiline) {
+                inputControl = <textarea value={this.state.value} onChange={this.valueChanged} className="deselected" required rows={4} cols={30} placeholder="..." aria-label="Response to Question" />
+            } else {
+                inputControl = <input value={this.state.value} onChange={this.valueChanged} className="deselected" required type="text" placeholder="..." aria-label="Response to Question" />;
+            }
             return (
                 <div className="response-segment">
                     <form onSubmit={() => false}>
-                        <input value={this.state.value} onChange={this.valueChanged} className="deselected" required type="text" placeholder="..." aria-label="Response to Question" />
+                        {inputControl}
                         <button disabled={this.state.answerIsbeingSubmitted} onClick={this.handleSubmit}>Submit</button>
                     </form>
                 </div>
@@ -47,7 +53,7 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
         }
     }
 
-    @bind valueChanged(event: React.ChangeEvent<HTMLInputElement>) {
+    @bind valueChanged(event: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) {
         this.setState({value: event.target.value});
     }
 
@@ -62,7 +68,7 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
         } catch (err) {
             this.props.dispatch<AnyAction>({
                 type: MessagesStateActions.SHOW_ERROR,
-                title: "Unable to submti answer",
+                title: "Unable to submit answer",
                 errorHtml: err.message,
             });
         }
