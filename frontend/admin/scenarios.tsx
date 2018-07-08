@@ -10,13 +10,14 @@ import {
     SimpleShowLayout,
     EditButton,
     Edit,
+    Create,
     SimpleForm,
     TextInput,
     LongTextInput,
     NumberInput,
     ReferenceInput,
     SelectInput,
-    BooleanInput
+    BooleanInput,
 } from 'react-admin';
 
 export const ScenarioList = (props: any) => (
@@ -50,25 +51,32 @@ export const ScenarioShow = (props: any) => (
     </Show>
 );
 
+const editForm = <SimpleForm redirect={false}>
+    <TextInput source="name" />
+    <ReferenceInput label="Script" source="script" reference="scripts">
+        <SelectInput optionText="name" />
+    </ReferenceInput>
+    <TextInput source="start_point_name" />
+    <NumberInput source="start_point.lat" />
+    <NumberInput source="start_point.lng" />
+    <LongTextInput source="description_html" />
+    <BooleanInput source="is_active" />
+    <NumberInput source="duration_min" />
+    <SelectInput source="difficulty" choices={[
+        { id: 'easy', name: 'easy' },
+        { id: 'med', name: 'med' },
+        { id: 'hard', name: 'hard' },
+    ]} />
+</SimpleForm>;
+
 export const ScenarioEdit = (props: any) => (
-    <Edit {...props}>
-        <SimpleForm redirect={false}>
-            <TextInput source="name" />
-            <ReferenceInput label="Script" source="script" reference="scripts">
-                <SelectInput optionText="name" />
-            </ReferenceInput>
-            <TextInput source="start_point_name" />
-            <NumberInput source="start_point.lat" />
-            <NumberInput source="start_point.lng" />
-            <LongTextInput source="description_html" />
-            <BooleanInput source="is_active" />
-            <NumberInput source="duration_min" />
-            <SelectInput source="difficulty" choices={[
-                { id: 'easy', name: 'easy' },
-                { id: 'med', name: 'med' },
-                { id: 'hard', name: 'hard' },
-            ]} />
-        </SimpleForm>
+    <Edit {...props} undoable={false}>
+        {editForm}
     </Edit>
 );
 
+export const ScenarioCreate = (props: any) => (
+    <Create {...props} undoable={false}>
+        {editForm}
+    </Create>
+);

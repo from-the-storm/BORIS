@@ -1,7 +1,7 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO } from './admin-api';
+import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO, CREATE_SCENARIO, EDIT_SCENARIO } from './admin-api';
 import { ApiMethod } from '../../common/api';
 import { createTeam, TEST_SCENARIO_ID } from '../test-lib/test-data';
 
@@ -97,7 +97,59 @@ describe("Admin API tests", () => {
                     start_point_name: "SE False Creek",
                 });
             });
+        });
 
+        describe("Create Scenario (POST /api/admin/scenarios)", async () => {
+
+            checkSecurity(CREATE_SCENARIO);
+
+            it("Can create a new scenario", async () => {
+                // Create the scenario:
+                const createResponse = await client.callApi(CREATE_SCENARIO, {
+                    name: "A New Test Scenario",
+                    is_active: false,
+                    start_point: {lat: 15.2, lng: 35.15},
+                    start_point_name: 'a place',
+                    script: 'test-script',
+                });
+                expect(typeof createResponse.id).toBe('number');
+                expect(createResponse.name).toEqual("A New Test Scenario");
+                expect(createResponse.is_active).toBe(false);
+                expect(createResponse.start_point).toEqual({lat: 15.2, lng: 35.15});
+                const result = await client.callApi(GET_SCENARIO, {id: String(createResponse.id)});
+                expect(result).toEqual(createResponse);
+            });
+
+        });
+        describe("Update Scenario (PUT /api/admin/scenarios/:id)", async () => {
+
+            checkSecurity(EDIT_SCENARIO, {id: String(TEST_SCENARIO_ID)});
+
+            it("Can edit an existing scenario", async () => {
+                const createResponse = await client.callApi(CREATE_SCENARIO, {
+                    name: "A New Test Scenario",
+                    script: 'test-script',
+                    is_active: false,
+                    start_point: {lat: 15.2, lng: 35.15},
+                    description_html: 'test description',
+                });
+                expect(createResponse.is_active).toBe(false);
+                const updateResponse = await client.callApi(EDIT_SCENARIO, {
+                    id: String(createResponse.id),
+                    name: "A Modified Test Scenario",
+                    is_active: true,
+                    start_point: {lat: 18.2, lng: 15.15},
+                    // We don't specify a script nor description_html which should leave it unchanged.
+                });
+                expect(updateResponse.id).toEqual(createResponse.id);
+                expect(updateResponse.name).toEqual("A Modified Test Scenario");
+                expect(updateResponse.is_active).toBe(true);
+                expect(updateResponse.start_point).toEqual({lat: 18.2, lng: 15.15});
+                expect(updateResponse.script).toEqual('test-script');
+                expect(updateResponse.description_html).toEqual('test description');
+                const getResponse = await client.callApi(GET_SCENARIO, {id: String(createResponse.id)});
+                expect(getResponse).toEqual(updateResponse);
+            });
         });
     });
 
