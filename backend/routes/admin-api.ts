@@ -6,7 +6,7 @@ import * as massive from 'massive';
 
 import { UserType } from '../express-extended';
 import { BorisDatabase } from '../db/db';
-import { BasicUser, Team, scenarioFromDbScenario, Game } from '../db/models';
+import { BasicUser, Team, scenarioFromDbScenario, Game, DBScenario } from '../db/models';
 import { ApiMethod } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { Scenario } from '../../common/models';
@@ -85,11 +85,97 @@ interface ScenarioWithScript extends Scenario {
 }
 
 export const LIST_SCENARIOS = defineListMethod<ScenarioWithScript>('scenarios', async (criteria, queryOptions, db, app, user) => {
-    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'script', 'description_html', 'start_point', ];
+    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'is_active', 'script', 'description_html', 'start_point', ];
     const {data, count} = await queryWithCount(db.scenarios, {...criteria, is_active: true}, {...queryOptions, fields});
     const scenarios = data.map( s => ({...s, start_point: {lat: s.start_point.x, lng: s.start_point.y}}) );
     return { data: scenarios, count, };
 });
+
+/**
+ * A Scenario containing all the fields we would edit in the admin.
+ * Includes a couple additional fields that we don't send via other
+ * API endpoints.
+ **/
+interface AdminScenario extends Scenario {
+    is_active: boolean;
+    script: string;
+}
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+type AdminScenarioNoId = Omit<AdminScenario, 'id'>;
+/**
+ * Our Postgres API retrieves point types in a different way than we need to specify them for INSERT/UPDATE so
+ * we have to override the type of 'start_point' for INSERT or UPDATE:
+ */
+type DBScenarioForInsertOrUpdate = Omit<DBScenario, 'start_point'> & {'start_point': string};
+function adminScenarioFromDBScenario(scenarioData: DBScenario): AdminScenario {
+    return {
+        ...scenarioFromDbScenario(scenarioData),
+        is_active: scenarioData.is_active,
+        script: scenarioData.script,
+    };
+}
+
+function cleanScenarioDataForInsertOrUpdate(data: Partial<AdminScenarioNoId>): Partial<DBScenarioForInsertOrUpdate> {
+    const cleanData: Partial<DBScenarioForInsertOrUpdate> = {};
+    for (const field of ['name', 'is_active', 'script', 'start_point_name', 'duration_min', 'description_html']) {
+        if ((data as any)[field] !== undefined) { (cleanData as any)[field] = (data as any)[field]; };
+    }
+    if (data.start_point !== undefined) {
+        cleanData.start_point = `${data.start_point.lat}, ${data.start_point.lng}`;
+    }
+    if (data.difficulty !== undefined) {
+        cleanData.difficulty = (
+            data.difficulty === 'easy' ? 'easy' :
+            data.difficulty === 'hard' ? 'hard' :
+            'med'
+        );
+    }
+    return cleanData;
+}
+
+export const GET_SCENARIO: ApiMethod<{id: string}, AdminScenario> = {path: `/api/admin/scenarios/:id`, type: 'GET'};
+defineMethod(GET_SCENARIO, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const id = parseInt(data.id, 10);
+    if (isNaN(id)) {
+        throw new SafeError(`Invalid scenario ID.`);
+    }
+    const scenario = await db.scenarios.findOne(id);
+    if (scenario === null) {
+        throw new SafeError(`Scenario ${id} not found.`, 404);
+    }
+    return adminScenarioFromDBScenario(scenario);
+});
+
+export const CREATE_SCENARIO: ApiMethod<Partial<AdminScenarioNoId>, AdminScenario> = {path: `/api/admin/scenarios`, type: 'POST'};
+defineMethod(CREATE_SCENARIO, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const insertData = cleanScenarioDataForInsertOrUpdate(data);
+
+    let scenario: DBScenario;
+    try {
+        scenario = await db.scenarios.insert(insertData);
+    } catch (err) {
+        throw new SafeError(`Unable to save scenario "${data.name}": ${err.message}`, 400);
+    }
+    return adminScenarioFromDBScenario(scenario);
+});
+
+export const EDIT_SCENARIO: ApiMethod<{id: string}&Partial<AdminScenarioNoId>, AdminScenario> = {path: `/api/admin/scenarios/:id`, type: 'PUT'};
+defineMethod(EDIT_SCENARIO, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const scenarioId = parseInt(data.id, 20);
+    const dbData = cleanScenarioDataForInsertOrUpdate(data);
+
+    let scenario: DBScenario;
+    try {
+        scenario = ((await db.scenarios.update({id: scenarioId}, dbData)) as any as DBScenario[])[0];
+    } catch (err) {
+        throw new SafeError(`Unable to save scenario "${data.name}"`, 400);
+    }
+    return adminScenarioFromDBScenario(scenario);
+});
+
 
 export const LIST_SCRIPTS = defineListMethod<{name: string}>('scripts', async (criteria, queryOptions, db, app, user) => {
     return queryWithCount(db.scripts, criteria, {...queryOptions, fields: ['name']});

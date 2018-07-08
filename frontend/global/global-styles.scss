@@ -6,6 +6,7 @@ body {
     font-family: $textfont;
     font-size: 16px;
     background: lighten($black, 5%);
+    scroll-behavior: smooth; // Enable native smooth scrolling in browsers that support it
 }
 #app-container {
     max-width: 32em;
@@ -18,10 +19,10 @@ header {
 }
 .content {
     padding: 1rem;
-    overflow: auto;
-        p:first-of-type {
-            margin-top: 0;
-        }
+
+    p:first-of-type {
+        margin-top: 0;
+    }
 }
 
 header.fixed {
@@ -45,7 +46,7 @@ header.fixed {
             height: 40px;
         }
         ~ .content {
-            margin-top: 40px;
+            padding-top: calc(40px + 1rem);
         }
 }
 
