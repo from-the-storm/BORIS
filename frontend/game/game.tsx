@@ -33,6 +33,7 @@ interface State {
 }
 
 class _GameComponent extends React.PureComponent<Props, State> {
+    private contentElement: HTMLDivElement;
     constructor(props: Props) {
         super(props);
         this.state = {showHelpPrompt: false, showQuitPrompt: false, hasSeenSplash: false};
@@ -57,7 +58,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
                     <h1>{this.props.scenarioName.replace(/[aeiouy]/ig,'')}</h1>
                     <button className="help" onClick={this.handleHelpButton}>?</button>
                 </header>
-                <div className="content">
+                <div className="content" ref={el => this.contentElement = el}>
                     {uiElements}
                 </div>
             </div>
@@ -100,6 +101,20 @@ class _GameComponent extends React.PureComponent<Props, State> {
     }
     @bind private onSplashDone() {
         this.setState({hasSeenSplash: true});
+    }
+
+    componentDidUpdate(prevProps: Props, prevState: State, snapshot?: any) {
+        // We want to scroll to the bottom when receiving any new message etc.
+        // We could just always scroll to the bottom on any update, but on
+        // mobile safari, because of the bottom bar, if there are only a
+        // few messages on the screen it still lets us scroll slightly, and
+        // then the first few messages get cut off. So we don't scroll unless
+        // the content element is at least as big as the screen.
+        if (this.contentElement.offsetHeight >= window.innerHeight * 0.9) {
+            // Scroll as far down as possible.
+            // This will use smooth scrolling on browsers that support it.
+            window.scrollTo({top: 1e5, behavior: 'smooth'});
+        }
     }
 }
 
