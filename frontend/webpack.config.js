@@ -48,6 +48,17 @@ module.exports = {
                     } 
                 }]
             },
+            // Include audio files, either automatically inlined as data URLs or served from the 'dist' folder.
+            {
+                test: /\.(mp3)$/,  
+                use: [{
+                    loader: 'url-loader',
+                    options: { 
+                        limit: 4000, // Convert sounds < 4kb to base64 strings
+                        name: 'sounds/[name]-[hash].[ext]'
+                    } 
+                }]
+            },
         ]
     },
 

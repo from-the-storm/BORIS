@@ -91,7 +91,12 @@
 
 .game {
     .content {
-        float: left;
+        &::after {
+            // We need a non-floated element at the end to force .content to have a height > 0
+            content: " ";
+            clear: both;
+            display: block;
+        }
     }
     header {
         h1 {

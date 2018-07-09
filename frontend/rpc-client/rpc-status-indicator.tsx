@@ -35,8 +35,8 @@ export class _RpcConnectionStatusIndicator extends React.PureComponent<Props> {
             </div>;
         }
         return <div className="uses-rpc">
-            <div>{this.props.children}</div>
             {indicator}
+            <div>{this.props.children}</div>
         </div>;
     }
 }
