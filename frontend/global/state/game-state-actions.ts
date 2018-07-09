@@ -73,7 +73,7 @@ export function startGame(scenarioId: number) {
 }
 
 export function refreshGameUiState() {
-    return async (dispatch: Dispatch<{}>, getState: () => {}) => {
+    return async (dispatch: Dispatch<{}>, getState: () => RootState) => {
         let result: GetUiStateResponse;
         try {
             result = await callApi(GET_UI_STATE, {});
@@ -86,6 +86,19 @@ export function refreshGameUiState() {
             console.error(err);
             return;
         }
+        if (getState().gameState.isActive && !result.gameStatus.isActive) {
+            // A game was active but now that we check, it's not.
+            dispatch<GameStateActionsType>({type: Actions.ABANDON_GAME});
+            return;
+        } else if (!getState().gameState.isActive && result.gameStatus.isActive) {
+            // A game was not active but now that we check, it is.
+            dispatch<GameStateActionsType>({
+                type: GameStateActions.START_GAME,
+                scenarioId: result.gameStatus.scenarioId,
+                scenarioName: result.gameStatus.scenarioName,
+            });
+        }
+        // And force the game UI to update:
         dispatch<GameStateActionsType>({
             type: Actions.SET_UI_STATE,
             state: result.state,

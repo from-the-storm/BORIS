@@ -126,6 +126,7 @@ export const START_GAME: ApiMethod<StartGameRequest, GameStatus> = {path: '/api/
 
 /** GET_UI_STATE Request */
 export interface GetUiStateResponse {
+    gameStatus: GameStatus;
     uiUpdateSeqId: number;
     state: AnyUiState[];
 }
