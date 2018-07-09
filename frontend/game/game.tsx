@@ -2,6 +2,7 @@ import {bind} from 'bind-decorator';
 import * as React from 'react';
 import {connect, DispatchProp} from 'react-redux';
 import { List } from 'immutable';
+import { Howl } from 'howler';
 
 import { AnyUiState, StepType } from '../../common/game';
 import { RootState } from '../global/state';
@@ -16,6 +17,7 @@ import { MultipleChoiceStep } from './ui-steps/choice-step';
 import { BulletinStep } from './ui-steps/bulletin-step';
 
 import * as back from './images/back.svg';
+import * as messageSoundUrl from './sounds/bulletin.mp3';
 
 // Include our SCSS (via webpack magic)
 import './game.scss';
@@ -34,9 +36,13 @@ interface State {
 
 class _GameComponent extends React.PureComponent<Props, State> {
     private contentElement: HTMLDivElement;
+    private messageSound: Howl;
     constructor(props: Props) {
         super(props);
         this.state = {showHelpPrompt: false, showQuitPrompt: false, hasSeenSplash: false};
+        this.messageSound = new Howl({
+            src: [messageSoundUrl],
+        });
     }
     public render() {
         const uiElements: JSX.Element[] = [];
@@ -114,6 +120,10 @@ class _GameComponent extends React.PureComponent<Props, State> {
             // Scroll as far down as possible.
             // This will use smooth scrolling on browsers that support it.
             window.scrollTo({top: 1e5, behavior: 'smooth'});
+        }
+        // Play a sound if there's a new UI element:
+        if (this.props.uiState.size > prevProps.uiState.size && prevProps.uiState.size > 0) {
+            this.messageSound.play();
         }
     }
 }
