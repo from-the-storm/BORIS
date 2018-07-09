@@ -124,6 +124,16 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
         }
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, shapshot?: any) {
+        const screenChanged = (this.state.hasConsented !== prevState.hasConsented) || (this.state.registrationComplete !== prevState.registrationComplete);
+        if (screenChanged) {
+            // When the user clicks "I consent" to move to the next step of the form, etc.,
+            // we need to scroll back up to the top, or else they'll see the middle of the
+            // next step of the form, instead of the beginning.
+            window.scrollTo({top: 0});
+        }
+    }
+
     @bind private handleDoNotConsent() { this.props.dispatch<AnyAction>({type: Actions.SHOW_HOME}); }
     @bind private handleConsent() { this.setState({hasConsented: true}); }
     @bind private handleFormFieldChange(event: React.ChangeEvent<HTMLInputElement>) {
