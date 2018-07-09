@@ -235,14 +235,17 @@ describe("Admin API tests", () => {
             });
 
             it("Can edit an existing script", async () => {
-                const oldYaml = (await client.callApi(GET_SCRIPT, {id: EXISTING_SCRIPT_ID})).script_yaml;
+                const newScriptId = 'new-script35';
+                await client.callApi(CREATE_SCRIPT, {name: newScriptId, script_yaml: '[]'});
+
+                const oldYaml = (await client.callApi(GET_SCRIPT, {id: newScriptId})).script_yaml;
                 expect(oldYaml).not.toEqual(MINIMAL_SCRIPT);
-                const response = await client.callApi(EDIT_SCRIPT, {id: EXISTING_SCRIPT_ID, script_yaml: MINIMAL_SCRIPT});
+                const response = await client.callApi(EDIT_SCRIPT, {id: newScriptId, script_yaml: MINIMAL_SCRIPT});
                 expect(response).toEqual({
-                    name: EXISTING_SCRIPT_ID,
+                    name: newScriptId,
                     script_yaml: MINIMAL_SCRIPT,
                 });
-                const newYaml = (await client.callApi(GET_SCRIPT, {id: EXISTING_SCRIPT_ID})).script_yaml;
+                const newYaml = (await client.callApi(GET_SCRIPT, {id: newScriptId})).script_yaml;
                 expect(newYaml).toEqual(MINIMAL_SCRIPT);
             });
 
