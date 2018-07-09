@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 describe("BORIS Integration tests", () => {
 
-    let driver: ThenableWebDriver;
+    let driver: WebDriver;
     let borisServer: ChildProcess;
 
     beforeAll(async () => {
@@ -33,12 +33,18 @@ describe("BORIS Integration tests", () => {
         });
         await spawnedBorisServer;
 
-        driver = new Builder().forBrowser('chrome').setChromeOptions(
-            // Simulate an iPhone 7. Disable touch because it's buggy with Selenium (click causes context menu to pop up)
-            new chrome.Options().setMobileEmulation({deviceMetrics: {width: 375, height: 667, pixelRatio: 2, touch: false}})
-        ).build();
+        try {
+            driver = await new Builder().forBrowser('chrome').setChromeOptions(
+                // Simulate an iPhone 7. Disable touch because it's buggy with Selenium (click causes context menu to pop up)
+                new chrome.Options().setMobileEmulation({deviceMetrics: {width: 375, height: 667, pixelRatio: 2, touch: false}})
+            ).build();
+        } catch (err) {
+            console.error("* * * * Unable to initialize WebDriver for integration tests - all tests will fail.");
+            // Unfortunately Jest/Jasmine will still try to run the tests.
+            throw err;
+        }
 
-    });
+    }, 8000);
 
     afterAll(async () => {
         // To kill the boris server, which is a child of this child process,
