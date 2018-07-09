@@ -69,7 +69,9 @@ export function rpcClientMiddleware(store: MiddlewareAPI<RootState>) {
         if (notification.method === 'connection_ready' && store.getState().rpcClientState.wantConnection) {
             store.dispatch<AnyAction>({type: Actions.WSCS_AVAILABLE});
             // In case a game has started/stopped/updated while we were disconnected:
-            store.dispatch(refreshGameUiState());
+            if (store.getState().teamState.hasJoinedTeam) { // The API call will return an error if we're not even on a team, so only check if we are.
+                store.dispatch(refreshGameUiState());
+            }
             console.log("CONNECTION READY");
         } else {
             handleNotification(store as Store<RootState>, notification.params);
