@@ -6,6 +6,7 @@ import { UserStateActions } from "../global/state/user-state-actions";
 import { RpcClientConnectionStatus, Actions } from "./rpc-client-actions";
 import { handleNotification } from "./notifications";
 import { Store } from "react-redux";
+import { refreshGameUiState } from "../global/state/game-state-actions";
 
 const client = new Client((location.protocol === 'http:' ? 'ws:' : 'wss:') + `//${location.host}/rpc`);
 
@@ -67,6 +68,10 @@ export function rpcClientMiddleware(store: MiddlewareAPI<RootState>) {
     client.on('notification', (notification: any) => {
         if (notification.method === 'connection_ready' && store.getState().rpcClientState.wantConnection) {
             store.dispatch<AnyAction>({type: Actions.WSCS_AVAILABLE});
+            // In case a game has started/stopped/updated while we were disconnected:
+            if (store.getState().teamState.hasJoinedTeam) { // The API call will return an error if we're not even on a team, so only check if we are.
+                store.dispatch(refreshGameUiState());
+            }
             console.log("CONNECTION READY");
         } else {
             handleNotification(store as Store<RootState>, notification.params);

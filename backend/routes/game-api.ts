@@ -20,8 +20,6 @@ async function requireActiveTeamMembership(db: BorisDatabase, userId: number) {
     return activeTeamMembership;
 }
 
-const noActiveGame = Symbol();
-
 /**
  * Since any user may only be playing one game at a time, this gets
  * the active game being played by any user, or returns noActiveGame
@@ -29,14 +27,18 @@ const noActiveGame = Symbol();
  * @param db The BorisDatabase
  * @param userId The ID of the user whose active game you want
  */
-async function getActiveGameForUser(app: express.Application, userId: number): Promise<GameManager|typeof noActiveGame> {
+async function getActiveGameForUser(app: express.Application, userId: number): Promise<{active: boolean, gameManager?: GameManager, scenarioId?: number}> {
     const db: BorisDatabase = app.get('db');
     const activeTeamMembership = await requireActiveTeamMembership(db, userId);
     const game = await db.games.findOne({team_id: activeTeamMembership.team_id, is_active: true});
     if (game === null) {
-        return noActiveGame;
+        return {active: false};
     }
-    return await GameManager.loadGame(game.id);
+    return {
+        active: true,
+        gameManager: await GameManager.loadGame(game.id),
+        scenarioId: game.scenario_id,
+    };
 }
 
 /**
@@ -53,21 +55,35 @@ apiMethod(START_GAME, async (data, app, user) => {
  * API endpoint for ending the active scenario
  */
 apiMethod(ABANDON_GAME, async (data, app, user) => {
-    const gameManager = await getActiveGameForUser(app, user.id);
-    if (gameManager !== noActiveGame) {
+    const {active, gameManager} = await getActiveGameForUser(app, user.id);
+    if (active) {
         await gameManager.abandon();
     }
     return {result: 'ok'};
 });
 
 apiMethod(GET_UI_STATE, async (data, app, user) => {
-    const gameManager = await getActiveGameForUser(app, user.id);
-    if (gameManager === noActiveGame) {
-        throw new SafeError("No game is currently active.");
+    const db: BorisDatabase = app.get("db");
+    const {active, gameManager, scenarioId} = await getActiveGameForUser(app, user.id);
+    if (active) {
+        return {
+            gameStatus: {
+                isActive: true,
+                scenarioId: scenarioId,
+                scenarioName: (await db.scenarios.findOne({id: scenarioId})).name,
+            },
+            uiUpdateSeqId: gameManager.lastUiUpdateSeqIdsByUserId[user.id],
+            state: gameManager.getUiStateForUser(user.id),
+        };
     }
     return {
-        uiUpdateSeqId: gameManager.lastUiUpdateSeqIdsByUserId[user.id],
-        state: gameManager.getUiStateForUser(user.id),
+        gameStatus: {
+            isActive: false,
+            scenarioId: 0,
+            scenarioName: '',
+        },
+        uiUpdateSeqId: 0,
+        state: [],
     };
 });
 
@@ -76,8 +92,8 @@ apiMethod(GET_UI_STATE, async (data, app, user) => {
  * For example, selecitng a choice from a multiple choice prompt.
  */
 apiMethod(STEP_RESPONSE, async (data, app, user) => {
-    const gameManager = await getActiveGameForUser(app, user.id);
-    if (gameManager === noActiveGame) {
+    const {active, gameManager} = await getActiveGameForUser(app, user.id);
+    if (!active) {
         throw new SafeError("No game is currently active.");
     }
     await gameManager.callStepHandler(data);
