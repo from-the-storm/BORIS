@@ -11,6 +11,8 @@ import { loadScript } from "./script-loader";
 import { SafeError } from "../routes/api-utils";
 import { GameStatus, StepResponseRequest } from "../../common/api";
 import { getPlayerIdWithRole } from "./steps/assign-roles";
+import { GotoStep } from "./steps/goto-step";
+import { TargetStep } from "./steps/target-step";
 
 /** External services that the GameManager needs to run */
 interface GameManagerContext {
@@ -394,12 +396,7 @@ export class GameManager implements GameManagerStepInterface {
                     try {
                         result = !!this.safeEvalScriptExpression(step.ifCondition, userId);
                     } catch (err) {
-                        const errorNotification: GameErrorNotification = {
-                            type: NotificationType.GAME_ERROR,
-                            friendlyErrorMessage: "An error ocurred on the server while processing this step of the scenario. Sorry!",
-                            debuggingInfoForConsole: `Error evaluating if condition: ${err.message}`,
-                        };
-                        publishEventToUsers([userId], errorNotification);
+                        this.publishErrorToUser(userId, `Error evaluating if condition: ${err.message}`);
                     }
                     if (!result) {
                         // That step can't be the next one because its if condition failed.
@@ -408,6 +405,9 @@ export class GameManager implements GameManagerStepInterface {
                     }
                 }
 
+                if (step instanceof GotoStep) {
+                    return this.getGotoTargetStep(step, userId);
+                }
                 return step;
 
             } else if (nextStepId === currentStepId) {
@@ -415,6 +415,36 @@ export class GameManager implements GameManagerStepInterface {
             }
         }
         return EndOfScript; // There is no next step; perhaps we've completed the game.
+    }
+
+    /**
+     * If we're currently on a Goto step, find the corresponding target step.
+     * @param currentStep The Goto step that we're on
+     * @param userId The ID of the user who's on the goto step.
+     */
+    private getGotoTargetStep(currentStep: GotoStep, userId: number): Step|typeof EndOfScript {
+        const targetName = currentStep.settings.name;
+        let passedCurrentStep = false;
+        for (const step of this.steps.values()) {
+            if (step === currentStep) {
+                passedCurrentStep = true;
+            } else if (passedCurrentStep && step instanceof TargetStep && step.settings.name === targetName) {
+                // Target steps don't have 'if' conditions so we can go there unconditionally
+                return step;
+            }
+        }
+        // Otherwise, we couldn't find the target step:
+        this.publishErrorToUser(userId, `Can't find target step with name: ${targetName}`);
+        return EndOfScript;
+    }
+
+    private publishErrorToUser(userId: number, debuggingInfoForConsole: string, friendlyErrorMessage: string = "An error ocurred on the server while processing this step of the scenario. Sorry!") {
+        const errorNotification: GameErrorNotification = {
+            type: NotificationType.GAME_ERROR,
+            friendlyErrorMessage,
+            debuggingInfoForConsole,
+        };
+        publishEventToUsers([userId], errorNotification);
     }
 
     /**
