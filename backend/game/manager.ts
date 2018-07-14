@@ -682,7 +682,6 @@ export class GameManager implements GameManagerStepInterface {
                     [this.gameId]
                 );
             } catch (err) {
-                await task.none('ROLLBACK');
                 throw new Error("Game was not active.");
             }
             const pendingTeamVars = result.pending_team_vars;
@@ -693,7 +692,6 @@ export class GameManager implements GameManagerStepInterface {
                 `UPDATE teams SET game_vars = $2 WHERE id = $1`,
                 [this.teamId, combinedTeamVars]
             );
-            await task.none('COMMIT');
         });
         this._gameActive = false;
         this.publishEventToUsers(this.playerIds, {
