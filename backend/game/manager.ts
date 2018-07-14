@@ -204,6 +204,9 @@ export class GameManager implements GameManagerStepInterface {
     }
 
     public async callStepHandler(data: StepResponseRequest) {
+        if (!this.gameActive) {
+            throw new SafeError("Game has ended already.");
+        }
         const usersOnStep = this.getUserIdsWhoAreOnStep(data.stepId);
         if (usersOnStep.length === 0) {
             console.error(`Step ${data.stepId} is no longer the current step for any user.`);
