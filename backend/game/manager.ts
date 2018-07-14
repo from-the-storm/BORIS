@@ -145,6 +145,9 @@ export class GameManager implements GameManagerStepInterface {
      * so we don't want the caller to ever await this result.
      */
     private runCurrentSteps() {
+        if (!this.gameActive) {
+            return;
+        }
         const activeStepIds: Set<number> = new Set();
         this.playerIds.forEach(userId => { activeStepIds.add(this.getCurrentStepForUser(userId).id); });
 
