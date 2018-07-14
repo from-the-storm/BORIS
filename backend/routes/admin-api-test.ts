@@ -187,7 +187,7 @@ describe("Admin API tests", () => {
                 const response = await client.callApi(GET_SCRIPT, {id: 'test-script2'});
                 expect(response).toEqual({
                     name: 'test-script2',
-                    script_yaml: '---\n- step: message\n  messages:\n  - Hello! This is a message from the second script file.\n',
+                    script_yaml: '---\n- step: choice\n  key: chooseXtoEndGame\n  choices:\n    - x: Done\n',
                 });
             });
 

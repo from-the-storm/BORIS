@@ -638,9 +638,8 @@ export class GameManager implements GameManagerStepInterface {
      * Mark this game as successfully finished.
      * Save any pending changes to the team vars (like # of saltines earned).
      */
-    public async finish() {
+    private async finish() {
         // Mark the game as finished, but check that it wasn't already finished or abandoned
-        await this._advanceUsersToNextStepPromise;
         await this.db.instance.tx('update_team_var', async (task) => {
             let result: any;
             await task.none('START TRANSACTION');

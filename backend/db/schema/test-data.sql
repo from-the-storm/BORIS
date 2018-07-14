@@ -8,9 +8,10 @@ INSERT INTO scripts (name, script_yaml) VALUES
 '),
 
 ('test-script2', '---
-- step: message
-  messages:
-  - Hello! This is a message from the second script file.
+- step: choice
+  key: chooseXtoEndGame
+  choices:
+    - x: Done
 '),
 
 ('test-roles-script', '---
