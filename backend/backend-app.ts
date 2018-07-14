@@ -16,7 +16,7 @@ import { Server } from 'http';
 
 import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
-import { getRedisClient } from './db/redisClient';
+import { getRedisClient, wrapRedis } from './db/redisClient';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
 import {router as lobbyRouter} from './routes/lobby-api';
@@ -253,7 +253,7 @@ async function stopServer() {
         server.close(resolve);
     });
     await getPubSubClient().quit();
-    await getRedisClient().quit();
+    await wrapRedis(cb => getRedisClient().quit(cb));
     await db.instance.$pool.end();
 }
 

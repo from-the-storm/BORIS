@@ -1,18 +1,5 @@
-import * as redis from 'redis';
-import { getRedisClient } from '../db/redisClient';
+import { getRedisClient, wrapRedis } from '../db/redisClient';
 
-/** Helper method to promisify the redis API */
-function wrapRedis<T>(fn: (cb: redis.Callback<T>) => void): Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-        fn((err, reply) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(reply);
-            }
-        });
-    });
-}
 const USERS_ONLINE = 'users_online';
 
 export async function setUserOnline(userId: number) {
