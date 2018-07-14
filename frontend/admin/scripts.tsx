@@ -134,7 +134,7 @@ export const DocumentationAndStyles = (props: {}) => (
   - no: No
 - step: message
   if: VAR('canbehacked') === 'yes'
-  message:
+  messages:
   - Actually, no. BORIS is so advanced it cannot b$@^$#% UNAUTHORIZED CODE ALTERATION
 `}</pre></code>
             <h3>"Done" example:</h3>
