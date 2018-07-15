@@ -8,7 +8,6 @@ import * as nodemailerMockTransport from 'nodemailer-mock-transport';
 import * as passport from 'passport';
 import {Strategy as UniqueTokenStrategy} from 'passport-unique-token';
 import * as path from 'path';
-import * as redis from 'redis';
 import * as session from 'express-session';
 import * as connectRedis from 'connect-redis';
 import * as whiskers from 'whiskers';
@@ -21,6 +20,7 @@ import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
 import {router as lobbyRouter} from './routes/lobby-api';
 import {router as gameRouter} from './routes/game-api';
+import {router as marketRouter} from './routes/market-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
 import {router as appAdminRouter} from './routes/admin-api';
 import { subscribeToRedis, getPubSubClient } from './websocket/pub-sub';
@@ -174,6 +174,9 @@ app.use('/api/lobby', lobbyRouter);
 
 // Game API
 app.use('/api/game', gameRouter);
+
+// Market API
+app.use('/api/market', marketRouter);
 
 // Misc. API used by the single page app frontend:
 app.use('/api/app', appAPIRouter);

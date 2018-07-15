@@ -659,7 +659,7 @@ export class GameManager implements GameManagerStepInterface {
     }
     private async _setTeamVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
         const startTime = +new Date();
-        const result = this.db.instance.tx('update_team_var', async (task) => {
+        const result = await this.db.instance.tx('update_team_var', async (task) => {
             // Acquire a lock on the specific variable we're about to update, then call the updater
             // method, then save the result. This enables atomic increments, etc.
             // We use [game ID, 't' + var key] as a custom lock. This is because if we lock the whole
