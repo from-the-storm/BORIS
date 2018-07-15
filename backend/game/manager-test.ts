@@ -24,18 +24,9 @@ describe("GameManager tests", () => {
         gameManager = (await GameManager.startGame(teamId, TEST_SCENARIO_ID, testContext)).manager;
     });
     afterEach(async () => {
-        await gameManager.abandon();
-    });
-
-    describe("finish()", () => {
-        it("throws an error if the game was abandoned.", async () => {
+        if (gameManager.gameActive) {
             await gameManager.abandon();
-            await expect(gameManager.finish()).rejects.toHaveProperty('message', "Game was not active.");
-        });
-        it("throws an error if the game was completed.", async () => {
-            await gameManager.finish();
-            await expect(gameManager.finish()).rejects.toHaveProperty('message', "Game was not active.");
-        });
+        }
     });
 
     describe("GameVars", () => {
@@ -66,7 +57,13 @@ describe("GameManager tests", () => {
                 expect(await getTeamVar(teamVarNumber, teamId, db)).toEqual(10); // Default value
                 await gameManager.setVar(teamVarNumber, val => 42);
                 expect(await getTeamVar(teamVarNumber, teamId, db)).toEqual(42);
-                await gameManager.finish();
+                // Finish the test game:
+                await gameManager.allPendingStepsFlushed();
+                const lastStepId = Array.from(gameManager.steps.keys()).pop();
+                await gameManager.callStepHandler({stepId: lastStepId, choiceId: 'x'});
+                await gameManager.allPendingStepsFlushed();
+                expect(gameManager.gameActive).toBe(false);
+                //////
                 expect(await getTeamVar(teamVarNumber, teamId, db)).toEqual(42);
                 // Note: the new value '42' will affect any subsequent test cases here.
             });

@@ -11,6 +11,8 @@ import { loadScript } from "./script-loader";
 import { SafeError } from "../routes/api-utils";
 import { GameStatus, StepResponseRequest } from "../../common/api";
 import { getPlayerIdWithRole } from "./steps/assign-roles";
+import { GotoStep } from "./steps/goto-step";
+import { TargetStep } from "./steps/target-step";
 
 /** External services that the GameManager needs to run */
 interface GameManagerContext {
@@ -48,6 +50,17 @@ export interface GameManagerStepInterface {
     readonly playerIds: number[];
     readonly gameActive: boolean;
 }
+
+/** Create a numeric hash from the given string. */
+function hashKey(key: string) {
+    let hash: number = 0;
+    for (let i = 0; i < key.length; i++) {
+        const chr = key.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0;
+    }
+    return hash;
+};
 
 export class GameManager implements GameManagerStepInterface {
     private readonly db: BorisDatabase;
@@ -145,6 +158,9 @@ export class GameManager implements GameManagerStepInterface {
      * so we don't want the caller to ever await this result.
      */
     private runCurrentSteps() {
+        if (!this.gameActive) {
+            return;
+        }
         const activeStepIds: Set<number> = new Set();
         this.playerIds.forEach(userId => { activeStepIds.add(this.getCurrentStepForUser(userId).id); });
 
@@ -199,6 +215,9 @@ export class GameManager implements GameManagerStepInterface {
     }
 
     public async callStepHandler(data: StepResponseRequest) {
+        if (!this.gameActive) {
+            throw new SafeError("Game has ended already.");
+        }
         const usersOnStep = this.getUserIdsWhoAreOnStep(data.stepId);
         if (usersOnStep.length === 0) {
             console.error(`Step ${data.stepId} is no longer the current step for any user.`);
@@ -391,12 +410,7 @@ export class GameManager implements GameManagerStepInterface {
                     try {
                         result = !!this.safeEvalScriptExpression(step.ifCondition, userId);
                     } catch (err) {
-                        const errorNotification: GameErrorNotification = {
-                            type: NotificationType.GAME_ERROR,
-                            friendlyErrorMessage: "An error ocurred on the server while processing this step of the scenario. Sorry!",
-                            debuggingInfoForConsole: `Error evaluating if condition: ${err.message}`,
-                        };
-                        publishEventToUsers([userId], errorNotification);
+                        this.publishErrorToUser(userId, `Error evaluating if condition: ${err.message}`);
                     }
                     if (!result) {
                         // That step can't be the next one because its if condition failed.
@@ -405,6 +419,9 @@ export class GameManager implements GameManagerStepInterface {
                     }
                 }
 
+                if (step instanceof GotoStep) {
+                    return this.getGotoTargetStep(step, userId);
+                }
                 return step;
 
             } else if (nextStepId === currentStepId) {
@@ -412,6 +429,36 @@ export class GameManager implements GameManagerStepInterface {
             }
         }
         return EndOfScript; // There is no next step; perhaps we've completed the game.
+    }
+
+    /**
+     * If we're currently on a Goto step, find the corresponding target step.
+     * @param currentStep The Goto step that we're on
+     * @param userId The ID of the user who's on the goto step.
+     */
+    private getGotoTargetStep(currentStep: GotoStep, userId: number): Step|typeof EndOfScript {
+        const targetName = currentStep.settings.name;
+        let passedCurrentStep = false;
+        for (const step of this.steps.values()) {
+            if (step === currentStep) {
+                passedCurrentStep = true;
+            } else if (passedCurrentStep && step instanceof TargetStep && step.settings.name === targetName) {
+                // Target steps don't have 'if' conditions so we can go there unconditionally
+                return step;
+            }
+        }
+        // Otherwise, we couldn't find the target step:
+        this.publishErrorToUser(userId, `Can't find target step with name: ${targetName}`);
+        return EndOfScript;
+    }
+
+    private publishErrorToUser(userId: number, debuggingInfoForConsole: string, friendlyErrorMessage: string = "An error ocurred on the server while processing this step of the scenario. Sorry!") {
+        const errorNotification: GameErrorNotification = {
+            type: NotificationType.GAME_ERROR,
+            friendlyErrorMessage,
+            debuggingInfoForConsole,
+        };
+        publishEventToUsers([userId], errorNotification);
     }
 
     /**
@@ -441,6 +488,7 @@ export class GameManager implements GameManagerStepInterface {
                 return interpreter.nativeToPseudo(userIdWithRole === userId);
             }
             interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
+            interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
         });
         let maxSteps = 200, running = true;
         do { running = jsInterpreter.step(); } while (running && maxSteps-- > 0);
@@ -571,10 +619,17 @@ export class GameManager implements GameManagerStepInterface {
         return variable.default;
     }
     private async _setGameVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
-        return await this.db.instance.tx('update_game_var', async (task) => {
-            // Acquire a row-level lock on the row we're about to update, then call the updater
+        const startTime = +new Date();
+        let txLockTime: number, selectTime: number, updateTime: number, resultTime: number;
+        const result = await this.db.instance.tx('update_game_var', async (task) => {
+            // Acquire a lock on the specific variable we're about to update, then call the updater
             // method, then save the result. This enables atomic increments, etc.
-            const origData = await task.one('SELECT game_vars FROM games WHERE id = $1 FOR UPDATE', [this.gameId]);
+            // We use [game ID, 'g' + var key] as a custom lock. This is because if we lock the whole
+            // row, we will often run into slow lock acquisition due to concurrent lock requests for
+            // team vars and other game vars. Since we use jsonb_set() we don't need to lock the row,
+            // only to avoid concurrent writes to the same variable.
+            await task.one('SELECT pg_advisory_xact_lock($1, $2)', [this.gameId, hashKey(`g${variable.key}`)]);
+            const origData = await task.one('SELECT game_vars FROM games WHERE id = $1', [this.gameId]);
             const origValue: T = variable.key in origData.game_vars ? origData.game_vars[variable.key] : variable.default;
             const newValue = updater(origValue);
             const forceCast = typeof newValue === 'string' ? '::text' : ''; // to_jsonb() needs to know how to interpret a string type.
@@ -587,6 +642,11 @@ export class GameManager implements GameManagerStepInterface {
             this.gameVars = result.game_vars;
             return newValue;
         });
+        const timeTaken = (+new Date()) - startTime;
+        if (timeTaken > 500) {
+            console.error(`     Took ${timeTaken}ms to save game var ${variable.key} for game ${this.gameId}`);
+        }
+        return result;
     }
     private _getTeamVar<T>(variable: Readonly<GameVar<T>>): T {
         if (variable.key in this.pendingTeamVars) {
@@ -598,10 +658,16 @@ export class GameManager implements GameManagerStepInterface {
         }
     }
     private async _setTeamVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
-        return this.db.instance.tx('update_team_var', async (task) => {
-            // Acquire a row-level lock on the row we're about to update, then call the updater
+        const startTime = +new Date();
+        const result = this.db.instance.tx('update_team_var', async (task) => {
+            // Acquire a lock on the specific variable we're about to update, then call the updater
             // method, then save the result. This enables atomic increments, etc.
-            const origData = await task.one('SELECT pending_team_vars FROM games WHERE id = $1 FOR UPDATE', [this.gameId]);
+            // We use [game ID, 't' + var key] as a custom lock. This is because if we lock the whole
+            // row, we will often run into slow lock acquisition due to concurrent lock requests for
+            // team vars and other game vars. Since we use jsonb_set() we don't need to lock the row,
+            // only to avoid concurrent writes to the same variable.
+            await task.one('SELECT pg_advisory_xact_lock($1, $2)', [this.gameId, hashKey(`t${variable.key}`)]);
+            const origData = await task.one('SELECT pending_team_vars FROM games WHERE id = $1', [this.gameId]);
             const origValue: T = (
                 variable.key in origData.pending_team_vars ? origData.pending_team_vars[variable.key] :
                 variable.key in this.teamVars ? this.teamVars[variable.key] :
@@ -618,6 +684,11 @@ export class GameManager implements GameManagerStepInterface {
             this.pendingTeamVars = result.pending_team_vars;
             return newValue;
         });
+        const timeTaken = (+new Date()) - startTime;
+        if (timeTaken > 500) {
+            console.error(`     Took ${timeTaken}ms to save team var ${variable.key} for game ${this.gameId}`);
+        }
+        return result;
     }
     /**
      * Mark this game as abandoned.
@@ -638,10 +709,9 @@ export class GameManager implements GameManagerStepInterface {
      * Mark this game as successfully finished.
      * Save any pending changes to the team vars (like # of saltines earned).
      */
-    public async finish() {
+    private async finish() {
         // Mark the game as finished, but check that it wasn't already finished or abandoned
-        await this._advanceUsersToNextStepPromise;
-        await this.db.instance.tx('update_team_var', async (task) => {
+        await this.db.instance.tx('finish_game', async (task) => {
             let result: any;
             await task.none('START TRANSACTION');
             try {
@@ -650,7 +720,6 @@ export class GameManager implements GameManagerStepInterface {
                     [this.gameId]
                 );
             } catch (err) {
-                await task.none('ROLLBACK');
                 throw new Error("Game was not active.");
             }
             const pendingTeamVars = result.pending_team_vars;
@@ -661,7 +730,6 @@ export class GameManager implements GameManagerStepInterface {
                 `UPDATE teams SET game_vars = $2 WHERE id = $1`,
                 [this.teamId, combinedTeamVars]
             );
-            await task.none('COMMIT');
         });
         this._gameActive = false;
         this.publishEventToUsers(this.playerIds, {

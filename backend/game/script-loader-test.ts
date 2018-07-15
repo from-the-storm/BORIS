@@ -14,8 +14,9 @@ describe("Script Loader tests", () => {
             expect(Array.isArray(script)).toBe(true);
             expect(script.length).toBe(1);
             expect(script[0]).toEqual({
-                "step": "message",
-                "messages": ["Hello! This is a message from the second script file."],
+                "step": "choice",
+                "key": "chooseXtoEndGame",
+                "choices": [{x: "Done"}],
             });
         });
         it("can load a script from multiple files using includes", async () => {
@@ -27,8 +28,9 @@ describe("Script Loader tests", () => {
                 "messages": ["Hello! This is a test."],
             });
             expect(script[1]).toEqual({
-                "step": "message",
-                "messages": ["Hello! This is a message from the second script file."],
+                "step": "choice",
+                "key": "chooseXtoEndGame",
+                "choices": [{x: "Done"}],
             });
         });
         it("throws an error if the script doesn't exist", async () => {

@@ -8,9 +8,10 @@ INSERT INTO scripts (name, script_yaml) VALUES
 '),
 
 ('test-script2', '---
-- step: message
-  messages:
-  - Hello! This is a message from the second script file.
+- step: choice
+  key: chooseXtoEndGame
+  choices:
+    - x: Done
 '),
 
 ('test-roles-script', '---
@@ -33,6 +34,26 @@ INSERT INTO scripts (name, script_yaml) VALUES
 - step: message
   messages:
     - "This is sent to everyone"
+'),
+
+('test-goto-script', '---
+- step: assignroles
+# Send the Doomsayer to the "dsmessage" target
+- step: goto
+  name: dsmessage
+  if: ROLE(''D'')
+- step: message
+  messages:
+    - The non-doomsayers should see this message
+- step: goto
+  name: end
+- step: target
+  name: dsmessage
+- step: message
+  messages:
+    - This is sent to the doomsayer
+- step: target
+  name: end
 ')
 
 ;

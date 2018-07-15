@@ -64,6 +64,7 @@ export const DocumentationAndStyles = (props: {}) => (
                     <p>A JavaScript expression that determines whether or not any given player should see this step.
                     Script variables can be accessed using the <code>VAR(name)</code> function.
                     You can use the <code>ROLE(roleId)</code> function to check if the current user has been assigned a particular role.</p>
+                    You can use the <code>NUM_PLAYERS</code> variable to get the number of players.
                     <p>Examples:</p>
                     <p><code>if: ROLE('D')</code> (only send this step to the user who is the doomsayer)</p>
                     <p><code>if: VAR('saltines') >= 10</code> (only display this step if the team has earned at least ten saltines).</p>
@@ -157,7 +158,7 @@ export const DocumentationAndStyles = (props: {}) => (
                 can later use the results of the user's choice in <code>if: </code> conditions using &nbsp;
                 <code>VAR('<em>(key)</em>')</code>.
             </p>
-            <h3>Eample:</h3>
+            <h3>Example:</h3>
             <p>A common use for the choice step is to pause the script until the user has completed some action:</p>
             <code><pre>{`
 - step: message
@@ -165,6 +166,31 @@ export const DocumentationAndStyles = (props: {}) => (
   - What's your team's code word?
 - step: free response
   key: teamname
+`.trim()}</pre></code>
+
+
+            <h2>Target Step</h2>
+            <p>
+                A target step labels a place in the script, so that user(s) can be sent to
+                that part of the script later using a "goto" step.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- step: target
+  name: end
+`.trim()}</pre></code>
+
+
+            <h2>Goto Step</h2>
+            <p>
+                A goto step jumps ahead to the "target" step with the specified name.
+                It can only jump forward in the script, not backward.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- step: goto
+  name: end
+  if: ROLE('D')
 `.trim()}</pre></code>
 
 

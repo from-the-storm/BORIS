@@ -49,8 +49,13 @@ describe("Assign Roles Integration tests", () => {
             const doomsayerUserId = await getUserIdWithRoleForTeam('D', teamId, db);
             expect(doomsayerUserId).not.toBeUndefined();
             expect([user1.id, user2.id, user3.id]).toContain(doomsayerUserId);
-            // And that should persist after the game:
-            await manager.finish();
+            // And that should persist after the game.
+            // Finish the game:
+            const choiceAwaitingResponse = messageQueue.find(msg => msg.stepUi.type === StepType.MultipleChoice);
+            await manager.callStepHandler({stepId: choiceAwaitingResponse.stepUi.stepId, choiceId: 'x'});
+            await manager.allPendingStepsFlushed();
+            // Now the game should be finished:
+            expect(manager.gameActive).toBe(false);
             expect(await getUserIdWithRoleForTeam('D', teamId, db)).toBe(doomsayerUserId);
         });
     });
