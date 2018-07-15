@@ -3,14 +3,13 @@ import * as React from 'react';
 import { connect, DispatchProp } from 'react-redux';
 
 import { RootState } from '../global/state';
-import { Actions } from './lobby-state-actions';
-import { Scenario, OtherTeamMember } from '../../common/models';
-import { AnyAction } from '../global/actions';
+import { OtherTeamMember } from '../../common/models';
 import { RpcClientConnectionStatus } from '../rpc-client/rpc-client-actions';
 
 import { Prompt } from '../prompt/prompt';
 
 import * as saltine from './images/saltine.svg';
+import { updateSaltinesBalance } from '../global/state/team-state-actions';
 
 interface TeamRowProps {
     details: OtherTeamMember,
@@ -93,8 +92,8 @@ interface OwnProps {
 interface Props extends OwnProps, DispatchProp<RootState> {
     teamCode: string;
     teamName: string;
-    totalPoints: number;
-    totalPointsAllTime: number;
+    saltinesBalance: number;
+    saltinesBalanceAllTime: number;
     myName: string;
     isTeamAdmin: boolean;
     isOnline: boolean;
@@ -113,7 +112,10 @@ class _TeamComponent extends React.PureComponent<Props, State> {
             teamView: true,
             editingTeam: false,
             showPrompt: false
-        })
+        });
+
+        // Update the saltines balance:
+        this.props.dispatch(updateSaltinesBalance());
     }
 
     public render() {
@@ -128,8 +130,8 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                     <h1>{this.props.teamName}</h1>
                     <div className="saltines-count">
                         <h3>Saltines</h3>
-                        <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.totalPoints}</span>(current balance)</p>
-                        <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.totalPointsAllTime}</span>(earned all-time)</p>
+                        <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.saltinesBalance}</span>(current balance)</p>
+                        <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.saltinesBalanceAllTime}</span>(earned all-time)</p>
                     </div>
                     {/* <div className="rankings-snapshot">
                         <h3>Rank</h3>
@@ -189,15 +191,14 @@ class _TeamComponent extends React.PureComponent<Props, State> {
 }
 
 export const TeamComponent = connect((state: RootState, ownProps: OwnProps) => {
-    const selectedScenarioId = state.lobbyState.showScenarioDetails;
     return {
         myName: state.userState.firstName,
         teamCode: state.teamState.teamCode,
         teamName: state.teamState.teamName,
         isTeamAdmin: state.teamState.isTeamAdmin,
         isOnline: state.rpcClientState.status === RpcClientConnectionStatus.Connected,
-        totalPoints: 70,
-        totalPointsAllTime: 90,
+        saltinesBalance: state.teamState.saltinesBalance,
+        saltinesBalanceAllTime: state.teamState.saltinesEarnedAllTime,
         otherTeamMembers: state.teamState.otherTeamMembers,
     };
 })(_TeamComponent);

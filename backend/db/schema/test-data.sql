@@ -54,6 +54,23 @@ INSERT INTO scripts (name, script_yaml) VALUES
     - This is sent to the doomsayer
 - step: target
   name: end
+'),
+
+('test-saltines-script', '---
+- step: award
+  earned: 5
+  possible: 10
+- step: choice
+  key: chooseXtoContinue
+  choices:
+    - x: Done
+- step: award
+  earned: 6
+  possible: 6
+- step: choice
+  key: chooseXtoEndGame
+  choices:
+    - x: Done
 ')
 
 ;

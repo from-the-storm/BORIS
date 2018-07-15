@@ -152,3 +152,15 @@ export type StepResponseRequest = (
     |MultipleChoiceStepResponseRequest
 );
 export const STEP_RESPONSE: ApiMethod<StepResponseRequest, EmptyApiResponse> = {path: '/api/game/step', type: 'POST'};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// market-api methods:
+
+
+/** GET_UI_STATE Request */
+export interface GetSaltinesBalanceResponse {
+    saltinesBalance: number;
+    saltinesEarnedAllTime: number;
+}
+export const GET_SALTINES_BALANCE: ApiMethod<NoRequestParameters, GetSaltinesBalanceResponse> = {path: '/api/market/saltines', type: 'GET'};

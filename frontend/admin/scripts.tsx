@@ -46,7 +46,7 @@ export const DocumentationAndStyles = (props: {}) => (
 
         <div style={{fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'}}>
             <h1>Documentation</h1>
-            <p>BORIS scripts are written in <a href="https://en.wikipedia.org/wiki/YAML">YAML</a>, and consist of a list of "steps", and/or includes.</p>
+            <p>BORIS scripts are written in <a href="https://en.wikipedia.org/wiki/YAML">YAML</a>, and consist of a list of "steps", conditionals, and/or includes.</p>
             <h2>Steps</h2>
             <p>A typical step looks like:</p>
             <code><pre>{`
@@ -85,6 +85,31 @@ export const DocumentationAndStyles = (props: {}) => (
             <p>A script can include other scripts, combining multiple scripts into one larger script. For example:</p>
             <code><pre>- include: story1-1</pre></code>
             <p>Includes are not steps so cannot have an <code>if</code> condition or any other parameters.</p>
+
+            <h2>Conditionals</h2>
+            <p>To make writing scripts easier, scripts can include <code>if: then:</code>, <code>elif: then:</code>, and <code>else: then:</code> directives.</p>
+            <p>
+                These are self-explanatory. The <code>if</code> must be first, followed by zero or more <code>elif</code> directives, and finally an optional <code>else</code> directive.
+                Each directive must have the <code>then:</code> keyword followed by an indented list of steps to follow when the condition is true.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- if: VAR('name').toLowerCase() === "bob"
+  then:
+  - step: message
+    messages:
+    - You think he is Bob.
+- elif: VAR('name').toLowerCase() === "carl"
+  then:
+  - step: message
+    messages:
+    - You think he is Carl.
+- else:
+  then:
+  - step: message
+    messages:
+    - You are way off.
+`.trim()}</pre></code>
 
             <h2>Message Step</h2>
             <p>
@@ -193,6 +218,35 @@ export const DocumentationAndStyles = (props: {}) => (
   if: ROLE('D')
 `.trim()}</pre></code>
 
+
+            <h2>Award Saltines Step</h2>
+            <p>
+                This step can award saltines to the team. You must specify how
+                many were earned, and how many could have been earned.
+                If you are using if conditions, you should include an 'award'
+                step in each possible branch of the script, even if it's
+                awarding 0 saltines, to ensure the total possible count is
+                correct.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- if: VAR('wantsSaltines') === 'yes'
+  then:
+  - step: message
+    messages:
+    - Ok, awarding you 3 saltines
+  - step: award
+    earned: 3
+    possible: 3
+- else:
+  then:
+  - step: message
+    messages:
+    - Ok, awarding you 0 saltines
+  - step: award
+    earned: 0
+    possible: 3
+`.trim()}</pre></code>
 
             <h2>Pause Step</h2>
             <p>
