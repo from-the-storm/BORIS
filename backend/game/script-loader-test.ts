@@ -41,6 +41,76 @@ describe("Script Loader tests", () => {
             const loadPromise = loadScript(db, "../scripts/test-script");
             await expect(loadPromise).rejects.toBeInstanceOf(Error);
         });
+
+        describe("Can rewrite an if statement into goto/target directives", () => {
+
+            it("step, if, elif, step", async() => {
+                const scriptName = 'can-rewrite-test';
+                const ctxID = 1001;
+                await db.scripts.insert({name: scriptName, script_yaml: `
+                - step: foo
+                - if: condition1
+                  then:
+                    - step: case1a
+                      if: foobar
+                    - step: case1b
+                - elif: condition2
+                  then:
+                    - step: case2a
+                - step: bar
+                `});
+                const parsedData = await loadScript(db, scriptName);
+                expect(parsedData).toEqual([
+                    {step: 'foo'},
+                    {step: 'goto', if: '!(condition1)', name: `nextCheck${ctxID}`},
+                        {step: 'case1a', if: 'foobar'},
+                        {step: 'case1b'},
+                        {step: 'goto', name: `endOfContext${ctxID}`},
+                    {step: 'target', name: `nextCheck${ctxID}`},
+                    {step: 'goto', if: '!(condition2)', name: `nextCheck${ctxID}`},
+                        {step: 'case2a'},
+                        {step: 'goto', name: `endOfContext${ctxID}`},
+                    {step: 'target', name: `nextCheck${ctxID}`},
+                    {step: 'target', name: `endOfContext${ctxID}`},
+                    {step: 'bar'},
+                ]);
+            });
+
+            it("if, if, else, step", async() => {
+                const scriptName = 'can-rewrite-test2';
+                const ctxID = 1002;
+                const ctxID2 = 1003;
+                await db.scripts.insert({name: scriptName, script_yaml: `
+                - if: condition1
+                  then:
+                    - step: case1a
+                - if: condition2
+                  then:
+                    - step: case2a
+                - else:
+                  then:
+                    - step: elsestep
+                - step: bar
+                `});
+                const parsedData = await loadScript(db, scriptName);
+                expect(parsedData).toEqual([
+                    {step: 'goto', if: '!(condition1)', name: `nextCheck${ctxID}`},
+                        {step: 'case1a'},
+                        {step: 'goto', name: `endOfContext${ctxID}`},
+                    {step: 'target', name: `nextCheck${ctxID}`},
+                    {step: 'target', name: `endOfContext${ctxID}`},
+
+                    {step: 'goto', if: '!(condition2)', name: `nextCheck${ctxID2}`},
+                        {step: 'case2a'},
+                        {step: 'goto', name: `endOfContext${ctxID2}`},
+                    {step: 'target', name: `nextCheck${ctxID2}`},
+                        {step: 'elsestep'},
+                    {step: 'target', name: `endOfContext${ctxID2}`},
+                    {step: 'bar'},
+                ]);
+            });
+
+        });
     });
 
 });
