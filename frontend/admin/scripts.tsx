@@ -64,6 +64,7 @@ export const DocumentationAndStyles = (props: {}) => (
                     <p>A JavaScript expression that determines whether or not any given player should see this step.
                     Script variables can be accessed using the <code>VAR(name)</code> function.
                     You can use the <code>ROLE(roleId)</code> function to check if the current user has been assigned a particular role.</p>
+                    You can use the <code>NUM_PLAYERS</code> variable to get the number of players.
                     <p>Examples:</p>
                     <p><code>if: ROLE('D')</code> (only send this step to the user who is the doomsayer)</p>
                     <p><code>if: VAR('saltines') >= 10</code> (only display this step if the team has earned at least ten saltines).</p>

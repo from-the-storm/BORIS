@@ -488,6 +488,7 @@ export class GameManager implements GameManagerStepInterface {
                 return interpreter.nativeToPseudo(userIdWithRole === userId);
             }
             interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
+            interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
         });
         let maxSteps = 200, running = true;
         do { running = jsInterpreter.step(); } while (running && maxSteps-- > 0);
