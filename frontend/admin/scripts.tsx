@@ -194,6 +194,34 @@ export const DocumentationAndStyles = (props: {}) => (
 `.trim()}</pre></code>
 
 
+            <h2>Award Saltines Step</h2>
+            <p>
+                This step can award saltines to the team. You must specify how
+                many were earned, and how many could have been earned.
+                If you are using if conditions, you should include an 'award'
+                step in each possible branch of the script, even if it's
+                awarding 0 saltines, to ensure the total possible count is
+                correct.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- step: goto
+  name: wrong
+  if: +VAR('guess') < 10
+# Here the user got it right:
+- step: award
+  earned: 10
+  possible: 10
+- step: goto
+  name: end
+# Here the user got it wrong:
+- step: award
+  earned: 0
+  possible: 10
+- step: target
+  name: end
+`.trim()}</pre></code>
+
             <h2>Pause Step</h2>
             <p>
                 A pause step pauses for the specified number of seconds.
