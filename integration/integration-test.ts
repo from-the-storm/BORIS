@@ -34,9 +34,13 @@ describe("BORIS Integration tests", () => {
         await spawnedBorisServer;
 
         try {
-            driver = await new Builder().forBrowser('chrome').setChromeOptions(
+            /*driver = await new Builder().forBrowser('chrome').setChromeOptions(
                 // Simulate an iPhone 7. Disable touch because it's buggy with Selenium (click causes context menu to pop up)
                 new chrome.Options().setMobileEmulation({deviceMetrics: {width: 375, height: 667, pixelRatio: 2, touch: false}})
+            ).build();*/
+            // Unforunately mobile emulation is buggy in newer versions of Chrome so we are just using the desktop version for now.
+            driver = await new Builder().forBrowser('chrome').setChromeOptions(
+                new chrome.Options().addArguments("--window-size=375,667")
             ).build();
         } catch (err) {
             console.error("* * * * Unable to initialize WebDriver for integration tests - all tests will fail.");
