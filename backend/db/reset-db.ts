@@ -3,6 +3,7 @@ import * as pgPromise from 'pg-promise';
 
 import {config, environment} from '../config';
 import {migrate} from './migrate';
+import { getRedisClient, wrapRedis } from './redisClient';
 
 
 const metaDb = pgPromise()({
@@ -14,6 +15,14 @@ const metaDb = pgPromise()({
 });
 
 export async function resetTestDB() {
+    console.log(`Resetting redis cache`)
+    const redisClient = getRedisClient();
+    const keys = await wrapRedis(cb => redisClient.keys(`${config.redis_prefix}*`, cb)) as any[];
+    for (const key of keys) {
+        const unprefixedKey = key.substr(config.redis_prefix.length);
+        await wrapRedis(cb => redisClient.del(unprefixedKey, cb));
+    }
+    await wrapRedis(cb => redisClient.quit(cb));
     console.log(`Resetting test database ${config.db_name}`)
     await metaDb.none(`DROP DATABASE IF EXISTS ${config.db_name}`);
     await metaDb.none(`CREATE DATABASE ${config.db_name}`);

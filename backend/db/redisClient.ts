@@ -17,3 +17,16 @@ export function getRedisClient() {
     }
     return redisClient;
 }
+
+/** Helper method to promisify the redis API */
+export function wrapRedis<T>(fn: (cb: redis.Callback<T>) => void): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        fn((err, reply) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(reply);
+            }
+        });
+    });
+}
