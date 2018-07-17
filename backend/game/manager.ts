@@ -47,6 +47,7 @@ export interface GameManagerStepInterface {
     pushUiUpdate(stepId: number): Promise<void>;
     getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T;
     setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T>;
+    safeEvalScriptExpression(jsExpression: string): any;
     readonly playerIds: number[];
     readonly gameActive: boolean;
 }
@@ -173,10 +174,15 @@ export class GameManager implements GameManagerStepInterface {
                         this.advanceUsersToNextStep(); // We don't need to wait for this result though.
                     }
                     this._stepRunPendingCount--;
-                }, () => {
+                }, (err) => {
                     // The step failed to run.
                     if (this.gameActive) {
-                        console.error(`Unable to finish running step ${stepId}`);
+                        console.error(`Unable to finish running step ${stepId}: ${err}`);
+                        this.playerIds.forEach(userId => {
+                            if (this.getCurrentStepForUser(userId).id === stepId) {
+                                this.publishErrorToUser(userId, `Error while running step ${stepId}.`);
+                            }
+                        });
                     }
                     this._stepRunPendingCount--;
                 }));
@@ -469,13 +475,15 @@ export class GameManager implements GameManagerStepInterface {
      * user has been assigned to the role in question.
      * @param jsExpression 
      */
-    public safeEvalScriptExpression(jsExpression: string, userId: number): any {
+    public safeEvalScriptExpression(jsExpression: string, userId?: number): any {
         const jsInterpreter = new JsInterpreter(jsExpression, (interpreter, scope) => {
-            const getVariable = (name: string) => {
+            const getVariable = (_name: JsInterpreter.Value, _defaultValue?: JsInterpreter.Value) => {
+                const name: string = interpreter.pseudoToNative(_name);
+                const defaultValue: any = _defaultValue !== undefined ? interpreter.pseudoToNative(_defaultValue) : undefined;
                 const notSet = Symbol();
                 let result = this._getGameVar({key: name, scope: GameVarScope.Game, default: notSet});
                 if (result === notSet) {
-                    result = this._getTeamVar({key: name, scope: GameVarScope.Team, default: undefined});
+                    result = this._getTeamVar({key: name, scope: GameVarScope.Team, default: defaultValue});
                 }
                 return interpreter.nativeToPseudo(result);
             };
@@ -487,7 +495,9 @@ export class GameManager implements GameManagerStepInterface {
                 }
                 return interpreter.nativeToPseudo(userIdWithRole === userId);
             }
-            interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
+            if (userId !== undefined) {
+                interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
+            }
             interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
         });
         let maxSteps = 200, running = true;
@@ -767,4 +777,5 @@ export class VoidGameManager implements GameManagerStepInterface {
     public async setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T> {
         return updater(this.getVar(variable));
     }
+    public safeEvalScriptExpression(jsExpression: string) { throw new Error("Unimplemented"); }
 }
