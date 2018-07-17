@@ -71,6 +71,16 @@ INSERT INTO scripts (name, script_yaml) VALUES
   key: chooseXtoEndGame
   choices:
     - x: Done
+'),
+
+('test-set-var-script', '---
+- step: message
+  messages:
+  - [''"You have played this scenario " + VAR("num_times_played", 0) + " times"'']
+- step: set
+  scope: team
+  key: num_times_played
+  to: VAR(''num_times_played'', 0) + 1
 ')
 
 ;

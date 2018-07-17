@@ -253,6 +253,25 @@ export const DocumentationAndStyles = (props: {}) => (
     possible: 3
 `.trim()}</pre></code>
 
+            <h2>Set Variable Step</h2>
+            <p>
+                A set variable step lets you set a variable. You must specify the scope of the variable, which is either
+                "game" or "team" (the difference is that team variables last across multiple games/scenarios, and "game"
+                variables are only available within the current game/scenario). The "key" paramter is the name of the
+                variable to set, and the "to" parameter specifies the value as a JavaScript expression.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- step: message
+  messages:
+  - ['"You have played this scenario " + VAR("num_times_played", 0) + " times"']
+# Increase the number of times played by 1:
+- step: set
+  scope: team
+  key: num_times_played
+  to: VAR('num_times_played', 0) + 1
+`.trim()}</pre></code>
+
             <h2>Pause Step</h2>
             <p>
                 A pause step pauses for the specified number of seconds.
