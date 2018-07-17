@@ -10,6 +10,7 @@ import { TargetStep } from "./target-step";
 import { AssignRolesStep } from "./assign-roles";
 import { BulletinStep } from "./bulletin";
 import { AwardSaltinesStep } from "./award-saltines";
+import { SetVariableStep } from "./set-step";
 
 export function loadStepFromData(data: any, id: number, manager: GameManagerStepInterface): Step {
     const {step, ...otherData} = data; // Remove the 'step' key from the data; 'step' is the step type.
@@ -23,6 +24,7 @@ export function loadStepFromData(data: any, id: number, manager: GameManagerStep
         case 'target': return new TargetStep(args);
         case 'award': return new AwardSaltinesStep(args);
         case 'bulletin': return new BulletinStep(args);
+        case 'set': return new SetVariableStep(args);
         case 'assignroles': return new AssignRolesStep(args);
         default: throw new Error(`Unable to load type with step type "${step}".`);
     }

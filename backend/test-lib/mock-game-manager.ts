@@ -35,6 +35,10 @@ export class MockGameManager implements GameManagerStepInterface {
         return newValue;
     }
 
+    public safeEvalScriptExpression(jsExpression: string) {
+        return `MOCK JS RESULT OF: ${jsExpression}`;
+    }
+
     /** A helper method for test cases to use to load Steps from YAML strings */
     static loadStepFromYaml(yamlData: string, manager = new MockGameManager()): Step {
         const data = yaml.safeLoad(yamlData);

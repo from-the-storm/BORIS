@@ -62,12 +62,12 @@ export const DocumentationAndStyles = (props: {}) => (
                 <dt><code>if: <em>(condition)</em></code></dt>
                 <dd>
                     <p>A JavaScript expression that determines whether or not any given player should see this step.
-                    Script variables can be accessed using the <code>VAR(name)</code> function.
+                    Script variables can be accessed using the <code>VAR(name, [optional default])</code> function.
                     You can use the <code>ROLE(roleId)</code> function to check if the current user has been assigned a particular role.</p>
                     You can use the <code>NUM_PLAYERS</code> variable to get the number of players.
                     <p>Examples:</p>
                     <p><code>if: ROLE('D')</code> (only send this step to the user who is the doomsayer)</p>
-                    <p><code>if: VAR('saltines') >= 10</code> (only display this step if the team has earned at least ten saltines).</p>
+                    <p><code>if: VAR('saltines', 0) >= 10</code> (only display this step if the team has earned at least ten saltines).</p>
                 </dd>
                 <dt><code>parallel: yes</code></dt>
                 <dd>
@@ -120,6 +120,10 @@ export const DocumentationAndStyles = (props: {}) => (
                 The character is optional and defaults to <code>boris</code>.
                 It can also be set to <code>backfeed</code>, <code>clarence</code>, or <code>nameless</code> (for the nameless organization).
             </p>
+            <p>
+                A message can also optionally contain a JavaScript expression, if you surround it with <code>['</code> and <code>']</code>.
+                If doing this, check your work using a YAML editor, because it's easy to get the syntax wrong.
+            </p>
             <h3>Example:</h3>
             <code><pre>{`
 - step: message
@@ -128,6 +132,7 @@ export const DocumentationAndStyles = (props: {}) => (
   - Let’s begin the scenario.
   - First, walk to the ocean.
   - Then, yell at the moon.
+  - ['"You have played this scenario " + VAR("num_times_played", 0) + " times"']
 `}</pre></code>
 
             <h2>[Multiple] Choice Step</h2>
@@ -246,6 +251,25 @@ export const DocumentationAndStyles = (props: {}) => (
   - step: award
     earned: 0
     possible: 3
+`.trim()}</pre></code>
+
+            <h2>Set Variable Step</h2>
+            <p>
+                A set variable step lets you set a variable. You must specify the scope of the variable, which is either
+                "game" or "team" (the difference is that team variables last across multiple games/scenarios, and "game"
+                variables are only available within the current game/scenario). The "key" paramter is the name of the
+                variable to set, and the "to" parameter specifies the value as a JavaScript expression.
+            </p>
+            <h3>Example:</h3>
+            <code><pre>{`
+- step: message
+  messages:
+  - ['"You have played this scenario " + VAR("num_times_played", 0) + " times"']
+# Increase the number of times played by 1:
+- step: set
+  scope: team
+  key: num_times_played
+  to: VAR('num_times_played', 0) + 1
 `.trim()}</pre></code>
 
             <h2>Pause Step</h2>

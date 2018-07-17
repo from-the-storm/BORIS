@@ -1,5 +1,5 @@
 import { AnyUiState, StepType } from "../../common/game";
-import { GameManagerStepInterface, GameManager } from "./manager";
+import { GameManagerStepInterface } from "./manager";
 import { GameVar, GameVarScope } from "./vars";
 import { StepResponseRequest } from "../../common/api";
 import { SafeError } from "../routes/api-utils";
@@ -116,5 +116,9 @@ export abstract class Step {
         if (!this.manager.gameActive) {
             throw new Error("Skipping rest of step run() - game is over.");
         }
+    }
+
+    protected safeEvalScriptExpression(jsExpression: string) {
+        return this.manager.safeEvalScriptExpression(jsExpression);
     }
 }
