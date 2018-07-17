@@ -80,6 +80,29 @@ export const LIST_TEAMS = defineListMethod<Team>('teams', async (criteria, query
     return queryWithCount(db.teams, criteria, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
 });
 
+
+
+export const GET_TEAM: ApiMethod<{id: string}, Team&{game_vars: any}> = {path: `/api/admin/teams/:id`, type: 'GET'};
+defineMethod(GET_TEAM, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const id = parseInt(data.id, 10);
+    if (isNaN(id)) {
+        throw new SafeError(`Invalid team ID.`);
+    }
+    const team = await db.teams.findOne(id);
+    if (team === null) {
+        throw new SafeError(`Team ${id} not found.`, 404);
+    }
+    return {
+        id: team.id,
+        name: team.name,
+        organization: team.organization,
+        code: team.code,
+        created: team.created,
+        game_vars: team.game_vars,
+    };
+});
+
 interface ScenarioWithScript extends Scenario {
     script: string;
 }

@@ -1,7 +1,7 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO, CREATE_SCENARIO, EDIT_SCENARIO } from './admin-api';
+import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO, CREATE_SCENARIO, EDIT_SCENARIO, GET_TEAM } from './admin-api';
 import { ApiMethod } from '../../common/api';
 import { createTeam, TEST_SCENARIO_ID } from '../test-lib/test-data';
 
@@ -69,6 +69,24 @@ describe("Admin API tests", () => {
         describe("List Teams (GET /api/admin/teams)", async () => {
 
             checkSecurity(LIST_TEAMS);
+
+        });
+        describe("Team Details (GET /api/admin/teams/:id)", async () => {
+
+            checkSecurity(GET_TEAM, {id: "1"});
+
+            it("Returns team data", async () => {
+                const {team, teamId} = await createTeam(server.app.get("db") as BorisDatabase, 3);
+                const response = await client.callApi(GET_TEAM, {id: String(teamId)});
+                expect(response).toEqual({
+                    id: teamId,
+                    name: team.name,
+                    organization: team.organization,
+                    code: team.code,
+                    created: JSON.stringify(team.created).replace(/"/g, ''),
+                    game_vars: team.game_vars,
+                });
+            });
 
         });
     });
