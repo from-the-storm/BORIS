@@ -1,4 +1,4 @@
-import { GameManagerStepInterface } from "../manager";
+import { GameManagerStepInterface } from "../manager-defs";
 import { Step, StepParams } from "../step";
 
 import { MessageStep } from "./message-step";

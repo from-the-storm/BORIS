@@ -3,6 +3,7 @@ import { TEST_SCENARIO_ID, createTeam } from '../test-lib/test-data';
 import { BorisDatabase, getDB } from '../db/db';
 import { GameVar, GameVarScope } from "./vars";
 import { GameManager } from './manager';
+import { GameStatus } from './manager-defs';
 import { getTeamVar } from './team-vars';
 
 const teamVarNumber: GameVar<number> = {key: 'teamVarNumber', scope: GameVarScope.Team, default: 10};
@@ -24,7 +25,7 @@ describe("GameManager tests", () => {
         gameManager = (await GameManager.startGame(teamId, TEST_SCENARIO_ID, testContext)).manager;
     });
     afterEach(async () => {
-        if (gameManager.gameActive) {
+        if (gameManager.status === GameStatus.InProgress) {
             await gameManager.abandon();
         }
     });
@@ -62,7 +63,7 @@ describe("GameManager tests", () => {
                 const lastStepId = Array.from(gameManager.steps.keys()).pop();
                 await gameManager.callStepHandler({stepId: lastStepId, choiceId: 'x'});
                 await gameManager.allPendingStepsFlushed();
-                expect(gameManager.gameActive).toBe(false);
+                expect(gameManager.status).toBe(GameStatus.InReview);
                 //////
                 expect(await getTeamVar(teamVarNumber, teamId, db)).toEqual(42);
                 // Note: the new value '42' will affect any subsequent test cases here.

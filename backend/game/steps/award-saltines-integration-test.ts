@@ -1,6 +1,7 @@
 import 'jest';
 import { BorisDatabase, getDB } from '../../db/db';
 import { GameManager } from '../manager';
+import { GameStatus } from '../manager-defs';
 import { createTeam } from '../../test-lib/test-data';
 import { DBScenario } from '../../db/models';
 import { AnyNotification } from '../../../common/notifications';
@@ -67,9 +68,9 @@ describe("Award Saltines Integration tests", () => {
             spent: 0,
             balance: 11,
         });
-        expect(manager.gameActive).toBe(true);
+        expect(manager.status).toBe(GameStatus.InProgress);
         await sendXtoCurrentChoiceStep(manager);
-        expect(manager.gameActive).toBe(false);
+        expect(manager.status).toBe(GameStatus.InReview);
         // The game is now complete:
         expect(getSaltinesEarnedInGame(manager)).toEqual({
             earnedThisGame: 11,

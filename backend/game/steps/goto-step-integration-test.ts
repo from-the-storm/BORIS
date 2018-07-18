@@ -2,6 +2,7 @@ import 'jest';
 import { getUserIdWithRoleForTeam } from './assign-roles';
 import { BorisDatabase, getDB } from '../../db/db';
 import { GameManager } from '../manager';
+import { GameStatus } from '../manager-defs';
 import { createTeam } from '../../test-lib/test-data';
 import { DBScenario } from '../../db/models';
 import { AnyNotification, NotificationType } from '../../../common/notifications';
@@ -67,6 +68,6 @@ describe("Goto Target Integration tests", () => {
         expectMessage(burdenedMessages[0], ["The non-doomsayers should see this message"]);
         expect(burdenedMessages).toHaveLength(1);
         
-        expect(manager.gameActive).toBe(false);
+        expect(manager.status).toBe(GameStatus.InReview);
     }, 10000);
 });

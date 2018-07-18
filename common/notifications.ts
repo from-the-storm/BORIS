@@ -1,6 +1,6 @@
 import { OtherTeamMember } from "./models";
 import { AnyUiState } from "./game";
-import { GameStatus } from "./api";
+import { GameDetailedStatus } from "./api";
 
 /**
  * The types of notifications that can be sent over the websocket connection
@@ -20,7 +20,7 @@ export interface TeamChangedNotification {
     teamMembers: OtherTeamMember[];
 }
 
-export interface GameStatusChangedNotification extends GameStatus {
+export interface GameStatusChangedNotification extends GameDetailedStatus {
     type: NotificationType.GAME_STATUS_CHANGED;
 }
 

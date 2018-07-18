@@ -68,7 +68,9 @@ apiMethod(GET_UI_STATE, async (data, app, user) => {
     if (active) {
         return {
             gameStatus: {
+                gameId: gameManager.gameId,
                 isActive: true,
+                isFinished: false,
                 scenarioId: scenarioId,
                 scenarioName: (await db.scenarios.findOne({id: scenarioId})).name,
             },
@@ -78,7 +80,9 @@ apiMethod(GET_UI_STATE, async (data, app, user) => {
     }
     return {
         gameStatus: {
+            gameId: null,
             isActive: false,
+            isFinished: false,
             scenarioId: 0,
             scenarioName: '',
         },

@@ -62,9 +62,11 @@ getApiMethod(GET_INITIAL_STATE, async (data, app, user) => {
             if (activeGame !== null) {
                 const scenario = await db.scenarios.findOne({id: activeGame.scenario_id});
                 result.game = {
+                    gameId: activeGame.id,
                     scenarioName: scenario.name,
                     scenarioId: scenario.id,
                     isActive: true,
+                    isFinished: false,
                 }
             }
         }

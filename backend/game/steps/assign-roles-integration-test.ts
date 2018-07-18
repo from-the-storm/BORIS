@@ -2,6 +2,7 @@ import 'jest';
 import { getUserIdWithRoleForTeam } from './assign-roles';
 import { BorisDatabase, getDB } from '../../db/db';
 import { GameManager } from '../manager';
+import { GameStatus } from '../manager-defs';
 import { createTeam } from '../../test-lib/test-data';
 import { DBScenario } from '../../db/models';
 import { AnyNotification, NotificationType } from '../../../common/notifications';
@@ -55,7 +56,7 @@ describe("Assign Roles Integration tests", () => {
             await manager.callStepHandler({stepId: choiceAwaitingResponse.stepUi.stepId, choiceId: 'x'});
             await manager.allPendingStepsFlushed();
             // Now the game should be finished:
-            expect(manager.gameActive).toBe(false);
+            expect(manager.status).toBe(GameStatus.InReview);
             expect(await getUserIdWithRoleForTeam('D', teamId, db)).toBe(doomsayerUserId);
         });
     });

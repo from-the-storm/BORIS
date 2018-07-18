@@ -1,5 +1,5 @@
 import { AnyUiState, StepType } from "../../common/game";
-import { GameManagerStepInterface } from "./manager";
+import { GameStatus, GameManagerStepInterface } from './manager-defs';
 import { GameVar, GameVarScope } from "./vars";
 import { StepResponseRequest } from "../../common/api";
 import { SafeError } from "../routes/api-utils";
@@ -113,7 +113,7 @@ export abstract class Step {
         if (timeLeft > 0) {
             await new Promise(resolve => setTimeout(resolve, timeLeft));
         }
-        if (!this.manager.gameActive) {
+        if (this.manager.status !== GameStatus.InProgress && this.manager.status !== GameStatus.InReview) {
             throw new Error("Skipping rest of step run() - game is over.");
         }
     }
