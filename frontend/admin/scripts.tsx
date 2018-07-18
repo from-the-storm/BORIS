@@ -301,6 +301,14 @@ export const DocumentationAndStyles = (props: {}) => (
                 take any parameters.
             </p>
 
+            <h2>Finish Line Step</h2>
+            <p>
+                If you want to have an optional post-game experience, use <code>- step: finish line</code> to mark
+                the end of the game. Any steps that come after that will be considered optional. Note that you
+                cannot save any team variables after the finish line has been passeed. The finish line step does
+                not take any parameters and should never have any 'if' conditions nor be marked as 'parallel'.
+            </p>
+
             <h2>Common Issues</h2>
             <p>If a message (or any parameter) has a colon (<code>:</code>) in it, the message must be in quotes:</p>
             <code><pre>{`

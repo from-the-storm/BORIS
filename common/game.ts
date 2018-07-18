@@ -8,6 +8,7 @@ export enum StepType {
     FreeResponse = 'fr',
     MultipleChoice = 'mc',
     BulletinStep = 'b',
+    FinishLineStep = 'fin',
 }
 
 interface UiState {
@@ -34,10 +35,14 @@ export interface BulletinStepUiState extends UiState {
     type: StepType.BulletinStep;
     bulletinHTML: string;
 }
+export interface FinishLineStepUiState extends UiState {
+    type: StepType.FinishLineStep;
+}
 export type AnyUiState = (
     |MessageStepUiState
     |FreeResponseStepUiState
     |MultipleChoiceStepUiState
     |BulletinStepUiState
+    |FinishLineStepUiState
     |null
 );

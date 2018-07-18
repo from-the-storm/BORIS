@@ -14,6 +14,7 @@ import { GameDetailedStatus, StepResponseRequest } from "../../common/api";
 import { getPlayerIdWithRole } from "./steps/assign-roles";
 import { GotoStep } from "./steps/goto-step";
 import { TargetStep } from "./steps/target-step";
+import { FinishLineStep } from "./steps/finish-line-step";
 
 /** External services that the GameManager needs to run */
 interface GameManagerContext {
@@ -166,6 +167,11 @@ export class GameManager implements GameManagerStepInterface {
                 this.stepRunPromisesByStepId.set(stepId, step.run().then(() => {
                     if (step.isComplete && this.isGameActive) {
                         this.advanceUsersToNextStep(); // We don't need to wait for this result though.
+
+                        // Special case for the 'finish line' step:
+                        if (step instanceof FinishLineStep && this._gameStatus === GameStatus.InProgress) {
+                            this.finish();
+                        }
                     }
                     this._stepRunPendingCount--;
                 }, (err) => {
