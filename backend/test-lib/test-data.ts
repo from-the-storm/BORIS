@@ -11,7 +11,7 @@ export async function createTeam(db: BorisDatabase, numUsers: number = 3): Promi
     const team = await db.teams.insert({name: `Test Team`, organization: `Test Org`, code: codeGenerator.next().value});
     let result: any = {team, teamId: team.id};
     for (let i = 1; i <= numUsers; i++) {
-        const user = await db.users.insert({first_name: `Tester${i}`, email: `tester-${team.id}-${i}@example.com`, survey_data: {}});
+        const user = await db.users.insert({first_name: `Tester${i}`, email: `tester-${team.id}-${i}@example.com`, survey_data: {q1: 'a1'}});
         await db.team_members.insert({user_id: user.id, team_id: team.id, is_admin: false, is_active: true});
         result['user' + i] = user;
     }

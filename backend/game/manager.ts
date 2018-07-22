@@ -1,6 +1,6 @@
 import * as JsInterpreter from "js-interpreter";
 import { BorisDatabase, getDB } from "../db/db";
-import { Game } from "../db/models";
+import { Game, User } from "../db/models";
 import { GameStatus, GameManagerStepInterface } from './manager-defs';
 import { GameVar, GameVarScope } from "./vars";
 import { Step } from "./step";
@@ -25,7 +25,7 @@ interface GameManagerContext {
 interface GameManagerInitData {
     context: GameManagerContext;
     game: Game;
-    players: {id: number}[];
+    players: User[];
     teamVars: any;
     scriptSteps: any[];
 }
@@ -59,6 +59,7 @@ export class GameManager implements GameManagerStepInterface {
     readonly gameId: number;
     readonly teamId: number;
     readonly playerIds: number[];
+    readonly playerData: {[key: number]: User}; // Cached user data so we can read it synchronously
     private startedAt: Date;
     private finishedAt?: Date;
     gameVars: any;
@@ -106,6 +107,10 @@ export class GameManager implements GameManagerStepInterface {
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
         this.playerIds = data.players.map(entry => entry.id);
+        this.playerData = {};
+        for (const player of data.players) {
+            this.playerData[player.id] = player;
+        }
         this.lastUiUpdateSeqIdsByUserId = {};
         this.playerIds.forEach(userId => { this.lastUiUpdateSeqIdsByUserId[userId] = 0; });
         this.gameVars = data.game.game_vars;
@@ -516,6 +521,10 @@ export class GameManager implements GameManagerStepInterface {
             }
             if (userId !== undefined) {
                 interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
+                const getUserSurveyResponses = () => {
+                    return interpreter.nativeToPseudo(this.playerData[userId].survey_data);
+                };
+                interpreter.setProperty(scope, 'SURVEY_RESPONSES', interpreter.createNativeFunction(getUserSurveyResponses));
             }
             interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
             const getTimeElapsed = (callback: Function) => {
@@ -559,7 +568,8 @@ export class GameManager implements GameManagerStepInterface {
 
             const team = await context.db.teams.findOne(game.team_id);
             const teamMembers = await context.db.team_members.find({team_id: team.id, is_active: true}, {columns: ['user_id']});
-            const players = teamMembers.map(entry => ({id: entry.user_id}));
+            const playerIds = teamMembers.map(entry => entry.user_id);
+            const players = await context.db.users.find({id: playerIds});
 
             return new GameManager({context, game, players, teamVars: team.game_vars, scriptSteps});
         })();

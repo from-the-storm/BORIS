@@ -66,6 +66,7 @@ export const DocumentationAndStyles = (props: {}) => (
                     You can use the <code>ROLE(roleId)</code> function to check if the current user has been assigned a particular role.
                     You can use the <code>NUM_PLAYERS</code> variable to get the number of players.
                     You can use the <code>ELAPSED_MINUTES()</code> function to get the number of minutes that the scenario took / has taken so far.
+                    You can use the <code>SURVEY_RESPONSES()</code> function to get the current user's answers to the registration survey.
                     </p>
                     <p>Examples:</p>
                     <p><code>if: ROLE('D')</code> (only send this step to the user who is the doomsayer)</p>
