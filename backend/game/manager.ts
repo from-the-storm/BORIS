@@ -532,12 +532,6 @@ export class GameManager implements GameManagerStepInterface {
             if (game === null) {
                 throw new Error(`Game ${gameId} not found.`);
             }
-            if (!game.is_active) {
-                throw new Error(`Game ${gameId} is not active.`)
-            }
-            if (game.finished !== null) {
-                throw new Error(`Game ${gameId} is active but finished - shouldn't happen.`)
-            }
 
             const scenario = await context.db.scenarios.findOne({id: game.scenario_id, is_active: true});
             const scriptSteps = await loadScript(context.db, scenario.script);
