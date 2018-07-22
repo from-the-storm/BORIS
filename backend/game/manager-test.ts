@@ -134,4 +134,24 @@ describe("GameManager tests", () => {
         });
     });
 
+    describe("getElapsedTime()", () => {
+        it("is being tested on a computer whose clock is in sync with the DB's clock", async () => {
+            const dbResults = await db.query('SELECT NOW() as nowdate', [], {});
+            const dbDate = dbResults[0].nowdate;
+            const nowDate = new Date();
+            expect(+nowDate - +dbDate).toBeLessThan(3000);
+            expect(+nowDate - +dbDate).toBeGreaterThan(-3000);
+        });
+        it("Returns a value that seems reasonable", async () => {
+            await new Promise (r => setTimeout(r, 1000));
+            const origTime = gameManager.getElapsedTime();
+            expect(origTime).toBeGreaterThanOrEqual(1.0);
+            expect(origTime).toBeLessThan(30);
+            await new Promise (r => setTimeout(r, 1000));
+            const newTime = gameManager.getElapsedTime();
+            expect(newTime - origTime).toBeGreaterThanOrEqual(1.0);
+            expect(newTime - origTime).toBeLessThan(10.0);
+        });
+    });
+
 });

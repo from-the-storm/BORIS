@@ -59,6 +59,8 @@ export class GameManager implements GameManagerStepInterface {
     readonly gameId: number;
     readonly teamId: number;
     readonly playerIds: number[];
+    private startedAt: Date;
+    private finishedAt?: Date;
     gameVars: any;
     pendingTeamVars: any; // team vars that will be saved to the team.game_vars when the game is completed.
     readonly teamVars: any;
@@ -99,6 +101,8 @@ export class GameManager implements GameManagerStepInterface {
             data.game.finished ? GameStatus.Complete :
             GameStatus.Abandoned
         );
+        this.startedAt = data.game.started;
+        this.finishedAt = data.game.finished ? data.game.finished : undefined;
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
         this.playerIds = data.players.map(entry => entry.id);
@@ -470,6 +474,19 @@ export class GameManager implements GameManagerStepInterface {
     }
 
     /**
+     * Get how long this game has been running for / ran for, in seconds.
+     * While the game is running, this might be slightly inaccurate as it
+     * compares the app server's clock time to the start time in the
+     * database. But if the game is finished, it will use the start time
+     * and finish time as computed by the same source (the DB server).
+     **/
+    public getElapsedTime(): number {
+        if (this.finishedAt !== undefined) {}
+        const endTimestamp = this.finishedAt ? this.finishedAt : new Date();
+        return Math.round((+endTimestamp - (+this.startedAt)) / 1000);
+    }
+
+    /**
      * Safely evaluate a JavaScript expression and return the result (synchronously)
      * The JavaScript in question can load any Game or Team-scoped variable using
      * the VAR(key: string) function, which will return undefined if the var has
@@ -501,6 +518,10 @@ export class GameManager implements GameManagerStepInterface {
                 interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
             }
             interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
+            const getTimeElapsed = (callback: Function) => {
+                return Math.round(this.getElapsedTime() / 60.0);
+            }
+            interpreter.setProperty(scope, 'ELAPSED_MINUTES', interpreter.createNativeFunction(getTimeElapsed));
         });
         let maxSteps = 200, running = true;
         do { running = jsInterpreter.step(); } while (running && maxSteps-- > 0);
@@ -729,18 +750,20 @@ export class GameManager implements GameManagerStepInterface {
             throw new SafeError("Cannot finish a game that is not in progress.");
         }
         // Mark the game as finished, but check that it wasn't already finished or abandoned
+        let finishedAt: Date;
         await this.db.instance.tx('finish_game', async (task) => {
             let result: any;
             await task.none('START TRANSACTION');
             try {
                 result = await task.one(
-                    `UPDATE games SET finished = NOW(), is_active = FALSE WHERE id = $1 AND is_active = TRUE RETURNING pending_team_vars`,
+                    `UPDATE games SET finished = NOW(), is_active = FALSE WHERE id = $1 AND is_active = TRUE RETURNING pending_team_vars, finished`,
                     [this.gameId]
                 );
             } catch (err) {
                 throw new Error("Game was not active.");
             }
             const pendingTeamVars = result.pending_team_vars;
+            finishedAt = result.finished;
             // Always fetch the latest team vars from the DB in this transaction instead of trusting this.teamVars:
             const oldTeamVars = (await task.one('SELECT game_vars FROM teams WHERE id = $1', [this.teamId])).game_vars;
             const combinedTeamVars = {...oldTeamVars, ...pendingTeamVars};
@@ -749,6 +772,7 @@ export class GameManager implements GameManagerStepInterface {
                 [this.teamId, combinedTeamVars]
             );
         });
+        this.finishedAt = finishedAt;
         this._gameStatus = GameStatus.InReview;
         this.publishEventToUsers(this.playerIds, {
             type: NotificationType.GAME_STATUS_CHANGED,
