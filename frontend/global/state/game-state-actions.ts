@@ -80,7 +80,8 @@ export function refreshGameUiState() {
     return async (dispatch: Dispatch<{}>, getState: () => RootState) => {
         let result: GetUiStateResponse;
         try {
-            result = await callApi(GET_UI_STATE, {});
+            const activeGameId = getState().gameState.gameId;
+            result = await callApi(GET_UI_STATE, activeGameId !== null ? {gameId: String(activeGameId)} : {});
         } catch(err) {
             dispatch<AnyAction>({
                 type: MessagesStateActions.SHOW_ERROR,

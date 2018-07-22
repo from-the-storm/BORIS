@@ -127,13 +127,17 @@ export interface StartGameRequest {
 }
 export const START_GAME: ApiMethod<StartGameRequest, GameDetailedStatus> = {path: '/api/game/start', type: 'POST'};
 
+export interface GetUiStateRequest {
+    gameId?: string; // As a GET parameter it becomes a string
+}
+
 /** GET_UI_STATE Request */
 export interface GetUiStateResponse {
     gameStatus: GameDetailedStatus;
     uiUpdateSeqId: number;
     state: AnyUiState[];
 }
-export const GET_UI_STATE: ApiMethod<NoRequestParameters, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
+export const GET_UI_STATE: ApiMethod<GetUiStateRequest, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
 
 export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};
 

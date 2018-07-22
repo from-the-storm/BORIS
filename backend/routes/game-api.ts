@@ -7,6 +7,7 @@ import {BorisDatabase} from '../db/db';
 import { START_GAME, ABANDON_GAME, GET_UI_STATE, STEP_RESPONSE } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { GameManager } from '../game/manager';
+import { GameStatus } from '../game/manager-defs';
 
 export const router = express.Router();
 
@@ -62,15 +63,35 @@ apiMethod(ABANDON_GAME, async (data, app, user) => {
     return {result: 'ok'};
 });
 
+/**
+ * Get the UI state of the current game, if any.
+ * Or, optionally, get the UI state of a particular game.
+ */
 apiMethod(GET_UI_STATE, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
-    const {active, gameManager, scenarioId} = await getActiveGameForUser(app, user.id);
-    if (active) {
+    let gameManager: GameManager, scenarioId: number;
+    if (data.gameId !== undefined) {
+        const gameId = parseInt(data.gameId, 10);
+        if (typeof gameId !== 'number') {
+            throw new SafeError("Invalid gameId parameter");
+        }
+        gameManager = await GameManager.loadGame(gameId);
+        if (gameManager.playerIds.indexOf(user.id) === -1) {
+            throw new SafeError("You don't have permission to access that game.", 403);
+        }
+        scenarioId = (await db.games.findOne({id: gameId}, {columns: ['scenario_id']})).scenario_id;
+    } else {
+        // Load the active game only:
+        const gameInfo = await getActiveGameForUser(app, user.id);
+        gameManager = gameInfo.gameManager;
+        scenarioId = gameInfo.scenarioId;
+    }
+    if (gameManager) {
         return {
             gameStatus: {
                 gameId: gameManager.gameId,
-                isActive: true,
-                isFinished: false,
+                isActive: gameManager.status === GameStatus.InProgress,
+                isFinished: gameManager.status === GameStatus.Complete,
                 scenarioId: scenarioId,
                 scenarioName: (await db.scenarios.findOne({id: scenarioId})).name,
             },
