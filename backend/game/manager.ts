@@ -526,6 +526,15 @@ export class GameManager implements GameManagerStepInterface {
                 };
                 interpreter.setProperty(scope, 'SURVEY_RESPONSES', interpreter.createNativeFunction(getUserSurveyResponses));
             }
+            const playerNameWithRole = (roleId: string) => {
+                const userIdWithRole = getPlayerIdWithRole(this, roleId);
+                if (userIdWithRole === undefined) {
+                    throw new Error(`Invalid role passed to ROLE() function: ${roleId}`);
+                }
+                const firstName = this.playerData[userIdWithRole].first_name;
+                return interpreter.nativeToPseudo(firstName);
+            }
+            interpreter.setProperty(scope, 'NAME_WITH_ROLE', interpreter.createNativeFunction(playerNameWithRole));
             interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
             const getTimeElapsed = (callback: Function) => {
                 return Math.round(this.getElapsedTime() / 60.0);
