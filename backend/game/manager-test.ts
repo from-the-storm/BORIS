@@ -132,8 +132,8 @@ describe("GameManager tests", () => {
             expect(gameManager.safeEvalScriptExpression("true === true", userId1)).toBe(true);
             expect(gameManager.safeEvalScriptExpression("'hello' === 'goobye'", userId1)).toBe(false);
         });
-        it("Can access player survey data using SURVEY_RESPONSES()", () => {
-            expect(gameManager.safeEvalScriptExpression("SURVEY_RESPONSES().q1", userId1)).toEqual('a1');
+        it("Can access player survey data using USER_INFO()", () => {
+            expect(gameManager.safeEvalScriptExpression("USER_INFO().survey_data.q1", userId1)).toEqual('a1');
         });
     });
 

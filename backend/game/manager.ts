@@ -521,10 +521,10 @@ export class GameManager implements GameManagerStepInterface {
             }
             if (userId !== undefined) {
                 interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
-                const getUserSurveyResponses = () => {
-                    return interpreter.nativeToPseudo(this.playerData[userId].survey_data);
+                const getUserInfo = () => {
+                    return interpreter.nativeToPseudo(this.playerData[userId]);
                 };
-                interpreter.setProperty(scope, 'SURVEY_RESPONSES', interpreter.createNativeFunction(getUserSurveyResponses));
+                interpreter.setProperty(scope, 'USER_INFO', interpreter.createNativeFunction(getUserInfo));
             }
             const playerNameWithRole = (roleId: string) => {
                 const userIdWithRole = getPlayerIdWithRole(this, roleId);
