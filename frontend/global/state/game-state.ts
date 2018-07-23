@@ -5,7 +5,6 @@ import {GameStateActions as Actions} from './game-state-actions';
 import {TeamStateActions} from './team-state-actions';
 import {UserStateActions} from './user-state-actions';
 import { AnyAction } from '../actions';
-import { OtherTeamMember } from '../../../common/models';
 import { AnyUiState } from '../../../common/game';
 
 /**
@@ -14,10 +13,12 @@ import { AnyUiState } from '../../../common/game';
 export class GameState extends Record({
     /** Is this team currently playing a game? */
     isActive: false,
+    isReviewingGame: false, // Once the game is finished, the script/story may continue a bit, so we set isActive false but isReviewingGame true until the user quits
+    gameId: null as number|null,
     scenarioId: 0,
     scenarioName: "Unknown scenario",
     uiState: List<AnyUiState>(),
-    uiUpdateSeqId: -1,
+    uiUpdateSeqId: 0,
     // ^ Whenever the server pushes out UI updates, they include a 'sequence number'.
     // It should always be increased by one; if not, we missed some updates and
     // should retrieve the whole list from the server from scratch.
@@ -36,12 +37,47 @@ export function gameStateReducer(state?: GameState, action?: AnyAction): GameSta
     }
 
     switch (action.type) {
-    case Actions.START_GAME:
-        return state.merge({
-            isActive: true,
-            scenarioId: action.scenarioId,
-            scenarioName: action.scenarioName,
-        });
+    case Actions.GAME_STATUS_CHANGED:
+        if (state.isActive || state.isReviewingGame) {
+            // We are currently in a game.
+            if (action.newStatus.gameId !== state.gameId) {
+                // Except the game ID has changed !?
+                // This should never happen, but if it does, treat it like starting a new game:
+                return state.clear().merge({
+                    isActive: true,
+                    gameId: action.newStatus.gameId,
+                    scenarioId: action.newStatus.scenarioId,
+                    scenarioName: action.newStatus.scenarioName,
+                });
+            }
+            if (action.newStatus.isFinished) {
+                // The user has completed the game, but there may still be more to the story
+                // so we enter review mode.
+                return state.merge({
+                    isActive: false,
+                    isReviewingGame: true,
+                });
+            } else if (!action.newStatus.isActive) {
+                // The game was abandoned.
+                return state.clear();
+            } else {
+                // No change
+                return state;
+            }
+        } else {
+            // We are not currently in a game.
+            if (action.newStatus.isActive) {
+                // But we should be - a new game has started:
+                return state.clear().merge({
+                    isActive: true,
+                    gameId: action.newStatus.gameId,
+                    scenarioId: action.newStatus.scenarioId,
+                    scenarioName: action.newStatus.scenarioName,
+                });
+            } else {
+                return state;
+            }
+        }
     case Actions.SET_UI_STATE:
         return state.merge({
             uiState: List<AnyUiState>(action.state),
@@ -55,6 +91,8 @@ export function gameStateReducer(state?: GameState, action?: AnyAction): GameSta
             state = state.setIn(['uiState', i], null);
         }
         return state.setIn(['uiState', action.stepIndex], action.state).set('uiUpdateSeqId', action.uiUpdateSeqId);
+    case Actions.REVIEW_COMPLETE:
+        return state.clear();
     case Actions.ABANDON_GAME:
         // The team has abandoned the game:
         return state.clear();

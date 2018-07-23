@@ -74,9 +74,9 @@ export function rpcClientMiddleware(store: MiddlewareAPI<RootState>) {
             }
             console.log("CONNECTION READY");
         } else {
+            console.log('notification received', notification);
             handleNotification(store as Store<RootState>, notification.params);
         }
-        console.log('notification received', notification);
     })
     
     return (next: any) => (action: AnyAction) => {

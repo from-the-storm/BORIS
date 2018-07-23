@@ -3,6 +3,7 @@ import { TEST_SCENARIO_ID, createTeam } from '../test-lib/test-data';
 import { BorisDatabase, getDB } from '../db/db';
 import { GameVar, GameVarScope } from "./vars";
 import { GameManager } from './manager';
+import { GameStatus } from './manager-defs';
 import { getTeamVar } from './team-vars';
 
 const teamVarNumber: GameVar<number> = {key: 'teamVarNumber', scope: GameVarScope.Team, default: 10};
@@ -24,7 +25,7 @@ describe("GameManager tests", () => {
         gameManager = (await GameManager.startGame(teamId, TEST_SCENARIO_ID, testContext)).manager;
     });
     afterEach(async () => {
-        if (gameManager.gameActive) {
+        if (gameManager.status === GameStatus.InProgress) {
             await gameManager.abandon();
         }
     });
@@ -62,7 +63,7 @@ describe("GameManager tests", () => {
                 const lastStepId = Array.from(gameManager.steps.keys()).pop();
                 await gameManager.callStepHandler({stepId: lastStepId, choiceId: 'x'});
                 await gameManager.allPendingStepsFlushed();
-                expect(gameManager.gameActive).toBe(false);
+                expect(gameManager.status).toBe(GameStatus.InReview);
                 //////
                 expect(await getTeamVar(teamVarNumber, teamId, db)).toEqual(42);
                 // Note: the new value '42' will affect any subsequent test cases here.
@@ -130,6 +131,29 @@ describe("GameManager tests", () => {
             expect(gameManager.safeEvalScriptExpression("1 + 1", userId1)).toBe(2);
             expect(gameManager.safeEvalScriptExpression("true === true", userId1)).toBe(true);
             expect(gameManager.safeEvalScriptExpression("'hello' === 'goobye'", userId1)).toBe(false);
+        });
+        it("Can access player survey data using USER_INFO()", () => {
+            expect(gameManager.safeEvalScriptExpression("USER_INFO().survey_data.q1", userId1)).toEqual('a1');
+        });
+    });
+
+    describe("getElapsedTime()", () => {
+        it("is being tested on a computer whose clock is in sync with the DB's clock", async () => {
+            const dbResults = await db.query('SELECT NOW() as nowdate', [], {});
+            const dbDate = dbResults[0].nowdate;
+            const nowDate = new Date();
+            expect(+nowDate - +dbDate).toBeLessThan(3000);
+            expect(+nowDate - +dbDate).toBeGreaterThan(-3000);
+        });
+        it("Returns a value that seems reasonable", async () => {
+            await new Promise (r => setTimeout(r, 1000));
+            const origTime = gameManager.getElapsedTime();
+            expect(origTime).toBeGreaterThanOrEqual(1.0);
+            expect(origTime).toBeLessThan(30);
+            await new Promise (r => setTimeout(r, 1000));
+            const newTime = gameManager.getElapsedTime();
+            expect(newTime - origTime).toBeGreaterThanOrEqual(1.0);
+            expect(newTime - origTime).toBeLessThan(10.0);
         });
     });
 

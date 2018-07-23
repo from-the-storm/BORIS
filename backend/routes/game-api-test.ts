@@ -1,6 +1,6 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, START_GAME, ABANDON_GAME } from '../../common/api';
+import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, START_GAME, ABANDON_GAME, GET_UI_STATE } from '../../common/api';
 
 describe("Game API tests", () => {
     let server: TestServer;
@@ -70,6 +70,58 @@ describe("Game API tests", () => {
         });
 
     });
+    describe("GET_UI_STATE", async () => {
+
+        it("states that no game is active if one is not active", async () => {
+            const result = await client1.callApi(GET_UI_STATE, {});
+            expect(result).toEqual({
+                gameStatus: {
+                    gameId: null,
+                    isActive: false,
+                    isFinished: false,
+                    scenarioId: 0,
+                    scenarioName: '',
+                },
+                uiUpdateSeqId: 0,
+                state: [],
+            });
+        });
+
+        it("returns details on the active game", async () => {
+            await client1.callApi(START_GAME, {scenarioId,});
+            const result = await client1.callApi(GET_UI_STATE, {});
+            expect(typeof result.gameStatus.gameId).toEqual('number');
+            expect(result.gameStatus.isActive).toEqual(true);
+            expect(result.gameStatus.isFinished).toEqual(false);
+            expect(result.gameStatus.scenarioId).toEqual(scenarioId);
+            expect(result.gameStatus.scenarioName).toEqual("Test Scenario");
+            expect(typeof result.uiUpdateSeqId).toEqual('number');
+        });
+
+        it("returns details on a specific game", async () => {
+            // Start a game:
+            await client1.callApi(START_GAME, {scenarioId,});
+            const origResult = await client1.callApi(GET_UI_STATE, {});
+            expect(origResult.gameStatus.isActive).toEqual(true);
+            const originalGameId = origResult.gameStatus.gameId;
+            expect(typeof originalGameId).toEqual('number');
+            // Now abandon that game:
+            const call = client1.callApi(ABANDON_GAME, {});
+            // Now start a new game:
+            await client1.callApi(START_GAME, {scenarioId,});
+            // Now fetch details of the original game:
+            const result = await client1.callApi(GET_UI_STATE, {gameId: String(originalGameId)});
+            expect(result.gameStatus).toEqual({
+                gameId: originalGameId,
+                isActive: false,
+                isFinished: false,
+                scenarioId: scenarioId,
+                scenarioName: "Test Scenario",
+            });
+        });
+
+    });
+
 
     describe("ABANDON_GAME", async () => {
 

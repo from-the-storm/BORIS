@@ -2,6 +2,7 @@ import 'jest';
 import { getUserIdWithRoleForTeam } from './assign-roles';
 import { BorisDatabase, getDB } from '../../db/db';
 import { GameManager } from '../manager';
+import { GameStatus } from '../manager-defs';
 import { createTeam } from '../../test-lib/test-data';
 import { DBScenario } from '../../db/models';
 import { AnyNotification, NotificationType } from '../../../common/notifications';
@@ -55,8 +56,22 @@ describe("Assign Roles Integration tests", () => {
             await manager.callStepHandler({stepId: choiceAwaitingResponse.stepUi.stepId, choiceId: 'x'});
             await manager.allPendingStepsFlushed();
             // Now the game should be finished:
-            expect(manager.gameActive).toBe(false);
+            expect(manager.status).toBe(GameStatus.InReview);
             expect(await getUserIdWithRoleForTeam('D', teamId, db)).toBe(doomsayerUserId);
+        });
+
+        it("Scripts can refer to other roles by player name using ", async () => {
+            const {teamId, user1, user2, user3} = await createTeam(db, 3);
+            const {manager} = await GameManager.startGame(teamId, scenario.id, testContext);
+            await manager.allPendingStepsFlushed();
+            // Now one of the three users should be the doomSayer
+            const doomsayerUserId = await getUserIdWithRoleForTeam('D', teamId, db);
+            const expectedName = (
+                doomsayerUserId === user1.id ? user1.first_name :
+                doomsayerUserId === user2.id ? user2.first_name :
+                user3.first_name
+            );
+            expect(manager.safeEvalScriptExpression(`NAME_WITH_ROLE("D")`)).toEqual(expectedName);
         });
     });
 

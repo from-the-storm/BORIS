@@ -53,7 +53,7 @@ class _App extends React.PureComponent<Props> {
 export const App = connect((state: RootState, ownProps: OwnProps) => ({
     isLoggedIn: state.userState.isLoggedIn,
     hasJoinedTeam: state.teamState.hasJoinedTeam,
-    isPlaying: state.gameState.isActive,
+    isPlaying: state.gameState.isActive || state.gameState.isReviewingGame,
     readyToPlay: state.registrationState.mode === RegistrationMode.ReadyToPlay,
     modalMessage: state.messagesState.currentMessage,
 }))(_App);

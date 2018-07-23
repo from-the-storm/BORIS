@@ -1,6 +1,6 @@
 import 'jest';
 import * as yaml from 'js-yaml';
-import { GameManager, GameManagerStepInterface } from "../game/manager";
+import { GameManagerStepInterface, GameStatus } from "../game/manager-defs";
 import { Step } from '../game/step';
 import { GameVarScope, GameVar } from "../game/vars";
 import { loadStepFromData } from '../game/steps/loader';
@@ -10,11 +10,11 @@ import { loadStepFromData } from '../game/steps/loader';
  */
 export class MockGameManager implements GameManagerStepInterface {
     playerIds: number[];
-    gameActive: boolean;
+    status: GameStatus;
     vars: Map<string, any>;
     constructor() {
         this.vars = new Map();
-        this.gameActive = true;
+        this.status = GameStatus.InProgress;
         this.pushUiUpdate = jest.fn();
         this.playerIds = [15, 16, 17, 18, 19]; // 5 mock player IDs
     }

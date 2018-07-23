@@ -8,13 +8,14 @@ import { AnyUiState, StepType } from '../../common/game';
 import { RootState } from '../global/state';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
 import { Prompt } from '../prompt/prompt';
-import { abandonGame } from '../global/state/game-state-actions';
+import { abandonGame, doneReviewingGame } from '../global/state/game-state-actions';
 import { SplashBorisInit } from './splash-boris-init';
 
 import { MessageStep } from './ui-steps/message-step';
 import { FreeResponseStep } from './ui-steps/free-response-step';
 import { MultipleChoiceStep } from './ui-steps/choice-step';
 import { BulletinStep } from './ui-steps/bulletin-step';
+import { FinishLineStep } from './ui-steps/finish-line-step';
 
 import * as back from './images/back.svg';
 import * as messageSoundUrl from './sounds/bulletin.mp3';
@@ -27,6 +28,7 @@ interface OwnProps {
 interface Props extends OwnProps, DispatchProp<RootState> {
     scenarioName: string;
     uiState: List<AnyUiState>;
+    gameIsFinished: boolean;
 }
 interface State {
     showHelpPrompt: boolean;
@@ -53,6 +55,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
                 step.type === StepType.FreeResponse ? <FreeResponseStep key={step.stepId} {...step} /> :
                 step.type === StepType.MultipleChoice ? <MultipleChoiceStep key={step.stepId} {...step} /> :
                 step.type === StepType.BulletinStep ? <BulletinStep key={step.stepId} {...step} /> :
+                step.type === StepType.FinishLineStep ? <FinishLineStep key={step.stepId} {...step} /> :
                 <div className="chat-segment"><strong>Unsupported step type</strong></div>
             );
         });
@@ -61,7 +64,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
             <div className="game">
                 <header className="fixed">
                     <button onClick={this.handleQuitButton}><img height="22" width="22" src={back} alt="Back" /></button>
-                    <h1>{this.props.scenarioName.replace(/[aeiouy]/ig,'')}</h1>
+                    <h1>{this.props.scenarioName.replace(/[aeiouy]/ig,'')}{this.props.gameIsFinished ? ' (Complete)' : ''}</h1>
                     <button className="help" onClick={this.handleHelpButton}>?</button>
                 </header>
                 <div className="content" ref={el => this.contentElement = el}>
@@ -96,7 +99,11 @@ class _GameComponent extends React.PureComponent<Props, State> {
         this.setState({showHelpPrompt: false});
     }
     @bind private handleQuitButton() {
-        this.setState({showQuitPrompt: true});
+        if (this.props.gameIsFinished) {
+            this.props.dispatch(doneReviewingGame());
+        } else {
+            this.setState({showQuitPrompt: true});
+        }
     }
     @bind private handleCancelQuitPrompt() {
         this.setState({showQuitPrompt: false});
@@ -131,4 +138,5 @@ class _GameComponent extends React.PureComponent<Props, State> {
 export const GameComponent = connect((state: RootState, ownProps: OwnProps) => ({
     scenarioName: state.gameState.scenarioName,
     uiState: state.gameState.uiState,
+    gameIsFinished: state.gameState.isReviewingGame,
 }))(_GameComponent);

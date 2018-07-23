@@ -1,7 +1,7 @@
 import { StepType } from "../../../common/game";
 import { Step } from "../step";
 import { GameVar, GameVarScope } from "../vars";
-import { GameManagerStepInterface } from "../manager";
+import { GameManagerStepInterface } from "../manager-defs";
 import { getTeamVar } from "../team-vars";
 import { BorisDatabase } from "../../db/db";
 

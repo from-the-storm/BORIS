@@ -77,9 +77,8 @@ callApi(GET_INITIAL_STATE, {}).then(async data => {
             });
             if (data.game) {
                 store.dispatch<AnyAction>({
-                    type: GameStateActions.START_GAME,
-                    scenarioId: data.game.scenarioId,
-                    scenarioName: data.game.scenarioName,
+                    type: GameStateActions.GAME_STATUS_CHANGED,
+                    newStatus: data.game,
                 });
                 store.dispatch(refreshGameUiState());
             }

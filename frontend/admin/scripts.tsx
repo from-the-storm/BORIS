@@ -61,10 +61,13 @@ export const DocumentationAndStyles = (props: {}) => (
             <dl>
                 <dt><code>if: <em>(condition)</em></code></dt>
                 <dd>
-                    <p>A JavaScript expression that determines whether or not any given player should see this step.
-                    Script variables can be accessed using the <code>VAR(name, [optional default])</code> function.
-                    You can use the <code>ROLE(roleId)</code> function to check if the current user has been assigned a particular role.</p>
-                    You can use the <code>NUM_PLAYERS</code> variable to get the number of players.
+                    <p>A JavaScript expression that determines whether or not any given player should see this step.</p>
+                    <p>Script variables can be accessed using the <code>VAR(name, [optional default])</code> function.</p>
+                    <p>You can use the <code>ROLE(roleId)</code> function to check if the current user has been assigned a particular role.</p>
+                    <p>You can use the <code>NUM_PLAYERS</code> variable to get the number of players.</p>
+                    <p>You can use the <code>ELAPSED_MINUTES()</code> function to get the number of minutes that the scenario took / has taken so far.</p>
+                    <p>You can use the <code>USER_INFO()</code> function to get the current user's info including their answers to the registration survey.</p>
+                    <p>You can use the <code>NAME_WITH_ROLE(roleId)</code> function to get the first name of the player with the given role.</p>
                     <p>Examples:</p>
                     <p><code>if: ROLE('D')</code> (only send this step to the user who is the doomsayer)</p>
                     <p><code>if: VAR('saltines', 0) >= 10</code> (only display this step if the team has earned at least ten saltines).</p>
@@ -299,6 +302,14 @@ export const DocumentationAndStyles = (props: {}) => (
                 If a script is going to use the roles, it should have <code>- step: assignroles</code> as early as
                 possible. This step will assign/re-assign roles as needed. It is invisible to the users and doesn't
                 take any parameters.
+            </p>
+
+            <h2>Finish Line Step</h2>
+            <p>
+                If you want to have an optional post-game experience, use <code>- step: finish line</code> to mark
+                the end of the game. Any steps that come after that will be considered optional. Note that you
+                cannot save any team variables after the finish line has been passeed. The finish line step does
+                not take any parameters and should never have any 'if' conditions nor be marked as 'parallel'.
             </p>
 
             <h2>Common Issues</h2>

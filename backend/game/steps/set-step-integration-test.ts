@@ -1,7 +1,7 @@
 import 'jest';
-import { getUserIdWithRoleForTeam } from './assign-roles';
 import { BorisDatabase, getDB } from '../../db/db';
 import { GameManager } from '../manager';
+import { GameStatus } from '../manager-defs';
 import { createTeam } from '../../test-lib/test-data';
 import { DBScenario } from '../../db/models';
 import { AnyNotification, NotificationType } from '../../../common/notifications';
@@ -51,12 +51,12 @@ describe("Set Variable Step Integration tests", () => {
         }
 
         expectMessage(messageQueue[0], ["You have played this scenario 0 times"]);
-        expect(manager.gameActive).toBe(false);
+        expect(manager.status).toBe(GameStatus.InReview);
 
         messageQueue = [];
         const manager2 = (await GameManager.startGame(teamId, scenario.id, testContext)).manager;
         await manager2.allPendingStepsFlushed();
         expectMessage(messageQueue[0], ["You have played this scenario 1 times"]);
-        expect(manager2.gameActive).toBe(false);
+        expect(manager2.status).toBe(GameStatus.InReview);
     }, 5000);
 });

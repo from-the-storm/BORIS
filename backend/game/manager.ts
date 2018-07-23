@@ -1,6 +1,7 @@
 import * as JsInterpreter from "js-interpreter";
 import { BorisDatabase, getDB } from "../db/db";
-import { Game } from "../db/models";
+import { Game, User } from "../db/models";
+import { GameStatus, GameManagerStepInterface } from './manager-defs';
 import { GameVar, GameVarScope } from "./vars";
 import { Step } from "./step";
 import { loadStepFromData } from "./steps/loader";
@@ -9,10 +10,11 @@ import { publishEventToUsers } from "../websocket/pub-sub";
 import { GameUiChangedNotification, NotificationType, GameErrorNotification } from "../../common/notifications";
 import { loadScript } from "./script-loader";
 import { SafeError } from "../routes/api-utils";
-import { GameStatus, StepResponseRequest } from "../../common/api";
+import { GameDetailedStatus, StepResponseRequest } from "../../common/api";
 import { getPlayerIdWithRole } from "./steps/assign-roles";
 import { GotoStep } from "./steps/goto-step";
 import { TargetStep } from "./steps/target-step";
+import { FinishLineStep } from "./steps/finish-line-step";
 
 /** External services that the GameManager needs to run */
 interface GameManagerContext {
@@ -23,7 +25,7 @@ interface GameManagerContext {
 interface GameManagerInitData {
     context: GameManagerContext;
     game: Game;
-    players: {id: number}[];
+    players: User[];
     teamVars: any;
     scriptSteps: any[];
 }
@@ -37,20 +39,6 @@ const EndOfScript = Symbol();
  * Uses a promise as a form of locking when initializing a new one.
  */
 const gameManagerCache = new Map<number, Promise<GameManager>>();
-
-/** 
- * The interface for GameManager that is used by Step subclasses.
- * We define an interface so we can mock it for tests, and to ensure
- * steps only call a limited API.
- **/
-export interface GameManagerStepInterface {
-    pushUiUpdate(stepId: number): Promise<void>;
-    getVar<T>(variable: Readonly<GameVar<T>>, stepId?: number): T;
-    setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T>;
-    safeEvalScriptExpression(jsExpression: string): any;
-    readonly playerIds: number[];
-    readonly gameActive: boolean;
-}
 
 /** Create a numeric hash from the given string. */
 function hashKey(key: string) {
@@ -66,11 +54,14 @@ function hashKey(key: string) {
 export class GameManager implements GameManagerStepInterface {
     private readonly db: BorisDatabase;
     private readonly publishEventToUsers: typeof publishEventToUsers;
-    /** If the game is completed or abandoned, this gets set to false. Read it publicly as 'gameActive'. */
-    private _gameActive: boolean;
+    /** If the game is completed or abandoned, this gets set to false. Read it publicly as 'status'. */
+    private _gameStatus: GameStatus;
     readonly gameId: number;
     readonly teamId: number;
     readonly playerIds: number[];
+    readonly playerData: {[key: number]: User}; // Cached user data so we can read it synchronously
+    private startedAt: Date;
+    private finishedAt?: Date;
     gameVars: any;
     pendingTeamVars: any; // team vars that will be saved to the team.game_vars when the game is completed.
     readonly teamVars: any;
@@ -106,10 +97,20 @@ export class GameManager implements GameManagerStepInterface {
     private constructor(data: GameManagerInitData) {
         this.db = data.context.db;
         this.publishEventToUsers = data.context.publishEventToUsers;
-        this._gameActive = true;
+        this._gameStatus = (
+            data.game.is_active ? GameStatus.InProgress :
+            data.game.finished ? GameStatus.Complete :
+            GameStatus.Abandoned
+        );
+        this.startedAt = data.game.started;
+        this.finishedAt = data.game.finished ? data.game.finished : undefined;
         this.gameId = data.game.id;
         this.teamId = data.game.team_id;
         this.playerIds = data.players.map(entry => entry.id);
+        this.playerData = {};
+        for (const player of data.players) {
+            this.playerData[player.id] = player;
+        }
         this.lastUiUpdateSeqIdsByUserId = {};
         this.playerIds.forEach(userId => { this.lastUiUpdateSeqIdsByUserId[userId] = 0; });
         this.gameVars = data.game.game_vars;
@@ -127,19 +128,22 @@ export class GameManager implements GameManagerStepInterface {
         this._stepRunPendingCount = 0;
         this._advanceUsersToNextStepPromise = new Promise(resolve => { resolve(); });
         this._advanceUsersToNextStepPendingCount = 0;
-        // Since this GameManager is only initialized once per game,
-        // we are either starting a new game or the server has restarted
-        // while this game was active. In either case, run the current step:
-        this.advanceUsersToNextStep().then(() => {
-            this.runCurrentSteps();
-            // Normally advanceUsersToNextStep() calls runCurrentSteps(), but we must explicitly call it
-            // in the case where the server was restarted and we're resuming a game in progress, because
-            // advanceUsersToNextStep() will only call runCurrentSteps() if it changed the current step
-            // for any user.
-        });
+        if (this._gameStatus === GameStatus.InProgress) {
+            // Since this GameManager is only initialized once per game,
+            // we are either starting a new game or the server has restarted
+            // while this game was active. In either case, run the current step:
+            this.advanceUsersToNextStep().then(() => {
+                this.runCurrentSteps();
+                // Normally advanceUsersToNextStep() calls runCurrentSteps(), but we must explicitly call it
+                // in the case where the server was restarted and we're resuming a game in progress, because
+                // advanceUsersToNextStep() will only call runCurrentSteps() if it changed the current step
+                // for any user.
+            });
+        }
     }
 
-    get gameActive() { return this._gameActive; }
+    get status() { return this._gameStatus; }
+    get isGameActive() { return this._gameStatus === GameStatus.InProgress || this._gameStatus === GameStatus.InReview; }
 
     private getCurrentStepForUser(userId: number): Step|undefined {
         const stepsSeen = this.getStepsSeenByUser(userId);
@@ -159,7 +163,7 @@ export class GameManager implements GameManagerStepInterface {
      * so we don't want the caller to ever await this result.
      */
     private runCurrentSteps() {
-        if (!this.gameActive) {
+        if (!this.isGameActive) {
             return;
         }
         const activeStepIds: Set<number> = new Set();
@@ -170,13 +174,18 @@ export class GameManager implements GameManagerStepInterface {
                 const step = this.steps.get(stepId);
                 this._stepRunPendingCount++;
                 this.stepRunPromisesByStepId.set(stepId, step.run().then(() => {
-                    if (step.isComplete && this._gameActive) {
+                    if (step.isComplete && this.isGameActive) {
                         this.advanceUsersToNextStep(); // We don't need to wait for this result though.
+
+                        // Special case for the 'finish line' step:
+                        if (step instanceof FinishLineStep && this._gameStatus === GameStatus.InProgress) {
+                            this.finish();
+                        }
                     }
                     this._stepRunPendingCount--;
                 }, (err) => {
                     // The step failed to run.
-                    if (this.gameActive) {
+                    if (this.isGameActive) {
                         console.error(`Unable to finish running step ${stepId}: ${err}`);
                         this.playerIds.forEach(userId => {
                             if (this.getCurrentStepForUser(userId).id === stepId) {
@@ -221,7 +230,7 @@ export class GameManager implements GameManagerStepInterface {
     }
 
     public async callStepHandler(data: StepResponseRequest) {
-        if (!this.gameActive) {
+        if (!this.isGameActive) {
             throw new SafeError("Game has ended already.");
         }
         const usersOnStep = this.getUserIdsWhoAreOnStep(data.stepId);
@@ -292,7 +301,7 @@ export class GameManager implements GameManagerStepInterface {
 
     // Don't call this directly; call advanceUsersToNextStep()
     private async _advanceUsersToNextStep() {
-        if (!this.gameActive) {
+        if (!this.isGameActive) {
             return;
         }
 
@@ -344,7 +353,9 @@ export class GameManager implements GameManagerStepInterface {
                     // This user has completed the game. Has everyone?
                     if (!anyUserIsSeeingAnIncompleteStep) {
                         // Yep, so the game is done!
-                        await this.finish();
+                        if (this._gameStatus === GameStatus.InProgress) {
+                            await this.finish();
+                        }
                         return;
                     }
                 }
@@ -468,6 +479,19 @@ export class GameManager implements GameManagerStepInterface {
     }
 
     /**
+     * Get how long this game has been running for / ran for, in seconds.
+     * While the game is running, this might be slightly inaccurate as it
+     * compares the app server's clock time to the start time in the
+     * database. But if the game is finished, it will use the start time
+     * and finish time as computed by the same source (the DB server).
+     **/
+    public getElapsedTime(): number {
+        if (this.finishedAt !== undefined) {}
+        const endTimestamp = this.finishedAt ? this.finishedAt : new Date();
+        return Math.round((+endTimestamp - (+this.startedAt)) / 1000);
+    }
+
+    /**
      * Safely evaluate a JavaScript expression and return the result (synchronously)
      * The JavaScript in question can load any Game or Team-scoped variable using
      * the VAR(key: string) function, which will return undefined if the var has
@@ -497,8 +521,25 @@ export class GameManager implements GameManagerStepInterface {
             }
             if (userId !== undefined) {
                 interpreter.setProperty(scope, 'ROLE', interpreter.createNativeFunction(checkIfUserHasRole));
+                const getUserInfo = () => {
+                    return interpreter.nativeToPseudo(this.playerData[userId]);
+                };
+                interpreter.setProperty(scope, 'USER_INFO', interpreter.createNativeFunction(getUserInfo));
             }
+            const playerNameWithRole = (roleId: string) => {
+                const userIdWithRole = getPlayerIdWithRole(this, roleId);
+                if (userIdWithRole === undefined) {
+                    throw new Error(`Invalid role passed to ROLE() function: ${roleId}`);
+                }
+                const firstName = this.playerData[userIdWithRole].first_name;
+                return interpreter.nativeToPseudo(firstName);
+            }
+            interpreter.setProperty(scope, 'NAME_WITH_ROLE', interpreter.createNativeFunction(playerNameWithRole));
             interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
+            const getTimeElapsed = (callback: Function) => {
+                return Math.round(this.getElapsedTime() / 60.0);
+            }
+            interpreter.setProperty(scope, 'ELAPSED_MINUTES', interpreter.createNativeFunction(getTimeElapsed));
         });
         let maxSteps = 200, running = true;
         do { running = jsInterpreter.step(); } while (running && maxSteps-- > 0);
@@ -530,19 +571,14 @@ export class GameManager implements GameManagerStepInterface {
             if (game === null) {
                 throw new Error(`Game ${gameId} not found.`);
             }
-            if (!game.is_active) {
-                throw new Error(`Game ${gameId} is not active.`)
-            }
-            if (game.finished !== null) {
-                throw new Error(`Game ${gameId} is active but finished - shouldn't happen.`)
-            }
 
             const scenario = await context.db.scenarios.findOne({id: game.scenario_id, is_active: true});
             const scriptSteps = await loadScript(context.db, scenario.script);
 
             const team = await context.db.teams.findOne(game.team_id);
             const teamMembers = await context.db.team_members.find({team_id: team.id, is_active: true}, {columns: ['user_id']});
-            const players = teamMembers.map(entry => ({id: entry.user_id}));
+            const playerIds = teamMembers.map(entry => entry.user_id);
+            const players = await context.db.users.find({id: playerIds});
 
             return new GameManager({context, game, players, teamVars: team.game_vars, scriptSteps});
         })();
@@ -550,7 +586,7 @@ export class GameManager implements GameManagerStepInterface {
         return await newGameManagerPromise;
     }
 
-    static async startGame(teamId: number, scenarioId: number, context?: GameManagerContext): Promise<{manager: GameManager, status: GameStatus}> {
+    static async startGame(teamId: number, scenarioId: number, context?: GameManagerContext): Promise<{manager: GameManager, status: GameDetailedStatus}> {
         if (context === undefined) {
             context = {
                 db: await getDB(),
@@ -582,10 +618,12 @@ export class GameManager implements GameManagerStepInterface {
             }
             const manager = await GameManager.loadGame(game.id, context);
             // Notify everyone that the game has started:
-            const gameStatus: GameStatus = {
+            const gameStatus: GameDetailedStatus = {
+                gameId: game.id,
                 scenarioId: scenario.id,
                 scenarioName: scenario.name,
                 isActive: true,
+                isFinished: false,
             };
             context.publishEventToUsers(teamMembers.map(tm => tm.user_id), {type: NotificationType.GAME_STATUS_CHANGED, ...gameStatus});
             return {manager, status: gameStatus};
@@ -607,7 +645,7 @@ export class GameManager implements GameManagerStepInterface {
         }
     }
     public async setVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T, stepId?: number): Promise<T> {
-        if (!this.gameActive) {
+        if (!this.isGameActive) {
             throw new Error("Cannot update any variable after the game is complete.");
         }
         if (variable.scope === GameVarScope.Step) {
@@ -630,7 +668,6 @@ export class GameManager implements GameManagerStepInterface {
     }
     private async _setGameVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
         const startTime = +new Date();
-        let txLockTime: number, selectTime: number, updateTime: number, resultTime: number;
         const result = await this.db.instance.tx('update_game_var', async (task) => {
             // Acquire a lock on the specific variable we're about to update, then call the updater
             // method, then save the result. This enables atomic increments, etc.
@@ -668,6 +705,12 @@ export class GameManager implements GameManagerStepInterface {
         }
     }
     private async _setTeamVar<T>(variable: Readonly<GameVar<T>>, updater: (value: T) => T) {
+        if (this._gameStatus !== GameStatus.InProgress) {
+            throw new SafeError("Cannot update team vars if the game is not in progress.");
+            // Note in particular that we do not allow writing to team vars while the game
+            // is in review status, since the changes would never get saved to the team row
+            // in the DB, which only happens during finish().
+        }
         const startTime = +new Date();
         const result = await this.db.instance.tx('update_team_var', async (task) => {
             // Acquire a lock on the specific variable we're about to update, then call the updater
@@ -706,33 +749,40 @@ export class GameManager implements GameManagerStepInterface {
      */
     public async abandon() {
         await this._advanceUsersToNextStepPromise;
-        this._gameActive = false;
+        this._gameStatus = GameStatus.Abandoned;
         await this.db.games.update({id: this.gameId}, {is_active: false});
         this.publishEventToUsers(this.playerIds, {
             type: NotificationType.GAME_STATUS_CHANGED,
-            scenarioId: 0,
-            scenarioName: "",
+            gameId: this.gameId,
             isActive: false,
+            isFinished: false,
         });
     }
     /**
      * Mark this game as successfully finished.
      * Save any pending changes to the team vars (like # of saltines earned).
+     * The scenario script _may_ optionally continue for a bit after this point,
+     * but cannot make further changes to team vars.
      */
     private async finish() {
+        if (this._gameStatus !== GameStatus.InProgress) {
+            throw new SafeError("Cannot finish a game that is not in progress.");
+        }
         // Mark the game as finished, but check that it wasn't already finished or abandoned
+        let finishedAt: Date;
         await this.db.instance.tx('finish_game', async (task) => {
             let result: any;
             await task.none('START TRANSACTION');
             try {
                 result = await task.one(
-                    `UPDATE games SET finished = NOW(), is_active = FALSE WHERE id = $1 AND is_active = TRUE RETURNING pending_team_vars`,
+                    `UPDATE games SET finished = NOW(), is_active = FALSE WHERE id = $1 AND is_active = TRUE RETURNING pending_team_vars, finished`,
                     [this.gameId]
                 );
             } catch (err) {
                 throw new Error("Game was not active.");
             }
             const pendingTeamVars = result.pending_team_vars;
+            finishedAt = result.finished;
             // Always fetch the latest team vars from the DB in this transaction instead of trusting this.teamVars:
             const oldTeamVars = (await task.one('SELECT game_vars FROM teams WHERE id = $1', [this.teamId])).game_vars;
             const combinedTeamVars = {...oldTeamVars, ...pendingTeamVars};
@@ -741,12 +791,13 @@ export class GameManager implements GameManagerStepInterface {
                 [this.teamId, combinedTeamVars]
             );
         });
-        this._gameActive = false;
+        this.finishedAt = finishedAt;
+        this._gameStatus = GameStatus.InReview;
         this.publishEventToUsers(this.playerIds, {
             type: NotificationType.GAME_STATUS_CHANGED,
-            scenarioId: 0,
-            scenarioName: "",
+            gameId: this.gameId,
             isActive: false,
+            isFinished: true,
         });
     }
 
@@ -767,7 +818,7 @@ export class GameManager implements GameManagerStepInterface {
  * validating steps outside of a game context.
  */
 export class VoidGameManager implements GameManagerStepInterface {
-    get gameActive(): boolean { return false; }
+    get status(): GameStatus { return GameStatus.InProgress; }
     get playerIds(): number[] { return []; }
     public async pushUiUpdate(stepId: number) {}
     private keyForVar(variable: GameVar<any>, stepId?: number): string {

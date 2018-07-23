@@ -22,10 +22,13 @@ export interface ApiMethod<RequestType, ResponseType> {
 ///////////////////////////////////////////////////////////////////////////////
 // app-api methods:
 
-export interface GameStatus {
-    scenarioId: number;
-    scenarioName: string;
+export interface GameDetailedStatus {
+    gameId: number|null; // ID of the game in question
     isActive: boolean;
+    isFinished: boolean; // If isActive is false and this is true, that means the team completed the scenario
+                         // If isActive is true and this is false, that means the team abandoned the scenario
+    scenarioId?: number; // Only set if isActive is true
+    scenarioName?: string; // Only set if isActive is true
 }
 
 /** GET_INITIAL_STATE response */
@@ -41,7 +44,7 @@ export interface InitialStateResponse {
         isTeamAdmin: boolean;
         otherTeamMembers: Array<OtherTeamMember>;
     };
-    game?: GameStatus;
+    game?: GameDetailedStatus;
 };
 
 export const GET_INITIAL_STATE: ApiMethod<{}, InitialStateResponse> = {path: '/api/app/get-initial-state', type: 'GET'};
@@ -122,15 +125,19 @@ export const GET_SCENARIOS: ApiMethod<NoRequestParameters, ScenariosResponse> = 
 export interface StartGameRequest {
     scenarioId: number;
 }
-export const START_GAME: ApiMethod<StartGameRequest, GameStatus> = {path: '/api/game/start', type: 'POST'};
+export const START_GAME: ApiMethod<StartGameRequest, GameDetailedStatus> = {path: '/api/game/start', type: 'POST'};
+
+export interface GetUiStateRequest {
+    gameId?: string; // As a GET parameter it becomes a string
+}
 
 /** GET_UI_STATE Request */
 export interface GetUiStateResponse {
-    gameStatus: GameStatus;
+    gameStatus: GameDetailedStatus;
     uiUpdateSeqId: number;
     state: AnyUiState[];
 }
-export const GET_UI_STATE: ApiMethod<NoRequestParameters, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
+export const GET_UI_STATE: ApiMethod<GetUiStateRequest, GetUiStateResponse> = {path: '/api/game/ui', type: 'GET'};
 
 export const ABANDON_GAME: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/api/game/quit', type: 'POST'};
 
