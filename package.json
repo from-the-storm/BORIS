@@ -10,7 +10,8 @@
     "server": "node -r ts-node/register --nolazy --inspect-brk=9229 backend/backend-server.ts",
     "build": "cd frontend && webpack",
     "watch": "cd frontend && webpack --watch",
-    "lint": "tslint -p ."
+    "lint": "tslint -p .",
+    "interactive-multisession": "./node_modules/.bin/ts-node integration/interactive-multisession.ts"
   },
   "author": "From the Storm",
   "license": "UNLICENSED",
