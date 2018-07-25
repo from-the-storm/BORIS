@@ -1,7 +1,7 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO, CREATE_SCENARIO, EDIT_SCENARIO, GET_TEAM } from './admin-api';
+import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO, CREATE_SCENARIO, EDIT_SCENARIO, GET_TEAM, RESET_TEAM_VARS } from './admin-api';
 import { ApiMethod } from '../../common/api';
 import { createTeam, TEST_SCENARIO_ID } from '../test-lib/test-data';
 
@@ -87,6 +87,11 @@ describe("Admin API tests", () => {
                     game_vars: team.game_vars,
                 });
             });
+
+        });
+        describe("Team Var Reset (POST /api/admin/teams/:id/reset)", async () => {
+
+            checkSecurity(RESET_TEAM_VARS, {id: "1"});
 
         });
     });
