@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { List, Datagrid, NumberField, TextField, DateField, ShowButton, ShowController, ShowView, SimpleShowLayout } from 'react-admin';
+import { List, Datagrid, NumberField, TextField, DateField, ShowButton, ShowController, ShowView, SimpleShowLayout, CardActions, ListButton, RefreshButton, Button } from 'react-admin';
 
 export const TeamList = (props: any) => (
     <List title="All teams" {...props}>
@@ -14,10 +14,39 @@ export const TeamList = (props: any) => (
     </List>
 );
 
+////// Begin code to add a custom "Reset vars" button
+const cardActionStyle = {
+    zIndex: 2,
+    display: 'inline-block',
+    float: 'right',
+};
+
+async function resetTeam(teamId: number) {
+    if (confirm("Are you sure you want to reset the variables (saltines, roles, etc.) for this team?")) {
+        await fetch(`/api/admin/teams/${teamId}/reset-vars`, {
+            credentials: 'include',
+            method: 'POST',
+            body: JSON.stringify({}),
+            headers: new Headers({"Content-Type": "application/json"}),
+        });
+        location.reload();
+    }
+}
+
+const TeamShowActions = (props: any) => (
+    <CardActions style={cardActionStyle}>
+        <ListButton basePath={props.basePath} />
+        <RefreshButton />
+        {/* Add your custom actions */}
+        <Button color="secondary" onClick={() => { resetTeam(props.data.id); }}>Reset Vars (!)</Button>
+    </CardActions>
+);
+////// End code to add a custom "Reset vars" button
+
 export const TeamShow = (props: any) => (
     <ShowController {...props}>
         {(controllerProps: any) => 
-            <ShowView {...props} {...controllerProps}>
+            <ShowView {...props} {...controllerProps} actions={<TeamShowActions />}>
                 <SimpleShowLayout>
                     <NumberField source="id" />
                     <TextField source="name" />
