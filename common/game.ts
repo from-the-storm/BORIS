@@ -25,6 +25,7 @@ export interface FreeResponseStepUiState extends UiState {
     multiline: boolean;
     complete: boolean; // Has a value been entered by the user already?
     value: string; // The value the user entered, if any
+    invalidGuesses: string[]; // Past values entered by the user that weren't acceptable
 }
 export interface MultipleChoiceStepUiState extends UiState {
     type: StepType.MultipleChoice;

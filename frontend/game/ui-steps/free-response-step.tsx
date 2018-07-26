@@ -26,31 +26,30 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
     }
 
     public render() {
-        if (this.props.complete) {
-            // The user already submitted their answer here, so just display the text they entered.
-            // TODO: change this to not be a <button> ? Should be a DIV or P
-            return (
-                <div className="response-segment">
-                    <button disabled={true}>{this.props.value}</button>
-                </div>
-            );
-        } else {
-            // Show a form for the user to enter their answer:
-            let inputControl: JSX.Element;
-            if (this.props.multiline) {
-                inputControl = <textarea value={this.state.value} onChange={this.valueChanged} className="deselected" required rows={4} cols={30} placeholder="..." aria-label="Response to Question" />
-            } else {
-                inputControl = <input value={this.state.value} onChange={this.valueChanged} className="deselected" required type="text" placeholder="..." aria-label="Response to Question" />;
-            }
-            return (
-                <div className="response-segment">
-                    <form onSubmit={() => false}>
-                        {inputControl}
-                        <button disabled={this.state.answerIsbeingSubmitted} onClick={this.handleSubmit}>Submit</button>
-                    </form>
-                </div>
-            );
-        }
+        return (
+            <div className="response-segment">
+                {this.props.invalidGuesses.map((guessString, idx) => <React.Fragment key={idx}>
+                    <div className="past-entry wrong">{guessString}</div>
+                    <div className="past-entry">That doesn’t make any sense. Try something else. </div>
+                </React.Fragment>)}
+                {
+                    this.props.complete ?
+                        // The user already submitted their answer here, so just display the text they entered.
+                        <div className="past-entry">{this.props.value}</div>
+                    :
+                        // Show a form for the user to enter their answer:
+                        <form onSubmit={() => false}>
+                            {
+                                this.props.multiline ?
+                                    <textarea value={this.state.value} onChange={this.valueChanged} className="deselected" required rows={4} cols={30} placeholder="..." aria-label="Response to Question" />
+                                :
+                                    <input value={this.state.value} onChange={this.valueChanged} className="deselected" required type="text" placeholder="..." aria-label="Response to Question" />
+                            }
+                            <button disabled={this.state.answerIsbeingSubmitted} onClick={this.handleSubmit}>Submit</button>
+                        </form>
+                }
+            </div>
+        );
     }
 
     @bind valueChanged(event: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) {
