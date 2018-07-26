@@ -191,14 +191,29 @@ export const DocumentationAndStyles = (props: {}) => (
                 can later use the results of the user's choice in <code>if: </code> conditions using &nbsp;
                 <code>VAR('<em>(key)</em>')</code>.
             </p>
+            <p>
+                A free response can optionally have a <code>allowed:</code> parameter, which is a list of allowed responses.
+                The user will be prompted to enter a response over and over until they enter one of the allowed responses.
+            </p>
             <h3>Example:</h3>
-            <p>A common use for the choice step is to pause the script until the user has completed some action:</p>
+            <p>Ask the team for a code word:</p>
             <code><pre>{`
 - step: message
   messages:
   - What's your team's code word?
 - step: free response
   key: teamname
+`.trim()}</pre></code>
+            <h3>Example:</h3>
+            <p>Ask the team for a password:</p>
+            <code><pre>{`
+- step: message
+  messages:
+  - What's the password?
+- step: free response
+  key: password
+  allowed:
+    - opensesame
 `.trim()}</pre></code>
 
 

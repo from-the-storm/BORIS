@@ -160,7 +160,10 @@
         float: right;
         text-align: right;
         clear: both;
-            button {
+            .past-entry {
+                background: $grey;
+            }
+            button, .past-entry {
                 text-align: right;
                 font-family: $textfont;
                 font-size: 1em;
@@ -181,6 +184,7 @@
                     }
             }
             form {
+                clear: right;
                 padding: 0.5rem;
                 background: $black;
                 border-radius: 3px;
