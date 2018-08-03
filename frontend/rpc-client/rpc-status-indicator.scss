@@ -1,7 +1,7 @@
 .uses-rpc {
     & > .rpc-status-indicator {
         position: fixed;
-        top: 40px; // Appear just below the normal header
+        top: 0px;
         width: 100%;
         max-width: 32em; // Same as the #app-container limit
         height: 40px;
@@ -11,9 +11,5 @@
         text-align: center;
         z-index: 99999;
         box-sizing: border-box;
-    }
-    .rpc-status-indicator + div {
-        padding-top: 40px;
-        z-index: 1;
     }
 }
