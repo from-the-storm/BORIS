@@ -167,7 +167,12 @@ export class GameManager implements GameManagerStepInterface {
             return;
         }
         const activeStepIds: Set<number> = new Set();
-        this.playerIds.forEach(userId => { activeStepIds.add(this.getCurrentStepForUser(userId).id); });
+        this.playerIds.forEach(userId => {
+            const currentStep = this.getCurrentStepForUser(userId);
+            if (currentStep !== undefined) {
+                activeStepIds.add(currentStep.id);
+            }
+        });
 
         for (const stepId of activeStepIds) {
             if (this.stepRunPromisesByStepId.get(stepId) === undefined) {
