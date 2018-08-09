@@ -7,11 +7,11 @@ html
         meta(name="viewport", content="width=device-width, initial-scale=1")
 
         link(href="https://fonts.googleapis.com/css?family=Kanit:700|Noto+Sans", rel="stylesheet")
-        link(href=`${resUrl}/style.css`, rel="stylesheet")
+        link(href=`${resUrl}/style.css?${styleCssHash}`, rel="stylesheet")
 
 body
     #app-container
-    script(crossorigin, src="https://unpkg.com/react@16/umd/react.development.js")
-    script(crossorigin, src="https://unpkg.com/react-dom@16/umd/react-dom.development.js")
+    script(crossorigin, src=`https://unpkg.com/react@${reactVersion}/umd/react.${reactBuild}.js`)
+    script(crossorigin, src=`https://unpkg.com/react-dom@${reactVersion}/umd/react-dom.${reactBuild}.js`)
 
-    script(src=`${resUrl}/main.js`)
+    script(src=`${resUrl}/main.js?${mainJsHash}`)

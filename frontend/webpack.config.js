@@ -1,5 +1,16 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
+const extraPlugins = (
+    process.env.NODE_ENV === 'production' ? [
+        new UglifyJsPlugin({
+            sourceMap: true,
+            parallel: true,
+        }),
+    ] : []
+);
+
 
 module.exports = {
     entry: {
@@ -78,6 +89,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin([
             {from:'other-images',to:'images'} 
-        ]), 
+        ]),
+        ...extraPlugins
     ]
 };
