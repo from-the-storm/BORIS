@@ -167,7 +167,12 @@ export class GameManager implements GameManagerStepInterface {
             return;
         }
         const activeStepIds: Set<number> = new Set();
-        this.playerIds.forEach(userId => { activeStepIds.add(this.getCurrentStepForUser(userId).id); });
+        this.playerIds.forEach(userId => {
+            const currentStep = this.getCurrentStepForUser(userId);
+            if (currentStep !== undefined) {
+                activeStepIds.add(currentStep.id);
+            }
+        });
 
         for (const stepId of activeStepIds) {
             if (this.stepRunPromisesByStepId.get(stepId) === undefined) {
@@ -333,7 +338,8 @@ export class GameManager implements GameManagerStepInterface {
             // others may not be eligible to advance anymore.
             // 'toAdvance' stores the pairs of [stepId, userIds] that are
             // potentially eligible to advance.
-            const toAdvance: {[stepId: number]: number[]} = {}; 
+            const toAdvance: {[stepId: number]: number[]} = {};
+            let numUsersAtEndOfScript = 0;
             for (const userId of usersWhoseCurrentStepIsComplete) {
                 const nextStep = this.computeNextStepForUser(userId);
                 if (nextStep !== EndOfScript) {
@@ -350,15 +356,18 @@ export class GameManager implements GameManagerStepInterface {
                         toAdvance[nextStep.id].push(userId);
                     }
                 } else {
-                    // This user has completed the game. Has everyone?
-                    if (!anyUserIsSeeingAnIncompleteStep) {
-                        // Yep, so the game is done!
-                        if (this._gameStatus === GameStatus.InProgress) {
-                            await this.finish();
-                        }
-                        return;
-                    }
+                    // This user has completed the game. 
+                    numUsersAtEndOfScript++;
                 }
+            }
+
+            // Has everyone completed the game?
+            if (!anyUserIsSeeingAnIncompleteStep && numUsersAtEndOfScript === this.playerIds.length) {
+                // Yep, so the game is done!
+                if (this._gameStatus === GameStatus.InProgress) {
+                    await this.finish();
+                }
+                return;
             }
 
             const numStepsCurrentlyReadyToAdvance = Object.keys(toAdvance).length;
