@@ -136,9 +136,7 @@
                         border-bottom: 2px solid;
                         font-weight: bold;
                         position: relative;
-                            &.gained {
-                                border-color: $green;
-                            }
+                        border-color: $green;
                             &.lost {
                                 border-color: $red;
                             }
