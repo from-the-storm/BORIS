@@ -38,8 +38,11 @@
     width: 100%;
     top: 0;
     left: 0;
+    right: 0;
+    margin: 0 auto;
     background: $black;
     z-index: 3;
+    max-width: 32em;
 }
 
 .sponsor, .boris {
@@ -181,6 +184,7 @@
                     }
                     &.wrong {
                         background: $red;
+                        color: $white;
                     }
             }
             form {

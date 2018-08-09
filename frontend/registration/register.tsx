@@ -51,7 +51,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
         if (this.state.registrationComplete) {
             return <div>
                 <h1>Check your email</h1>
-                <p>Thanks for registering! We've sent you a link by email - just click that link to log in and begin the apocalypse training.</p>
+                <p>Thanks for registering! We've sent you a link by email - just click that link to log in.</p>
             </div>
         } else if (!this.state.hasConsented) {
             return <div>

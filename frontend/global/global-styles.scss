@@ -98,7 +98,6 @@ button {
     }
 
     &:disabled {
-        background-color: darken($white, 50%);
         color: darken($white, 20%);
     }
 
