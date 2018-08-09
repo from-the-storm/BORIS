@@ -32,6 +32,7 @@
     "passport": "~0.4.0",
     "passport-unique-token": "~0.1.4",
     "pug": "^2.0.3",
+    "react": "~16.3.2",
     "redis": "~2.8.0",
     "validator": "~10.0.0",
     "whiskers": "~0.4.0"
@@ -73,7 +74,6 @@
     "jsonrpc-websocket-client": "~0.2.0",
     "node-fetch": "^2.1.2",
     "node-sass": "~4.6.0",
-    "react": "~16.3.2",
     "react-admin": "^2.0.4",
     "react-dom": "~16.3.2",
     "react-modal": "^3.4.5",
