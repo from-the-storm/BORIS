@@ -164,7 +164,12 @@ app.use((req, res, next) => {
 app.use(config.resource_url, express.static(path.join(__dirname, '..', 'frontend', 'dist')));
 
 // The React single page app:
-app.get('/', (req, res) => { res.render('react-app') });
+app.get('/', async (req, res) => {
+    res.render('react-app', {
+        reactBuild: config.react_build,
+        reactVersion: config.react_version,
+    });
+});
 
 // Login & Registration API:
 app.use('/auth', loginRegisterRouter);

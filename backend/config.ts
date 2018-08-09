@@ -22,6 +22,8 @@ export const config = (() => {
         db_user: 'boris',
         db_password: 'devpassword',
         secret_key: 'INSECURE - change me for prod',
+        react_build: environment === 'production' ? 'production.min' : 'development',
+        react_version: require('react/package.json').version,
     };
     // Test configuration:
     if (environment === 'test') {
