@@ -25,10 +25,11 @@ import {router as testHelperRouter} from './routes/test-helper-api';
 import {router as appAdminRouter} from './routes/admin-api';
 import { subscribeToRedis, getPubSubClient } from './websocket/pub-sub';
 import { rpcHandler } from './websocket/connections';
+import { isAdminUser } from './routes/api-utils';
+import { getFileHashSha1 } from './checksum';
 
 // Declare our additions to the Express API:
 import {UserType} from './express-extended';
-import { isAdminUser } from './routes/api-utils';
 
 const app = express();
 const {getWss} = expressWebsocket(app);
@@ -161,13 +162,29 @@ app.use((req, res, next) => {
 // Views:
 
 // Static files:
-app.use(config.resource_url, express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+const staticRoot: string = path.join(__dirname, '..', 'frontend', 'dist');
+app.use(config.resource_url, express.static(staticRoot));
 
 // The React single page app:
-app.get('/', async (req, res) => {
+app.get('/', async (req, res, next) => {
+    const getFileShortHash = async (filePath: string) => {
+        try {
+            return (await getFileHashSha1(filePath)).substr(0, 12);
+        } catch (err) {
+            console.error(err);
+            return 'unhashed';
+        }
+    }
+    
+    // Never cache this html file response since it's so short and it contains
+    // the checksums of the key JS and CSS files.
+    res.set('Cache-Control', 'no-cache');
+
     res.render('react-app', {
         reactBuild: config.react_build,
         reactVersion: config.react_version,
+        mainJsHash: await getFileShortHash(`${staticRoot}/main.js`),
+        styleCssHash: await getFileShortHash(`${staticRoot}/style.css`),
     });
 });
 
