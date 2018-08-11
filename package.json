@@ -24,6 +24,7 @@
     "express-ws": "~3.0.0",
     "js-interpreter": "^1.4.6",
     "js-yaml": "^3.12.0",
+    "@babel/runtime": "7.0.0-beta.42",
     "json-rpc-peer": "~0.15.3",
     "massive": "~4.7.2",
     "nodemailer": "~4.6.4",
@@ -32,6 +33,7 @@
     "passport": "~0.4.0",
     "passport-unique-token": "~0.1.4",
     "pug": "^2.0.3",
+    "react": "~16.3.2",
     "redis": "~2.8.0",
     "validator": "~10.0.0",
     "whiskers": "~0.4.0"
@@ -73,7 +75,6 @@
     "jsonrpc-websocket-client": "~0.2.0",
     "node-fetch": "^2.1.2",
     "node-sass": "~4.6.0",
-    "react": "~16.3.2",
     "react-admin": "^2.0.4",
     "react-dom": "~16.3.2",
     "react-modal": "^3.4.5",
@@ -92,6 +93,7 @@
     "typescript": "~2.8.3",
     "uglify-es": "~3.1.5",
     "uglifyify": "~3.0.4",
+    "uglifyjs-webpack-plugin": "^1.2.7",
     "url-loader": "^1.0.1",
     "webpack": "~3.8.1"
   },
