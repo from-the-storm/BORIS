@@ -64,7 +64,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
             <div className="game">
                 <header className="fixed">
                     <button onClick={this.handleQuitButton}><img height="22" width="22" src={back} alt="Back" /></button>
-                    <h1>{this.props.scenarioName.replace(/[aeiouy]/ig,'')}{this.props.gameIsFinished ? ' (Complete)' : ''}</h1>
+                    <h1>{this.props.gameIsFinished ? '(Complete)' : (this.props.scenarioName.replace(/[aeiouy]/ig,''))}</h1>
                     <button className="help" onClick={this.handleHelpButton}>?</button>
                 </header>
                 <div className="content" ref={el => this.contentElement = el}>
