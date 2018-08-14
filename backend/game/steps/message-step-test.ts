@@ -16,7 +16,7 @@ const stepYamlWithJsExpressions = `---
     - [("This is " + " a JS expression")]
 `;
 
-const MESSAGE_DELAY = 1000;
+const MESSAGE_DELAY = 1750;
 
 describe("Message Step tests", () => {
 

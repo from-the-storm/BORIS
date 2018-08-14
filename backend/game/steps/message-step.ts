@@ -23,7 +23,7 @@ export class MessageStep extends Step {
         }
         // Now, slowly reveal each message to the user, after a short delay:
         while (this.numMessagesShown < this.settings.messages.length) {
-            await this.sleep(`m${this.numMessagesShown}`, 1000);
+            await this.sleep(`m${this.numMessagesShown}`, 1750);
             await this.setVar(MessageStep.numMessagesShown, n => n + 1);
             this.pushUiUpdate();
         }

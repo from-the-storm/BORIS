@@ -58,7 +58,7 @@ describe("Assign Roles Integration tests", () => {
             // Now the game should be finished:
             expect(manager.status).toBe(GameStatus.InReview);
             expect(await getUserIdWithRoleForTeam('D', teamId, db)).toBe(doomsayerUserId);
-        });
+        }, 8000);
 
         it("Scripts can refer to other roles by player name using ", async () => {
             const {teamId, user1, user2, user3} = await createTeam(db, 3);
