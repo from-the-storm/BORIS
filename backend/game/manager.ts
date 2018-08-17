@@ -487,7 +487,7 @@ export class GameManager implements GameManagerStepInterface {
         return EndOfScript;
     }
 
-    private publishErrorToUser(userId: number, debuggingInfoForConsole: string, friendlyErrorMessage: string = "An error ocurred on the server while processing this step of the scenario. Sorry!") {
+    private publishErrorToUser(userId: number, debuggingInfoForConsole: string, friendlyErrorMessage: string = "Sorry, something went sideways with this part of the scenario. Pretend you didn't see this and carry on!") {
         const errorNotification: GameErrorNotification = {
             type: NotificationType.GAME_ERROR,
             friendlyErrorMessage,
