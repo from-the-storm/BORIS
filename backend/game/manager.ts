@@ -389,7 +389,16 @@ export class GameManager implements GameManagerStepInterface {
 
                 for (const userId of userIdsForEarliestStep) {
                     await this.pushStepSeenByUser(userId, earliestStepId);
-                    usersWhoseCurrentStepIsComplete.delete(userId);
+                    const step = this.steps.get(earliestStepId);
+                    if (step.isComplete) {
+                        // Somehow this step is already complete. Possibly it is a parallel step and
+                        // another user already completed it.
+                        if (step.getUiState() !== null) {
+                            await this.pushUiUpdate(step.id);
+                        }
+                    } else {
+                        usersWhoseCurrentStepIsComplete.delete(userId);
+                    }
                 }
                 newStepsPushed = true;
             }
