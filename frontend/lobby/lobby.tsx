@@ -5,6 +5,7 @@ import {connect, DispatchProp} from 'react-redux';
 import {RootState} from '../global/state';
 import { ChooseScenarioComponent } from './choose-scenario';
 import { TeamComponent } from './team';
+import { PreLaunchComponent } from './pre-launch';
 import {Mode} from './lobby-state';
 import {Actions} from './lobby-state-actions';
 import { Actions as RegistrationActions } from '../registration/registration-state-actions';
@@ -34,6 +35,8 @@ class _LobbyComponent extends React.PureComponent<Props> {
             this.props.dispatch<AnyAction>({type: Actions.SHOW_SCENARIOS_LIST});
         } else if (this.props.mode === Mode.TeamDetails) {
             this.props.dispatch<AnyAction>({type: Actions.SHOW_SCENARIOS_LIST});
+        } else if (this.props.mode === Mode.PreLaunch) {
+            this.props.dispatch<AnyAction>({type: Actions.SHOW_SCENARIOS_LIST});
         } else {
             this.props.dispatch<AnyAction>({type: RegistrationActions.SHOW_HOME});
         }
@@ -54,6 +57,7 @@ class _LobbyComponent extends React.PureComponent<Props> {
                     {
                         this.props.mode === Mode.ChooseScenario ? <ChooseScenarioComponent/> :
                         this.props.mode === Mode.TeamDetails ? <TeamComponent/> :
+                        this.props.mode === Mode.PreLaunch ? <PreLaunchComponent/> :
                         'Error: Unknown mode.'
                     }
                 </div>
@@ -64,5 +68,5 @@ class _LobbyComponent extends React.PureComponent<Props> {
 
 export const LobbyComponent = connect((state: RootState, ownProps: OwnProps) => ({
     mode: state.lobbyState.mode,
-    viewingScenarioDetails: state.lobbyState.showScenarioDetails !== null,
+    viewingScenarioDetails: state.lobbyState.selectedScenario !== null,
 }))(_LobbyComponent);

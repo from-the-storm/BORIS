@@ -11,7 +11,6 @@ import { AutoWayfinder } from '../auto-wayfinder/auto-wayfinder';
 import { MarketButton } from './market-button';
 import { Scenario } from '../../common/models';
 import { AnyAction } from '../global/actions';
-import { startGame } from '../global/state/game-state-actions';
 
 
 interface OwnProps {
@@ -105,12 +104,12 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     }
 
     @bind private startScenario(scenarioId: number) {
-        this.props.dispatch(startGame(scenarioId));
+        this.props.dispatch<AnyAction>({type: Actions.SHOW_PRE_LAUNCH_SCREEN, scenarioId});
     }
 }
 
 export const ChooseScenarioComponent = connect((state: RootState, ownProps: OwnProps) => {
-    const selectedScenarioId = state.lobbyState.showScenarioDetails;
+    const selectedScenarioId = state.lobbyState.selectedScenario;
     return {
         teamCode: state.teamState.teamCode,
         scenarios: state.lobbyState.scenarios,
