@@ -6,6 +6,8 @@ import { RootState } from '../global/state';
 import { OtherTeamMember, Scenario } from '../../common/models';
 import { RpcClientConnectionStatus } from '../rpc-client/rpc-client-actions';
 import { startGame } from '../global/state/game-state-actions';
+import { callApi } from '../api';
+import { KICK_OFF_TEAM } from '../../common/api';
 
 interface OwnProps {
 }
@@ -75,8 +77,8 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
         this.props.dispatch(startGame(scenarioId));
     }
 
-    private removeTeamMember(teamMemberId: number) {
-
+    private async removeTeamMember(teamMemberId: number) {
+        await callApi(KICK_OFF_TEAM, { teamMemberId, });
     }
 }
 

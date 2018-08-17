@@ -10,6 +10,8 @@ import { Prompt } from '../prompt/prompt';
 
 import * as saltine from './images/saltine.svg';
 import { updateSaltinesBalance } from '../global/state/team-state-actions';
+import { KICK_OFF_TEAM } from '../../common/api';
+import { callApi } from '../api';
 
 interface TeamRowProps {
     details: OtherTeamMember,
@@ -50,7 +52,7 @@ class TeamMemberRow extends React.PureComponent<TeamRowProps, TeamRowState> {
                         show={this.state.showRemovePrompt}
                     >
                         <p>Are you sure you want to remove {this.props.details.name} from your team?</p>
-                        <button>Yes</button>
+                        <button onClick={this.handleRemoveConfirmed}>Yes</button>
                     </Prompt>
                 }
                 {this.state.showAdminPrompt &&
@@ -77,6 +79,13 @@ class TeamMemberRow extends React.PureComponent<TeamRowProps, TeamRowState> {
         this.setState({
             showRemovePrompt: true,
         })
+    }
+
+    @bind private async handleRemoveConfirmed() {
+        await callApi(KICK_OFF_TEAM, { teamMemberId: this.props.details.id, });
+        this.setState({
+            showRemovePrompt: false,
+        });
     }
 
     @bind private handleClosePrompt () {
