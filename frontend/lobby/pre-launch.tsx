@@ -41,7 +41,7 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
         return <div className="pre-launch">
             <h1>{this.props.scenario.name}</h1>
             <h2>Confirm your team</h2>
-            <p>Before you start, make sure everyone is ready and their phone has enough battery to complete the scenario.</p>
+            <p>Before you start, make sure everyone is ready (and that their phones are charged).</p>
             <h3>Team Members Ready to Play</h3>
             <ul className="team">
                 {this.props.onlineTeamMembers.map(member =>
@@ -61,9 +61,9 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
                             )}
                         </ul>
                         <p className="callout">
-                            <strong>⚠️ Some of your team members are not online. </strong>
-                            If they're with you now, make sure they have logged in.
-                            If they are unable to play with you now, {this.props.isTeamAdmin ? 'you' : 'your team administrator'} can temporarily remove them from your team and the rest of you can start the scenario.
+                            <strong>⚠️ Some of your team members are offline.</strong>
+                            If they're with you now, make sure they've logged in.
+                            If they aren't here, {this.props.isTeamAdmin ? 'you' : 'your team admin'} can temporarily boot them from your team and then start the scenario.
                         </p>
                     </>
                 :
