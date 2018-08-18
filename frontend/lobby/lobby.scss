@@ -205,21 +205,6 @@
                 }
         }
 
-        ul.team {
-            list-style-type: none;
-            padding-left: 0;
-            margin-top: 1rem;
-                li {
-                    margin-bottom: 0.75rem;
-                        button {
-                            font-family: $fancyfont;
-                            font-size: 0.9em;
-                            padding: 0.25rem 0.5rem;
-                            margin: 0 0.25rem;
-                        }
-                }
-        }
-
         .online-indicator {
             background: $green;
             border-radius: 50%;
@@ -232,6 +217,25 @@
             vertical-align: middle;
         }
 
+    }
+
+    .teams, .pre-launch {
+        ul.team {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 1rem;
+
+            li {
+                margin-bottom: 0.75rem;
+
+                button {
+                    font-family: $fancyfont;
+                    font-size: 0.9em;
+                    padding: 0.25rem 0.5rem;
+                    margin: 0 0.25rem;
+                }
+            }
+        }
     }
 
     .leaderboards {

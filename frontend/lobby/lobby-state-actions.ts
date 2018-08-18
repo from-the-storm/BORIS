@@ -19,6 +19,8 @@ export enum Actions {
     SHOW_SCENARIO_DETAILS = 'LS_SD',
     // Show the Team status page:
     SHOW_TEAM_DETAILS = 'LS_TEAM',
+    // Show the pre-launch screen before playing a scenario (screen to make sure everyone on the team is online)
+    SHOW_PRE_LAUNCH_SCREEN = 'LS_PRELAUNCH',
 }
 
 interface ScenariosLoadingAction { type: Actions.SCENARIOS_LOADING; }
@@ -30,14 +32,16 @@ interface ScenariosLoadedAction {
 interface ShowScenariosListAction { type: Actions.SHOW_SCENARIOS_LIST; }
 interface ShowScenarioDetailsAction { type: Actions.SHOW_SCENARIO_DETAILS; scenarioId: number; }
 interface ShowTeamDetailsAction { type: Actions.SHOW_TEAM_DETAILS; }
+interface ShowPreLaunchScreenAction { type: Actions.SHOW_PRE_LAUNCH_SCREEN; scenarioId: number; }
 
 export type LobbyStateActionsType = (
-    ScenariosLoadingAction|
-    ScenariosLoadedAction|
-    ScenariosFailedToLoadAction|
-    ShowScenariosListAction|
-    ShowScenarioDetailsAction|
-    ShowTeamDetailsAction
+    |ScenariosLoadingAction
+    |ScenariosLoadedAction
+    |ScenariosFailedToLoadAction
+    |ShowScenariosListAction
+    |ShowScenarioDetailsAction
+    |ShowTeamDetailsAction
+    |ShowPreLaunchScreenAction
 );
 
 //// Action Creators

@@ -11,7 +11,7 @@ import {config} from '../config';
 import {BorisDatabase} from '../db/db';
 import {User} from '../db/models';
 import {alphanumericCodeGenerator} from './login-register-utils';
-import { JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER } from '../../common/api';
+import { JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER, KICK_OFF_TEAM } from '../../common/api';
 
 // Declare our additions to the Express API:
 import { UserType } from '../express-extended';
@@ -249,6 +249,15 @@ postApiMethodWithUser(JOIN_TEAM, (async (data, app, user) => {
     };
 }));
 
+async function removeUserFromTeam(userId: number, app: express.Application) {
+    const db: BorisDatabase = app.get("db");
+    const rows: any = await db.team_members.update({user_id: userId, is_active: true}, {is_active: false});
+    if (rows.length === 1) {
+        // Notify the team that this user has left:
+        notifyTeamStatusChanged(app, rows[0].team_id);
+    }
+}
+
 /**
  * API for leaving the user's active team.
  *
@@ -258,11 +267,29 @@ postApiMethodWithUser(JOIN_TEAM, (async (data, app, user) => {
  *
  */
 postApiMethodWithUser(LEAVE_TEAM, async (data, app, user) => {
-    const db: BorisDatabase = app.get("db");
-    const rows: any = await db.team_members.update({user_id: user.id, is_active: true}, {is_active: false});
-    if (rows.length === 1) {
-        // Notify the team that this user has left:
-        notifyTeamStatusChanged(app, rows[0].team_id);
-    }
+    await removeUserFromTeam(user.id, app);
     return {result: 'ok'};
 });
+
+/**
+ * API for kicking a user off a team.
+ *
+ * This preserve's the user's association with the team, but it means
+ * that team is no longer the user's "active" team. Each user can only
+ * be "active" on one team at a time but can be linked to many teams.
+ *
+ */
+postApiMethodWithUser(KICK_OFF_TEAM, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const currentUserMembership = await db.team_members.findOne({user_id: user.id, is_active: true, is_admin: true});
+    if (currentUserMembership === null) {
+        throw new SafeError("You are not a team admin", 403);
+    }
+    const targetUserMembership = await db.team_members.findOne({user_id: data.teamMemberId, is_active: true});
+    if (currentUserMembership.team_id != targetUserMembership.team_id) {
+        throw new SafeError("That user is not part of your team");
+    }
+    await removeUserFromTeam(data.teamMemberId, app);
+    return {result: 'ok'};
+});
+

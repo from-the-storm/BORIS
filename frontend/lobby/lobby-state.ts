@@ -10,6 +10,7 @@ import { Scenario } from '../../common/models';
 export const enum Mode {
     ChooseScenario,
     TeamDetails,
+    PreLaunch, // A user has chosen to start a particular scenario; this screen will confirm that their team is all online.
 }
 
 /**
@@ -18,7 +19,7 @@ export const enum Mode {
 export class LobbyState extends Record({
     scenarios: List<Scenario>(),
     scenariosState: LoadingState.NOT_LOADING,
-    showScenarioDetails: null as number|null,
+    selectedScenario: null as number|null,
     mode: Mode.ChooseScenario as Mode,
 }) {
     // ...
@@ -48,11 +49,16 @@ export function lobbyStateReducer(state?: LobbyState, action?: AnyAction): Lobby
         })
     case Actions.SHOW_SCENARIOS_LIST:
         return state.merge({
-            showScenarioDetails: null,
+            selectedScenario: null,
             mode: Mode.ChooseScenario,
         });
     case Actions.SHOW_SCENARIO_DETAILS:
-        return state.set('showScenarioDetails', action.scenarioId);
+        return state.set('selectedScenario', action.scenarioId);
+    case Actions.SHOW_PRE_LAUNCH_SCREEN:
+        return state.merge({
+            mode: Mode.PreLaunch,
+            selectedScenario: action.scenarioId,
+        });
     case Actions.SHOW_TEAM_DETAILS:
         return state.set('mode', Mode.TeamDetails);
     case UserStateActions.LOGOUT:

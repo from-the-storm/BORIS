@@ -107,6 +107,10 @@ export const JOIN_TEAM: ApiMethod<JoinTeamRequest, CreateOrJoinTeamResponse> = {
 
 export const LEAVE_TEAM: ApiMethod<NoRequestParameters, EmptyApiResponse> = {path: '/auth/team/leave', type: 'POST'};
 
+// Kick a user off a team:
+
+export const KICK_OFF_TEAM: ApiMethod<{teamMemberId: number}, EmptyApiResponse> = {path: '/auth/team/kick', type: 'POST'};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // lobby-api methods:
