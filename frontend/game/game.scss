@@ -152,6 +152,7 @@
                         animation-name: jittery;
                         font-size: 2em;
                         font-weight: bold;
+                        display: inline-block;
                     }
                     &.in {
                         animation: pop-in 0.2s forwards ease-in;
