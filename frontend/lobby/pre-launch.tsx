@@ -61,9 +61,7 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
                             )}
                         </ul>
                         <p className="callout">
-                            <strong>⚠️ Some of your team members are offline. </strong>
-                            If they're with you now, make sure they've logged in.
-                            If they aren't here, {this.props.isTeamAdmin ? 'you' : 'your team admin'} can temporarily boot them from your team and then start the scenario.
+                            <strong>⚠️ Some of your team members are offline.</strong> If they're with you now, make sure they've logged in. If they aren't here, {this.props.isTeamAdmin ? 'you' : 'your team admin'} can temporarily boot them from your team and then start the scenario.
                         </p>
                     </>
                 :
