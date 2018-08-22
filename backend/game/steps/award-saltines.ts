@@ -37,11 +37,13 @@ export function getSaltinesEarnedInGame(gameManager: GameManager) {
 export class AwardSaltinesStep extends Step {
     public static readonly stepType: StepType = StepType.Internal;
     readonly settings: AwardSaltinesStepSettings;
+    public static readonly hasRun: GameVar<boolean> = {key: 'hasRun', scope: GameVarScope.Step, default: false};
 
     async run() {
-        this.setVar(SALTINES_EARNED_ALL_TIME, oldAmount => oldAmount + this.settings.earned);
-        this.setVar(SALTINES_EARNED_THIS_GAME, oldAmount => oldAmount + this.settings.earned);
-        this.setVar(SALTINES_POSSIBLE_THIS_GAME, oldAmount => oldAmount + this.settings.possible);
+        await this.setVar(SALTINES_EARNED_ALL_TIME, oldAmount => oldAmount + this.settings.earned);
+        await this.setVar(SALTINES_EARNED_THIS_GAME, oldAmount => oldAmount + this.settings.earned);
+        await this.setVar(SALTINES_POSSIBLE_THIS_GAME, oldAmount => oldAmount + this.settings.possible);
+        await this.setVar(AwardSaltinesStep.hasRun, true);
     }
 
     protected parseConfig(config: any): AwardSaltinesStepSettings {
@@ -65,6 +67,6 @@ export class AwardSaltinesStep extends Step {
     }
 
     public get isComplete() {
-        return true;
+        return this.getVar(AwardSaltinesStep.hasRun);
     }
 }

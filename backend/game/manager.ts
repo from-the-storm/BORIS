@@ -390,7 +390,7 @@ export class GameManager implements GameManagerStepInterface {
                 for (const userId of userIdsForEarliestStep) {
                     await this.pushStepSeenByUser(userId, earliestStepId);
                     const step = this.steps.get(earliestStepId);
-                    if (step.isComplete) {
+                    if (step.isComplete && this.stepRunPromisesByStepId.has(step.id)) { // Check stepRunPromises because some steps 
                         // Somehow this step is already complete. Possibly it is a parallel step and
                         // another user already completed it.
                         if (step.getUiState() !== null) {
