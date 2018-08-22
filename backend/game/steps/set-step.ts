@@ -14,6 +14,7 @@ import { GameVarScope, GameVar } from "../vars";
  */
 export class SetVariableStep extends Step {
     public static readonly stepType: StepType = StepType.Internal;
+    public static readonly hasRun: GameVar<boolean> = {key: 'hasRun', scope: GameVarScope.Step, default: false};
     readonly settings: {
         key: string,
         scope: 'team'|'game',
@@ -27,6 +28,7 @@ export class SetVariableStep extends Step {
             default: undefined
         };
         await this.setVar(gameVar, (oldVal) => this.safeEvalScriptExpression(this.settings.to));
+        await this.setVar(SetVariableStep.hasRun, true);
     }
 
     protected parseConfig(config: any): any {
@@ -47,6 +49,6 @@ export class SetVariableStep extends Step {
     }
 
     public get isComplete() {
-        return true;
+        return this.getVar(SetVariableStep.hasRun);
     }
 }
