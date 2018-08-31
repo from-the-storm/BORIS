@@ -1,12 +1,25 @@
 import 'jest';
-import {Builder, By, until, ThenableWebDriver, WebDriver} from 'selenium-webdriver';
+import {Builder, WebDriver} from 'selenium-webdriver';
 import * as chrome from 'selenium-webdriver/chrome';
 import { spawn, ChildProcess } from 'child_process';
-import { waitForReactToRender, waitForHttpRequests, countElementsMatching, buttonWithText, trackHttpRequests, elementMatchingWithText } from './webdriver-utils';
+import { waitForReactToRender, waitForHttpRequests, countElementsMatching, buttonWithText, trackHttpRequests, getHeaderText } from './webdriver-utils';
 import { borisURL, getEmailsSentTo } from './integration-utils';
+import { registerAccount, loginWithLink, createTeam, expectIsOnJoinTeamPage, joinTeam } from './integration-steps';
+import { Gender } from '../common/models';
 
 if (process.env.NODE_ENV !== 'test') {
     throw new Error("The test suite should be run with NODE_ENV=test");
+}
+
+async function spawnBrowserAndDriver(): Promise<WebDriver> {
+    /*driver = await new Builder().forBrowser('chrome').setChromeOptions(
+        // Simulate an iPhone 7. Disable touch because it's buggy with Selenium (click causes context menu to pop up)
+        new chrome.Options().setMobileEmulation({deviceMetrics: {width: 375, height: 667, pixelRatio: 2, touch: false}})
+    ).build();*/
+    // Unforunately mobile emulation is buggy in newer versions of Chrome so we are just using the desktop version for now.
+    return await new Builder().forBrowser('chrome').setChromeOptions(
+        new chrome.Options().addArguments("--window-size=375,667")
+    ).build();
 }
 
 describe("BORIS Integration tests", () => {
@@ -34,14 +47,7 @@ describe("BORIS Integration tests", () => {
         await spawnedBorisServer;
 
         try {
-            /*driver = await new Builder().forBrowser('chrome').setChromeOptions(
-                // Simulate an iPhone 7. Disable touch because it's buggy with Selenium (click causes context menu to pop up)
-                new chrome.Options().setMobileEmulation({deviceMetrics: {width: 375, height: 667, pixelRatio: 2, touch: false}})
-            ).build();*/
-            // Unforunately mobile emulation is buggy in newer versions of Chrome so we are just using the desktop version for now.
-            driver = await new Builder().forBrowser('chrome').setChromeOptions(
-                new chrome.Options().addArguments("--window-size=375,667")
-            ).build();
+            driver = await spawnBrowserAndDriver();
         } catch (err) {
             console.error("* * * * Unable to initialize WebDriver for integration tests - all tests will fail.");
             // Unfortunately Jest/Jasmine will still try to run the tests.
@@ -58,11 +64,6 @@ describe("BORIS Integration tests", () => {
         await driver.quit();
     });
 
-    const getHeaderText = async (driver: WebDriver) => {
-        const header = await driver.findElement({css: 'h1'});
-        return header.getText();
-    }
-
     test('Home Page Test', async () => {
         await driver.get(borisURL);
         expect(await driver.getTitle()).toBe("BORIS");
@@ -71,91 +72,37 @@ describe("BORIS Integration tests", () => {
 
     test('Registration Test', async () => {
         const email = 'tom@example.com';
-        await driver.get(borisURL);
-        trackHttpRequests(driver);
-        await waitForReactToRender(driver); // Not sure yet if this is necessary.
-        const registerButton = await driver.findElement(buttonWithText("REGISTER!"));
-        await registerButton.click();
-        // See the consent page:
-        expect(await getHeaderText(driver)).toBe("CONSENT #1");
-        // Click the consent button:
-        await driver.findElement(buttonWithText("I CONSENT")).then(btn => btn.click());
-        // See the registration form:
-        expect(await getHeaderText(driver)).toBe("CREATE A PROFILE");
-        // If we prematurely click "Register", nothing should happen other than validation messages appearing:
-        await driver.findElement(buttonWithText("REGISTER")).then(btn => btn.click());
-        expect(await getHeaderText(driver)).toBe("CREATE A PROFILE");
-        // Fill out the form:
-        expect(await countElementsMatching('input:invalid', driver)).toBe(10); // 6 fields but some are radio buttons
-        await driver.findElement({css: 'input[name=firstName]'}).then(field => field.sendKeys("Tom"));
-        await driver.findElement({css: 'input[name=email]'}).then(field => field.sendKeys(email));
-        await driver.findElement({css: 'input[name=workInTech][value=yes]'}).then(field => field.click()); // "Work in tech: Yes"
-        await driver.findElement({css: 'input[name=occupation]'}).then(field => field.sendKeys("Mindlessly testing websites"));
-        await driver.findElement({css: 'input[name=age]'}).then(field => field.sendKeys("25"));
-        await driver.findElement({css: 'input[name=gender][value=o]'}).then(field => field.click()); // "Gender: Other"
-        expect(await countElementsMatching('input:invalid', driver)).toBe(0);
-        // Click "Register"
-        const emailCountBeforeRegistering = (await getEmailsSentTo(email)).length;
-        await driver.findElement(buttonWithText("REGISTER")).then(btn => btn.click());
-        await waitForHttpRequests(driver);
-        await waitForReactToRender(driver);
-        // User then sees a final message:
-        expect(await getHeaderText(driver)).toBe("CHECK YOUR EMAIL");
-        // Check the email that was sent to the user:
-        const emails = await getEmailsSentTo(email);
-        const emailCountAfterRegistering = emails.length;
-        expect(emailCountAfterRegistering - emailCountBeforeRegistering).toBe(1);
-        const registrationEmail = emails[emails.length - 1];
-        expect(registrationEmail.subject).toBe("Log in to Apocalypse Made Easy");
-        const loginLink = registrationEmail.html.match(/href="([^"]+)"/)[1];
-        expect(loginLink).toMatch(/^http.*/);
-
+        
+        const loginLink = await registerAccount(driver, {
+            firstName: "Tom",
+            email,
+            workInTech: true,
+            occupation: "Mindlessly testing websites",
+            age: 25,
+            gender: Gender.Other,
+        });
 
         // Login as that new user:
-        await driver.get(loginLink);
-        trackHttpRequests(driver);
-        await waitForReactToRender(driver); // Not sure yet if this is necessary.
+        await loginWithLink(driver, loginLink);
         // Now we should see the "Join Team" page
-        expect(await getHeaderText(driver)).toBe("JOIN/CREATE TEAM");
-        const createTeamButton = await driver.findElement(buttonWithText("CREATE A TEAM"));
-        await createTeamButton.click();
-        // Fill out the "Create Team" form
-        expect(await getHeaderText(driver)).toBe("CREATE TEAM");
-        expect(await countElementsMatching('input:invalid', driver)).toBe(1);
-        await driver.findElement({css: 'input[name=teamName]'}).then(field => field.sendKeys("Dream Team"));
-        await driver.findElement({css: 'input[name=organizationName]'}).then(field => field.sendKeys("Canada TestCo Inc. LLP Limited"));
-        expect(await countElementsMatching('input:invalid', driver)).toBe(0);
-        await driver.findElement(buttonWithText("CREATE MY TEAM")).then(btn => btn.click());
-        await waitForHttpRequests(driver);
+        await expectIsOnJoinTeamPage(driver);
+        const teamCode = await createTeam(driver, {
+            teamName: "Dream Team",
+            organizationName: "Canada TestCo Inc. LLP Limited",
+        });
         // Now we should see the "Choose Scenario" page:
         expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
         // Go back to the home area:
         await driver.findElement({css: 'img[alt*=Back]'}).then(btn => btn.click());
-        const getTeamCodeFromheader = async () => {
-            const loggedInheader = await driver.findElement({css: 'header .loggedin'});
-            const text = (await loggedInheader.getText()).replace('\n', ' ');
-            const regex = /TEAM CODE: ([A-Z0-9]+) .*/;
-            expect(text).toMatch(regex);
-            return text.match(regex)[1];
-        }
-        let teamCode = await getTeamCodeFromheader();
-        expect(teamCode).toHaveLength(5);
         // Leave the team:
         await driver.findElement(buttonWithText("LOG OUT")).click();
         expect(await getHeaderText(driver)).toBe("GOING SO SOON?");
         await driver.findElement(buttonWithText("CHANGE TEAM")).click();
         await waitForHttpRequests(driver);
-        expect(await getHeaderText(driver)).toBe("JOIN/CREATE TEAM");
+        await expectIsOnJoinTeamPage(driver);
         // Join the team again, using an invalid code:
-        await driver.findElement(buttonWithText("JOIN A TEAM")).click();
-        await driver.findElement({css: 'input[type=text]'}).then(field => field.sendKeys('FOOBAR'));
-        await driver.findElement(buttonWithText("JOIN TEAM")).then(btn => btn.click());
-        await waitForHttpRequests(driver);
-        expect(await driver.findElement({css: '.team-error'}).getText()).toBe("Unable to join team: Invalid team code: FOOBAR");
+        await expect(joinTeam(driver, 'FOOBAR')).rejects.toHaveProperty('message', "Unable to join team: Invalid team code: FOOBAR");
         // Now use the right code:
-        await driver.findElement({css: 'input[type=text]'}).then(async field => { await field.clear(); await field.sendKeys(teamCode) });
-        await driver.findElement(buttonWithText("JOIN TEAM")).then(btn => btn.click());
-        await waitForHttpRequests(driver);
-        expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
+        await joinTeam(driver, teamCode);
     }, 18000);
 });

@@ -92,3 +92,9 @@ export function elementMatchingWithText(css: string, text: string) {
     }
 }
 export const buttonWithText = elementMatchingWithText.bind(undefined, 'button');
+
+
+export async function getHeaderText(driver: WebDriver) {
+    const header = await driver.findElement({css: 'h1'});
+    return header.getText();
+}
