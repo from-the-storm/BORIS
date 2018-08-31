@@ -2,9 +2,9 @@ import 'jest';
 import {Builder, WebDriver} from 'selenium-webdriver';
 import * as chrome from 'selenium-webdriver/chrome';
 import { spawn, ChildProcess } from 'child_process';
-import { waitForReactToRender, waitForHttpRequests, countElementsMatching, buttonWithText, trackHttpRequests, getHeaderText } from './webdriver-utils';
-import { borisURL, getEmailsSentTo } from './integration-utils';
-import { registerAccount, loginWithLink, createTeam, expectIsOnJoinTeamPage, joinTeam } from './integration-steps';
+import { waitForHttpRequests, buttonWithText, getHeaderText } from './webdriver-utils';
+import { borisURL } from './integration-utils';
+import { registerAccount, loginWithLink, createTeam, getCurrentPage, joinTeam, BorisPage } from './integration-steps';
 import { Gender } from '../common/models';
 
 if (process.env.NODE_ENV !== 'test') {
@@ -85,7 +85,7 @@ describe("BORIS Integration tests", () => {
         // Login as that new user:
         await loginWithLink(driver, loginLink);
         // Now we should see the "Join Team" page
-        await expectIsOnJoinTeamPage(driver);
+        expect(await getCurrentPage(driver)).toEqual(BorisPage.JOIN_OR_CREATE_TEAM);
         const teamCode = await createTeam(driver, {
             teamName: "Dream Team",
             organizationName: "Canada TestCo Inc. LLP Limited",
@@ -99,7 +99,7 @@ describe("BORIS Integration tests", () => {
         expect(await getHeaderText(driver)).toBe("GOING SO SOON?");
         await driver.findElement(buttonWithText("CHANGE TEAM")).click();
         await waitForHttpRequests(driver);
-        await expectIsOnJoinTeamPage(driver);
+        expect(await getCurrentPage(driver)).toEqual(BorisPage.JOIN_OR_CREATE_TEAM);
         // Join the team again, using an invalid code:
         await expect(joinTeam(driver, 'FOOBAR')).rejects.toHaveProperty('message', "Unable to join team: Invalid team code: FOOBAR");
         // Now use the right code:

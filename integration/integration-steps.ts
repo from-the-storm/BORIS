@@ -13,6 +13,36 @@ import { borisURL, getEmailsSentTo } from './integration-utils';
 import { Gender } from '../common/models';
 
 
+export const enum BorisPage {
+    HOME_PAGE = 'HOME_PAGE',
+    REGISTER_CONSENT = 'REGISTER_CONSENT',
+    REGISTER_FORM = 'REGISTER_FORM',
+    REGISTER_COMPLETE = 'REGISTER_COMPLETE',
+    JOIN_OR_CREATE_TEAM = 'JOIN_OR_CREATE_TEAM',
+    JOIN_TEAM = 'JOIN_TEAM',
+    CREATE_TEAM = 'CREATE_TEAM',
+    CHOOSE_SCENARIO = 'CHOOSE_SCENARIO',
+    UNKNOWN = 'UNKNOWN',
+}
+
+export async function getCurrentPage(driver: WebDriver): Promise<BorisPage> {
+    const headerText = await getHeaderText(driver);
+    switch (headerText) {
+        case "WOULD YOU SURVIVE THE END OF THE WORLD?": return BorisPage.HOME_PAGE;
+        // User Registration:
+        case "CONSENT #1": return BorisPage.REGISTER_CONSENT;
+        case "CREATE A PROFILE": return BorisPage.REGISTER_FORM;
+        case "CHECK YOUR EMAIL": return BorisPage.REGISTER_COMPLETE;
+        // Teams:
+        case "JOIN/CREATE TEAM": return BorisPage.JOIN_OR_CREATE_TEAM;
+        case "JOIN TEAM": return BorisPage.JOIN_OR_CREATE_TEAM;
+        case "CREATE TEAM": return BorisPage.CREATE_TEAM;
+        // Lobby:
+        case "CHOOSE SCENARIO": return BorisPage.CHOOSE_SCENARIO;
+    }
+    return BorisPage.UNKNOWN;
+}
+
 /**
  * Go to the BORIS website and register a new user account.
  * Returns the URL used to login and verify the email address.
@@ -26,14 +56,14 @@ export async function registerAccount(driver: WebDriver, data: {firstName: strin
     const registerButton = await driver.findElement(buttonWithText("REGISTER!"));
     await registerButton.click();
     // See the consent page:
-    expect(await getHeaderText(driver)).toBe("CONSENT #1");
+    expect(await getCurrentPage(driver)).toBe(BorisPage.REGISTER_CONSENT);
     // Click the consent button:
     await driver.findElement(buttonWithText("I CONSENT")).then(btn => btn.click());
     // See the registration form:
-    expect(await getHeaderText(driver)).toBe("CREATE A PROFILE");
+    expect(await getCurrentPage(driver)).toBe(BorisPage.REGISTER_FORM);
     // If we prematurely click "Register", nothing should happen other than validation messages appearing:
     await driver.findElement(buttonWithText("REGISTER")).then(btn => btn.click());
-    expect(await getHeaderText(driver)).toBe("CREATE A PROFILE");
+    expect(await getCurrentPage(driver)).toBe(BorisPage.REGISTER_FORM);
     // Fill out the form:
     expect(await countElementsMatching('input:invalid', driver)).toBe(10); // 6 fields but some are radio buttons
     await driver.findElement({css: 'input[name=firstName]'}).then(field => field.sendKeys(data.firstName));
@@ -49,7 +79,7 @@ export async function registerAccount(driver: WebDriver, data: {firstName: strin
     await waitForHttpRequests(driver);
     await waitForReactToRender(driver);
     // User then sees a final message:
-    expect(await getHeaderText(driver)).toBe("CHECK YOUR EMAIL");
+    expect(await getCurrentPage(driver)).toBe(BorisPage.REGISTER_COMPLETE);
     // Check the email that was sent to the user:
     const emails = await getEmailsSentTo(data.email);
     const emailCountAfterRegistering = emails.length;
@@ -67,10 +97,6 @@ export async function loginWithLink(driver: WebDriver, loginLink: string) {
     await waitForReactToRender(driver); // Not sure yet if this is necessary.
 }
 
-export async function expectIsOnJoinTeamPage(driver: WebDriver) {
-    expect(await getHeaderText(driver)).toBe("JOIN/CREATE TEAM");
-}
-
 /**
  * If the team code is displayed somewhere on the current page, this will get it.
  * @param driver the webdriver to use
@@ -83,11 +109,11 @@ export async function getTeamCodeFromPage(driver: WebDriver): Promise<string> {
 }
 
 export async function createTeam(driver: WebDriver, data: {teamName: string, organizationName: string}): Promise<string> {
-    await expectIsOnJoinTeamPage(driver);
+    expect(await getCurrentPage(driver)).toEqual(BorisPage.JOIN_OR_CREATE_TEAM);
     const createTeamButton = await driver.findElement(buttonWithText("CREATE A TEAM"));
     await createTeamButton.click();
     // Fill out the "Create Team" form
-    expect(await getHeaderText(driver)).toBe("CREATE TEAM");
+    expect(await getCurrentPage(driver)).toBe(BorisPage.CREATE_TEAM);
     expect(await countElementsMatching('input:invalid', driver)).toBe(1);
     await driver.findElement({css: 'input[name=teamName]'}).then(field => field.sendKeys("Dream Team"));
     await driver.findElement({css: 'input[name=organizationName]'}).then(field => field.sendKeys("Canada TestCo Inc. LLP Limited"));
@@ -98,7 +124,7 @@ export async function createTeam(driver: WebDriver, data: {teamName: string, org
 }
 
 export async function joinTeam(driver: WebDriver, teamCode: string) {
-    await expectIsOnJoinTeamPage(driver);
+    expect(await getCurrentPage(driver)).toEqual(BorisPage.JOIN_OR_CREATE_TEAM);
     await driver.findElement(buttonWithText("JOIN A TEAM")).click();
     const codeInput = await driver.findElement({css: 'input[type=text]'});
     await codeInput.clear();
@@ -111,5 +137,5 @@ export async function joinTeam(driver: WebDriver, teamCode: string) {
         (await driver.findElement(elementMatchingWithText('a', "< Back"))).click();
         throw new Error(errorMessage);
     }
-    expect(await getHeaderText(driver)).toBe("CHOOSE SCENARIO");
+    expect(await getCurrentPage(driver)).toBe(BorisPage.CHOOSE_SCENARIO);
 }
