@@ -67,7 +67,7 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
                 :
                     null
             }
-            <button onClick={() => { this.startScenario(this.props.scenario.id) }} disabled={!canPlay}>Start Mission</button>
+            <button onClick={() => { this.startScenario(this.props.scenario.id) }} disabled={!canPlay}>Start Scenario</button>
         </div>;
     }
 

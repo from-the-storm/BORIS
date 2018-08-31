@@ -154,6 +154,10 @@
                         font-weight: bold;
                         display: inline-block;
                     }
+                    span.vanish {
+                        -webkit-animation: 1s 3s fade forwards;
+                        animation: 1s 3s fade forwards;
+                    }
                     &.in {
                         animation: pop-in 0.2s forwards ease-in;
                     }
