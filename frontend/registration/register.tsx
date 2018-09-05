@@ -61,7 +61,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
                 
                 <p>In order to study social connectedness and improve the program, the way you interact with Apocalypse Made Easy!, along with limited demographic data you supply while registering a profile, is recorded and stored. This data will be anonymized and stored on secure servers in Canada, and only accessible to the research team.</p>
 
-                <p>Each scenario that you choose to complete will take between 30 and 90 minutes. While using the program you are not required to do anything you are uncomfortable with.</p>
+                <p>Each scenario that you choose to complete will take between 40 and 120 minutes. While using the program you are not required to do anything you are uncomfortable with.</p>
 
                 <p>If you have any concerns or complaints about your rights as a research participant and/or your experiences while participating in this study, contact the Research Participant Complaint Line in the University British Columbia’s Office of Research Ethics at 1-604-822-8598 or if long distance e-mail RSIL@ors.ubc.ca or call toll free 1-877-822-8598.</p>
                 <div className="button-split">
