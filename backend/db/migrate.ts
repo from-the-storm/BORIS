@@ -48,6 +48,7 @@ export async function migrate() {
         } else if (environment === 'test') {
             console.log("Loading test data fixtures");
             await loadFixture('test-data.sql');
+            await loadFixture('integration-data.sql');
             console.log(" -> done");
         }
         db.instance.$pool.end();

@@ -5,6 +5,7 @@ import { spawn, ChildProcess } from 'child_process';
 import { buttonWithText, getHeaderText } from './webdriver-utils';
 import { BorisTestBrowser, BorisPage } from './integration-steps';
 import { Gender } from '../common/models';
+import { sleep } from './integration-utils';
 
 if (process.env.NODE_ENV !== 'test') {
     throw new Error("The test suite should be run with NODE_ENV=test");
@@ -24,7 +25,6 @@ async function spawnBrowserAndDriver(): Promise<BorisTestBrowser> {
 
 describe("BORIS Integration tests", () => {
 
-    let browser: BorisTestBrowser;
     let borisServer: ChildProcess;
 
     beforeAll(async () => {
@@ -45,15 +45,6 @@ describe("BORIS Integration tests", () => {
             borisServer.on('error', (err) => { console.log(err); reject(err); })
         });
         await spawnedBorisServer;
-
-        try {
-            browser = await spawnBrowserAndDriver();
-        } catch (err) {
-            console.error("* * * * Unable to initialize WebDriver for integration tests - all tests will fail.");
-            // Unfortunately Jest/Jasmine will still try to run the tests.
-            throw err;
-        }
-
     }, 8000);
 
     afterAll(async () => {
@@ -61,22 +52,22 @@ describe("BORIS Integration tests", () => {
         // we need to kill the whole process group (grouped because we used
         // {detached: true} when spawning), by making the PID negative.
         process.kill(-borisServer.pid, 'SIGTERM');
-        await browser.driver.quit();
     });
 
     test('Home Page Test', async () => {
+        const browser = await spawnBrowserAndDriver();
         await browser.goToHomePage();
         expect(await browser.driver.getTitle()).toBe("BORIS");
         expect(await browser.getCurrentPage()).toEqual(BorisPage.HOME_PAGE);
         expect(await getHeaderText(browser.driver)).toBe("WOULD YOU SURVIVE THE END OF THE WORLD?");
+        await browser.driver.quit();
     }, 10000);
 
     test('Registration Test', async () => {
-        const email = 'tom@example.com';
-        
+        const browser = await spawnBrowserAndDriver();
         const loginLink = await browser.registerAccount({
             firstName: "Tom",
-            email,
+            email: 'tom@example.com',
             workInTech: true,
             occupation: "Mindlessly testing websites",
             age: 25,
@@ -105,5 +96,83 @@ describe("BORIS Integration tests", () => {
         await expect(browser.joinTeam('FOOBAR')).rejects.toHaveProperty('message', "Unable to join team: Invalid team code: FOOBAR");
         // Now use the right code:
         await browser.joinTeam(teamCode);
+        await browser.driver.quit();
     }, 18000);
+
+    test('Short Two-Player Runthrough', async () => {
+        // Create two user accounts:
+        const alex = await spawnBrowserAndDriver();
+        const brian = await spawnBrowserAndDriver();
+
+        await alex.loginWithLink(await alex.registerAccount({
+            firstName: "Alex",
+            email: 'alex@example.com',
+            workInTech: true,
+            occupation: "Mindlessly testing websites",
+            age: 25,
+            gender: Gender.Male,
+        }));
+
+        await brian.loginWithLink(await brian.registerAccount({
+            firstName: "Brian",
+            email: 'brian@example.com',
+            workInTech: false,
+            occupation: "Nothing technical",
+            age: 23,
+            gender: Gender.Male,
+        }));
+
+        // Create a team:
+        const teamCode = await alex.createTeam({ teamName: "Team Rocket", organizationName: "Prepare For Trouble"});
+        await brian.joinTeam(teamCode);
+
+        // Now we should see the "Choose Scenario" page:
+        for (const user of [alex, brian]) {
+            expect(await user.getCurrentPage()).toBe(BorisPage.CHOOSE_SCENARIO);
+        }
+
+        await alex.selectScenarioInfo(100);
+        expect(await getHeaderText(alex.driver)).toEqual("INTEGRATION SCENARIO");
+        expect(await alex.driver.findElement({css: '.scenario-description'}).getText()).toEqual(
+            "This scenario has a script very similar to real scenarios."
+        );
+
+        await alex.startScenario();
+        // Now we should see the confirm page:
+        expect(await alex.getCurrentPage()).toBe(BorisPage.CONFIRM_TEAM);
+        expect (await alex.getConfirmPageTeamStatus()).toEqual({
+            online: ["Alex", "Brian"],
+            offline: [],
+            canStartScenario: true,
+        });
+
+        // Now test that if Brian goes offline, Alex can't start the scenario.
+        await brian.driver.get('about:blank');
+        // And wait a bit for Alex's websocket updates:
+        await sleep(500);
+        expect (await alex.getConfirmPageTeamStatus()).toEqual({
+            online: ["Alex"],
+            offline: ["Brian"],
+            canStartScenario: false,
+        });
+
+        // Now Brian returns:
+        await brian.goToHomePage();
+        // And wait a bit for Alex's websocket updates:
+        await sleep(500);
+        expect (await alex.getConfirmPageTeamStatus()).toEqual({
+            online: ["Alex", "Brian"],
+            offline: [],
+            canStartScenario: true,
+        });
+
+        await alex.confirmTeamAndReallyStartScenario();
+        await sleep(1_000);
+        expect(await alex.getCurrentPage()).toBe(BorisPage.SPLASH_SCREEN);
+        await sleep(8_000);
+
+        // Clean up:
+        await Promise.all([alex.driver.quit(), brian.driver.quit()]);
+    }, 30_000);
+
 });

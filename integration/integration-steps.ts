@@ -23,6 +23,9 @@ export const enum BorisPage {
     CREATE_TEAM = 'CREATE_TEAM',
     CHANGE_TEAM_OR_LOG_OUT = 'CHANGE_TEAM_OR_LOG_OUT',
     CHOOSE_SCENARIO = 'CHOOSE_SCENARIO',
+    SCENARIO_DETAILS = 'SCENARIO_DETAILS',
+    CONFIRM_TEAM = 'CONFIRM_TEAM', // Pre-launch page seen before launching a scenario
+    SPLASH_SCREEN = 'SPLASH_SCREEN', // Pre-mission splash screen
     UNKNOWN = 'UNKNOWN',
 }
 
@@ -44,6 +47,10 @@ export class BorisTestBrowser {
     }
 
     async getCurrentPage(): Promise<BorisPage> {
+        const currentUrl = await this.driver.getCurrentUrl();
+        if (currentUrl !== borisURL) {
+            return BorisPage.UNKNOWN;
+        }
         const headerText = await getHeaderText(this.driver);
         switch (headerText) {
             case "WOULD YOU SURVIVE THE END OF THE WORLD?": return BorisPage.HOME_PAGE;
@@ -58,6 +65,15 @@ export class BorisTestBrowser {
             case "GOING SO SOON?": return BorisPage.CHANGE_TEAM_OR_LOG_OUT;
             // Lobby:
             case "CHOOSE SCENARIO": return BorisPage.CHOOSE_SCENARIO;
+        }
+        if ((await this.driver.findElements({css: '.scenario-info.details'})).length === 1) {
+            return BorisPage.SCENARIO_DETAILS;
+        }
+        if ((await this.driver.findElements({css: '.pre-launch'})).length === 1) {
+            return BorisPage.CONFIRM_TEAM;
+        }
+        if ((await this.driver.findElements({css: '.splash.showing'})).length === 1) {
+            return BorisPage.SPLASH_SCREEN;
         }
         return BorisPage.UNKNOWN;
     }
@@ -165,6 +181,50 @@ export class BorisTestBrowser {
             throw new Error(errorMessage);
         }
         expect(await this.getCurrentPage()).toBe(BorisPage.CHOOSE_SCENARIO);
+    }
+
+    async selectScenarioInfo(scenarioId: number) {
+        expect(await this.getCurrentPage()).toEqual(BorisPage.CHOOSE_SCENARIO);
+        const scenarioContainer = await this.findElement({css: `.scenario-choice.id-${scenarioId}`});
+        const infoButton = await scenarioContainer.findElement(buttonWithText('INFO?'));
+        await infoButton.click();
+        await this.finishUpdates();
+    }
+
+    async startScenario(scenarioId?: number) {
+        const currentPage = await this.getCurrentPage();
+        if (currentPage === BorisPage.CHOOSE_SCENARIO) {
+            const scenarioContainer = await this.findElement({css: `.scenario-choice.id-${scenarioId}`});
+            await scenarioContainer.findElement(buttonWithText('START!')).click();
+        } else if (currentPage === BorisPage.SCENARIO_DETAILS) {
+            await this.findElement(buttonWithText('START!')).click();
+        }
+        await this.finishUpdates();
+    }
+
+    // "Confirm Team" / pre-launch page
+
+    async getConfirmPageTeamStatus() {
+        expect(await this.getCurrentPage()).toBe(BorisPage.CONFIRM_TEAM);
+        const onlineList  = await this.findElements({css: 'ul.team.online' });
+        const offlineList = await this.findElements({css: 'ul.team.offline' });
+        const onlineListItems  = onlineList.length  === 1 ? await  onlineList[0].findElements({css: 'li'}) : [];
+        const offlineListItems = offlineList.length === 1 ? await offlineList[0].findElements({css: 'li'}) : [];
+        const onlineNames  = await Promise.all( onlineListItems.map(el => el.getText()));
+        const offlineNames = (await Promise.all(offlineListItems.map(el => el.getText()))).map(name => name.replace(/X$/, '')); // Remove the 'X' from the "kick off team" buttons if it's there
+        const startButton = await this.findElement(buttonWithText('START MISSION'));
+        return {
+            online: onlineNames,
+            offline: offlineNames,
+            canStartScenario: (await startButton.getAttribute('disabled')) === null,
+        };
+    }
+
+    async confirmTeamAndReallyStartScenario() {
+        expect(await this.getCurrentPage()).toBe(BorisPage.CONFIRM_TEAM);
+        const startButton = await this.findElement(buttonWithText('START MISSION'));
+        await startButton.click();
+        await this.finishUpdates();
     }
 
 }
