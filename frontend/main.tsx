@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { default as thunk } from 'redux-thunk';
+import * as smoothscroll from 'smoothscroll-polyfill';
 
 import {
     RootState,
@@ -89,3 +90,7 @@ callApi(GET_INITIAL_STATE, {}).then(async data => {
 }, () => {
     store.dispatch<AnyAction>({type: InitStateActions.FAILED});
 });
+
+// Apply a polyfill for window.scrollTo
+// Without this, the signature window.scrollTo({top: y}) causes errors on Samsung Internet Browser
+smoothscroll.polyfill();
