@@ -32,7 +32,15 @@
             background: $black;
             color: $white;
                 #prompt-description button {
+                    margin-top: 1rem;
                     border: 1px solid $white;
+                }
+                .prompt-image {
+                    text-align: center;
+                        img {
+                            height: auto;
+                            margin-top: 1rem;
+                        }
                 }
                 h1 {
                     margin-top: 1.5rem;
@@ -41,6 +49,23 @@
                     margin-top: 1rem;
                     color: $red;
                     padding-top: 0.75rem;
+                }
+                a.research {
+                    background: white;
+                    display: inline-block;
+                    font-family: $fancyfont;
+                    text-decoration: none;
+                    line-height: 40px;
+                    padding: 0.5rem 0.75rem;
+                    font-size: 1.2em;
+                    margin-top: 0.75rem;
+                        &.no {
+                            font-family: $textfont;
+                            font-size: 1em;
+                            background: none;
+                            color: $white;
+                            padding-left: 0;
+                        }
                 }
         }
         h1 {
@@ -54,8 +79,5 @@
             background: $red;
             padding: 0.5rem 0.75rem;
         }
-        #prompt-description button {
-            margin-top: 1rem;
-        }
-        
+       
 }

@@ -6,6 +6,7 @@ import {RootState} from '../global/state';
 import { ChooseScenarioComponent } from './choose-scenario';
 import { TeamComponent } from './team';
 import { PreLaunchComponent } from './pre-launch';
+import { Prompt } from '../prompt/prompt';
 import {Mode} from './lobby-state';
 import {Actions} from './lobby-state-actions';
 import { Actions as RegistrationActions } from '../registration/registration-state-actions';
@@ -14,6 +15,7 @@ import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator
 
 import * as back from './images/back.svg';
 import * as teams from './images/teams-icon.svg';
+import * as backfeed from '../other-images/backfeed.png';
 
 // Include our SCSS (via webpack magic)
 import './lobby.scss';
@@ -24,10 +26,18 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     mode: Mode;
     viewingScenarioDetails: boolean;
 }
+interface State {
+    seenResearchPrompt: boolean;
+    showResearchPrompt: boolean;
+}
 
-class _LobbyComponent extends React.PureComponent<Props> {
+class _LobbyComponent extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
+        this.state = { 
+            showResearchPrompt: true,
+            seenResearchPrompt: false
+         };
     }
 
     @bind private handleBackButton() {
@@ -62,7 +72,25 @@ class _LobbyComponent extends React.PureComponent<Props> {
                     }
                 </div>
             </div>
+            <Prompt close={this.handleDeclineResearchPrompt}
+                show={this.state.showResearchPrompt && !this.state.seenResearchPrompt}
+                fullscreen
+            >
+                <div className="prompt-image"><img width="280" height="450" src={backfeed} alt="Backfeed" /></div>
+                <p>Welcome. Before you begin, why not join a very very ethical research study? It'll only take a few minutes to set up and pays modestly well. Then you can jump right back into the apocalypse training.</p>
+                <div className="button-split">
+                    <a className="research no" onClick={this.handleDeclineResearchPrompt}>Not interested</a>
+                    <a className="research" href="#">TELL ME MORE</a>
+                </div>
+            </Prompt>
         </RpcConnectionStatusIndicator>;
+    }
+
+    @bind private handleDeclineResearchPrompt() {
+        this.setState({
+            showResearchPrompt: false,
+            seenResearchPrompt: true
+        });
     }
 }
 
