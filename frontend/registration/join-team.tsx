@@ -14,9 +14,6 @@ import { AnyAction } from '../global/actions';
 interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {
-    firstName: string;
-    userId: number;
-    userEmail: string;
 }
 interface State {
     showEnterCode: boolean;
@@ -36,8 +33,6 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
         };
     }
     public render() {
-        const firstNameEncoded = encodeURIComponent(this.props.firstName);
-        const emailEncoded = encodeURIComponent(this.props.userEmail);
         if (this.state.showEnterCode) {
             return <div>
                 <h1>Join Team</h1>
@@ -108,7 +103,5 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
 }
 
 export const JoinTeamComponent = connect((state: RootState, ownProps: OwnProps) => ({
-    firstName: state.userState.firstName,
-    userId: state.userState.id,
-    userEmail: state.userState.email,
+
 }))(_JoinTeamComponent);
