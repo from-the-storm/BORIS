@@ -26,7 +26,7 @@ class _MultipleChoiceStep extends React.PureComponent<Props, State> {
     public render() {
         if (this.props.choiceMade) {
             return (
-                <div className="response-segment">
+                <div className="response-segment multi-choice">
                     {this.props.choices.map(choice =>
                         <button key={choice.id} disabled={true} className={
                             choice.correct === false ? 'wrong' :
@@ -38,7 +38,7 @@ class _MultipleChoiceStep extends React.PureComponent<Props, State> {
             );
         } else {
             return (
-                <div className="response-segment">
+                <div className="response-segment multi-choice">
                     {this.props.choices.map(choice =>
                         <button key={choice.id} onClick={() => this.handleChoice(choice.id)} disabled={this.state.answerIsbeingSubmitted}>{choice.choiceText}</button>
                     )}
