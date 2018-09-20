@@ -6,6 +6,7 @@ import { buttonWithText, getHeaderText } from './webdriver-utils';
 import { BorisTestBrowser, BorisPage } from './integration-steps';
 import { Gender } from '../common/models';
 import { sleep } from './integration-utils';
+import { StepType } from '../common/game';
 
 if (process.env.NODE_ENV !== 'test') {
     throw new Error("The test suite should be run with NODE_ENV=test");
@@ -169,10 +170,41 @@ describe("BORIS Integration tests", () => {
         await alex.confirmTeamAndReallyStartScenario();
         await sleep(1_000);
         expect(await alex.getCurrentPage()).toBe(BorisPage.SPLASH_SCREEN);
-        await sleep(8_000);
+        await sleep(10_000);
+
+        // Figure out which roles each player has:
+        let player_bds: BorisTestBrowser; // BURDENED, DOOMSAYING SCIENTICIAN
+        let player_iw: BorisTestBrowser; // INTERPRETIVE WAYFINDER
+        const alexFirstStep = await alex.getGameUiComponent(0);
+        const brianFirstStep = await brian.getGameUiComponent(0);
+        // Based on the script in 'integration-data.sql', the Doomsayer will receive a bulletin first.
+        if (alexFirstStep.type == StepType.BulletinStep) {
+            player_bds = alex;
+            player_iw = brian;
+        } else {
+            expect(brianFirstStep.type).toEqual(StepType.BulletinStep)
+            player_bds = brian;
+            player_iw = alex;
+        }
+
+        // Now the non-Doomsayer players see this:
+        expect((await player_iw.getGameUiComponent()).getMessages()).resolves.toEqual([
+            "(Waiting on your teammate.)"
+        ]);
+        // Now the Doomsayer (who doesn't yet know they're the Doomsayer) sees the bulletin:
+        expect((await player_bds.getGameUiComponent(0)).getBulletinText()).resolves.toEqual(
+            "Please read aloud: Greetings! Are you ready to have your roles assigned via personality testing?",
+        )
+        await player_bds.getGameUiComponent().then(async latestStep => {
+            expect(latestStep.type).toEqual(StepType.MultipleChoice);
+            expect(latestStep.getChoices()).resolves.toEqual(["Done"]);
+            await latestStep.selectChoice("Done");
+        });
+
+        await sleep(2_000);
 
         // Clean up:
         await Promise.all([alex.driver.quit(), brian.driver.quit()]);
-    }, 30_000);
+    }, 60_000);
 
 });

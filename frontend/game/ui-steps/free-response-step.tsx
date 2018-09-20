@@ -27,7 +27,7 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
 
     public render() {
         return (
-            <div className="response-segment">
+            <div className="response-segment free-response">
                 {this.props.invalidGuesses.map((guessString, idx) => <React.Fragment key={idx}>
                     <div className="past-entry wrong">{guessString}</div>
                     <div className="past-entry">That doesn’t make any sense. Try something else. </div>

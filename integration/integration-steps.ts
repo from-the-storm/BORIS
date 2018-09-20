@@ -1,5 +1,5 @@
 import 'jest';
-import { WebDriver, Locator as WebDriverLocator } from 'selenium-webdriver';
+import { WebDriver, Locator as WebDriverLocator, WebElement } from 'selenium-webdriver';
 import {
     waitForReactToRender,
     waitForHttpRequests,
@@ -9,8 +9,9 @@ import {
     elementMatchingWithText,
     getHeaderText,
 } from './webdriver-utils';
-import { borisURL, getEmailsSentTo } from './integration-utils';
+import { borisURL, getEmailsSentTo, sleep } from './integration-utils';
 import { Gender } from '../common/models';
+import { StepType } from '../common/game';
 
 
 export const enum BorisPage {
@@ -26,6 +27,7 @@ export const enum BorisPage {
     SCENARIO_DETAILS = 'SCENARIO_DETAILS',
     CONFIRM_TEAM = 'CONFIRM_TEAM', // Pre-launch page seen before launching a scenario
     SPLASH_SCREEN = 'SPLASH_SCREEN', // Pre-mission splash screen
+    GAME = 'GAME', // Actively playing a scenario
     UNKNOWN = 'UNKNOWN',
 }
 
@@ -74,6 +76,9 @@ export class BorisTestBrowser {
         }
         if ((await this.driver.findElements({css: '.splash.showing'})).length === 1) {
             return BorisPage.SPLASH_SCREEN;
+        }
+        if ((await this.driver.findElements({css: '.game'})).length === 1) {
+            return BorisPage.GAME;
         }
         return BorisPage.UNKNOWN;
     }
@@ -158,10 +163,10 @@ export class BorisTestBrowser {
         // Fill out the "Create Team" form
         expect(await this.getCurrentPage()).toBe(BorisPage.CREATE_TEAM);
         expect(await this.countElementsMatching('input:invalid')).toBe(1);
-        await this.findElement({css: 'input[name=teamName]'}).then(field => field.sendKeys("Dream Team"));
-        await this.findElement({css: 'input[name=organizationName]'}).then(field => field.sendKeys("Canada TestCo Inc. LLP Limited"));
+        await this.findElement({css: 'input[name=teamName]'}).sendKeys("Dream Team");
+        await this.findElement({css: 'input[name=organizationName]'}).sendKeys("Canada TestCo Inc. LLP Limited");
         expect(await this.countElementsMatching('input:invalid')).toBe(0);
-        await this.findElement(buttonWithText("CREATE MY TEAM")).then(btn => btn.click());
+        await this.findElement(buttonWithText("CREATE MY TEAM")).click();
         await this.finishUpdates();
         return await this.getTeamCodeFromPage();
     }
@@ -172,12 +177,12 @@ export class BorisTestBrowser {
         const codeInput = await this.findElement({css: 'input[type=text]'});
         await codeInput.clear();
         await codeInput.sendKeys(teamCode);
-        await this.findElement(buttonWithText("JOIN TEAM")).then(btn => btn.click());
+        await this.findElement(buttonWithText("JOIN TEAM")).click();
         await this.finishUpdates();
         const errorsFound = await this.findElements({css: '.team-error'});
         if (errorsFound.length > 0) {
             const errorMessage = await errorsFound[0].getText();
-            (await this.findElement(elementMatchingWithText('a', "< Back"))).click();
+            await this.findElement(elementMatchingWithText('a', "< Back")).click();
             throw new Error(errorMessage);
         }
         expect(await this.getCurrentPage()).toBe(BorisPage.CHOOSE_SCENARIO);
@@ -227,4 +232,83 @@ export class BorisTestBrowser {
         await this.finishUpdates();
     }
 
+    // Playing the game:
+
+    async getGameUiComponent(index: number = -1) {
+        const uiSegments = await this.findElements({css: '.game .content > *'});
+        if (uiSegments.length === 0) {
+            if (await this.getCurrentPage() !== BorisPage.GAME) {
+                throw new Error("Cannot use getGameUiComponent() when not playing a game.");
+            }
+            return null;
+        }
+        if (index < 0) {
+            index += uiSegments.length; // -1 is the last item, etc.
+        }
+        return await GameUiComponent.createFor(uiSegments[index], this);
+    }
+
+    async isGameComplete(): Promise<boolean> {
+        const headerText = await getHeaderText(this.driver);
+        return headerText === "(COMPLETE)";
+    }
+
+}
+
+/**
+ * Wrapper around the HTML element of a single component of the game,
+ * such as a message from Boris or a multiple choice prompt.
+ */
+export class GameUiComponent {
+    readonly domElement: WebElement;
+    readonly type: StepType;
+    readonly classSet: Set<string>;
+    readonly browser: BorisTestBrowser;
+
+    private constructor(values: Partial<GameUiComponent>) {
+        Object.assign(this, values);
+    }
+    // use createFor() instead of the constructor
+    static async createFor(domElement: WebElement, browser: BorisTestBrowser) {
+        let type = StepType.Unknown;
+        const classSet = new Set((await domElement.getAttribute('class')).split(' '));
+        if (classSet.has('chat-segment')) {
+            type = StepType.MessageStep;
+        } else if (classSet.has('response-segment') && classSet.has('multi-choice')) {
+            type = StepType.MultipleChoice;
+        } else if (classSet.has('response-segment') && classSet.has('free-response')) {
+            type = StepType.FreeResponse;
+        } else if (classSet.has('bulletin-segment')) {
+            type = StepType.BulletinStep;
+        } else if (await domElement.getTagName() === 'hr') {
+            type = StepType.FinishLineStep;
+        }
+        return new GameUiComponent({
+            domElement,
+            type,
+            classSet,
+            browser,
+        });
+    }
+
+    async getMessages(): Promise<string[]> {
+        if (this.type !== StepType.MessageStep) { throw new Error('getMessages() is only for message steps.'); }
+        return Promise.all((await this.domElement.findElements({css: 'p'})).map(el => el.getText()));
+    }
+
+    async getBulletinText(): Promise<string> {
+        if (this.type !== StepType.BulletinStep) { throw new Error('getBulletinText() is only for bulletin steps.'); }
+        return await this.domElement.getText();
+    }
+
+    async getChoices(): Promise<string[]> {
+        if (this.type !== StepType.MultipleChoice) { throw new Error('getChoices() is only for multiple choice steps.'); }
+        return Promise.all((await this.domElement.findElements({css: 'button'})).map(el => el.getText()));
+    }
+
+    async selectChoice(text: string) {
+        if (this.type !== StepType.MultipleChoice) { throw new Error('selectChoice() is only for multiple choice steps.'); }
+        await this.domElement.findElement(buttonWithText(text)).click();
+        await this.browser.finishUpdates();
+    }
 }
