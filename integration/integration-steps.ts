@@ -217,7 +217,7 @@ export class BorisTestBrowser {
         const offlineListItems = offlineList.length === 1 ? await offlineList[0].findElements({css: 'li'}) : [];
         const onlineNames  = await Promise.all( onlineListItems.map(el => el.getText()));
         const offlineNames = (await Promise.all(offlineListItems.map(el => el.getText()))).map(name => name.replace(/X$/, '')); // Remove the 'X' from the "kick off team" buttons if it's there
-        const startButton = await this.findElement(buttonWithText('START MISSION'));
+        const startButton = await this.findElement(buttonWithText('START SCENARIO'));
         return {
             online: onlineNames,
             offline: offlineNames,
@@ -227,7 +227,7 @@ export class BorisTestBrowser {
 
     async confirmTeamAndReallyStartScenario() {
         expect(await this.getCurrentPage()).toBe(BorisPage.CONFIRM_TEAM);
-        const startButton = await this.findElement(buttonWithText('START MISSION'));
+        const startButton = await this.findElement(buttonWithText('START SCENARIO'));
         await startButton.click();
         await this.finishUpdates();
     }
