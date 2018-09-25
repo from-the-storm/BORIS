@@ -27,7 +27,6 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     viewingScenarioDetails: boolean;
     firstName: string;
     userId: number;
-    userEmail: string;
 }
 interface State {
     seenResearchPrompt: boolean;
@@ -60,8 +59,6 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
     }
 
     public render() {
-        const firstNameEncoded = encodeURIComponent(this.props.firstName);
-        const emailEncoded = encodeURIComponent(this.props.userEmail);
         return <RpcConnectionStatusIndicator>
             <div className="lobby">
                 <header className="fixed">
@@ -85,7 +82,7 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
                 <p>Welcome. Before you begin, why not join a very very ethical research study? It'll only take a few minutes to set up and pays modestly well. Then you can jump right back into the apocalypse training.</p>
                 <div className="button-split">
                     <a className="research no" onClick={this.handleDeclineResearchPrompt}>Not interested</a>
-                    <a className="research" target="_blank" rel="noopener noreferrer" href={`http://dev.propelsurveysolutions.ca/registration/en/activity/197/1605/?email=${emailEncoded}&foreignid=${this.props.userId}&firstname=${firstNameEncoded}&gender=male&age=25-34`}>TELL ME MORE</a>
+                    <a className="research" target="_blank" rel="noopener noreferrer" href={`/survey/presurvey`}>TELL ME MORE</a>
                 </div>
             </Prompt>
         </RpcConnectionStatusIndicator>;
@@ -104,5 +101,4 @@ export const LobbyComponent = connect((state: RootState, ownProps: OwnProps) => 
     viewingScenarioDetails: state.lobbyState.selectedScenario !== null,
     firstName: state.userState.firstName,
     userId: state.userState.id,
-    userEmail: state.userState.email,
 }))(_LobbyComponent);

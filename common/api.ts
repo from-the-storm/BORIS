@@ -36,7 +36,6 @@ export interface InitialStateResponse {
     user?: {
         id: number;
         first_name: string;
-        email: string;
     };
     team?: {
         code: string;
