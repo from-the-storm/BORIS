@@ -43,7 +43,7 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
             <h2>Confirm your team</h2>
             <p>Before you start, make sure everyone is ready (and that their phones are charged).</p>
             <h3>Team Members Ready to Play</h3>
-            <ul className="team">
+            <ul className="team online">
                 {this.props.onlineTeamMembers.map(member =>
                     <li key={member.id}>{member.name}</li>
                 )}
@@ -52,7 +52,7 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
                 this.props.offlineTeamMembers.length > 0 ?
                     <>
                         <h3>Offline Team Members</h3>
-                        <ul className="team">
+                        <ul className="team offline">
                             {this.props.offlineTeamMembers.map(member =>
                                 <li key={member.id}>
                                     {member.name}
@@ -99,6 +99,9 @@ export const PreLaunchComponent = connect((state: RootState, ownProps: OwnProps)
     } else {
         offlineTeamMembers.push(currentUserInfo);
     }
+    // Sort team member names:
+    onlineTeamMembers.sort((tm1, tm2) => tm1.name.localeCompare(tm2.name));
+    offlineTeamMembers.sort((tm1, tm2) => tm1.name.localeCompare(tm2.name));
 
     return {
         scenario: state.lobbyState.scenarios.find(s => s.id === state.lobbyState.selectedScenario),

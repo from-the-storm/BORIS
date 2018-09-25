@@ -130,8 +130,8 @@ class _GameComponent extends React.PureComponent<Props, State> {
             // This will use smooth scrolling on browsers that support it.
             window.scrollTo({top: 1e5, behavior: 'smooth'});
         }
-        // Play a sound if there's a new UI element:
-        if (this.props.uiState.size > prevProps.uiState.size && prevProps.uiState.size > 0) {
+        // Play a sound if there's a new UI element, unless the splash screen is still visible:
+        if (this.props.uiState.size > prevProps.uiState.size && prevProps.uiState.size > 0 && this.state.hasSeenSplash) {
             this.messageSound.play();
         }
     }

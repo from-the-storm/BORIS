@@ -49,7 +49,7 @@ export function getDB() {
                 password: config.db_password,
             },
             {
-                //scripts: `${__dirname}/scripts`,
+                scripts: `do-not-load-scripts`,
                 enhancedFunctions: true,
             }
         ) as any as Promise<BorisDatabase>;
