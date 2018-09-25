@@ -19,7 +19,7 @@ export const Prompt: React.SFC<Props> = ({children, close, fullscreen, heading, 
         onRequestClose={close}
         role="dialog"
         aria={{
-            labelledby: "prompt-heading",
+            labelledby: heading ? "prompt-heading" : '',
             describedby: "prompt-description"
         }}
         overlayClassName="prompt-overlay"

@@ -4,9 +4,8 @@
 import * as express from 'express';
 import * as massive from 'massive';
 
-import { UserType } from '../express-extended';
 import { BorisDatabase } from '../db/db';
-import { BasicUser, Team, scenarioFromDbScenario, Game, DBScenario } from '../db/models';
+import { BasicUser, Team, scenarioFromDbScenario, Game, DBScenario, User } from '../db/models';
 import { ApiMethod } from '../../common/api';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { Scenario } from '../../common/models';
@@ -33,7 +32,7 @@ interface ListResponse<T> {
  * @param path The URL path to this resource, excluding the API prefix that all endpoints share
  * @param fn A method that loads the data from the database and returns it, along with a total count.
  */
-function defineListMethod<T>(path: string, fn: (criteria: any, queryOptions: massive.QueryOptions, db: BorisDatabase, user: UserType, app: express.Application) => Promise<ListResponse<T>>) {
+function defineListMethod<T>(path: string, fn: (criteria: any, queryOptions: massive.QueryOptions, db: BorisDatabase, user: User, app: express.Application) => Promise<ListResponse<T>>) {
     const methodDefinition: ApiMethod<ListRequest, ListResponse<T>> = {path: `/api/admin/${path}`, type: 'GET'};
     defineMethod(methodDefinition, async(data, app, user) => {
         const db: BorisDatabase = app.get("db");

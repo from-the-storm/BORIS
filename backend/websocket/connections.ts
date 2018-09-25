@@ -6,15 +6,15 @@ import * as WebSocket from 'ws';
 import JsonRpcPeer from 'json-rpc-peer';
 import {JsonRpcMessage} from 'json-rpc-protocol';
 
-import { UserType } from "../express-extended";
 import { setUserOnline, setUserOffline } from './online-users';
 import { notifyTeamStatusChangedForUser } from './team-changed';
 import { AnyNotification } from '../../common/notifications';
+import { User } from '../db/models';
 
 interface ConnectionState {
     // A mutable state variable used to track information about this specific connection.
     // i.e. this data is specific to this node process and this browser tab of this user.
-    user: UserType;
+    user: User;
     index: number;  // A unique number to represent this connection
     sharedState: {allConnections: Set<ConnectionState>, nextConnectionIndex: number};
     pingTimer: NodeJS.Timer;  // Used to avoid socket disconnecting after 60s

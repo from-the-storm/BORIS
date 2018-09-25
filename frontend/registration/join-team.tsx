@@ -103,5 +103,5 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
 }
 
 export const JoinTeamComponent = connect((state: RootState, ownProps: OwnProps) => ({
-
+    // Only the dispatch property is needed.
 }))(_JoinTeamComponent);

@@ -15,6 +15,7 @@ import { Server } from 'http';
 
 import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
+import { User } from './db/models';
 import { getRedisClient, wrapRedis } from './db/redisClient';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
@@ -27,9 +28,6 @@ import { subscribeToRedis, getPubSubClient } from './websocket/pub-sub';
 import { rpcHandler } from './websocket/connections';
 import { isAdminUser } from './routes/api-utils';
 import { getFileHashSha1 } from './checksum';
-
-// Declare our additions to the Express API:
-import {UserType} from './express-extended';
 
 const app = express();
 const {getWss} = expressWebsocket(app);
@@ -137,10 +135,10 @@ passport.use(new UniqueTokenStrategy(
 	}
 ));
 
-passport.serializeUser((user: UserType, done: any) => { done(null, user.id); });
+passport.serializeUser((user: User, done: any) => { done(null, user.id); });
 passport.deserializeUser((id: number, done: any) =>{
     const db = app.get('db');
-    db.users.find(id).then((user: UserType) => { done(null, user); }, (err: any) => { done(err, null); });
+    db.users.find(id).then((user: User) => { done(null, user); }, (err: any) => { done(err, null); });
 });
 
 // Configure logging:
