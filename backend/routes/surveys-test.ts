@@ -3,6 +3,8 @@ import 'jest';
 import { buildPreSurveyUrl } from './surveys';
 import { User } from '../db/models';
 import { Gender } from '../../common/models';
+import { TestClient, TestServer } from '../test-lib/utils';
+import { GET_INITIAL_STATE, PRESURVEY_PROMPT_SEEN } from '../../common/api';
 
 describe("Survey link tests", () => {
 
@@ -48,4 +50,33 @@ describe("Survey link tests", () => {
             );
         });
     });
+});
+
+describe("Survey API", () => {
+
+    describe("Pre-survey prompt", async () => {
+        
+        it("Can remember whether or not the pre-survey prompt was seen", async () => {
+
+            const server = new TestServer();
+            await server.ready();
+            const client = new TestClient(server);
+            await client.registerAndLogin();
+
+            // At first, it should be marked as not seen:
+            const result = await client.callApi(GET_INITIAL_STATE, {});
+            expect(result.user.hasSeenPreSurveyPrompt).toBe(false);
+
+            // Now mark it as seen:
+            await client.callApi(PRESURVEY_PROMPT_SEEN, {seen: true});
+
+            // Now it should be marked as seen:
+            const result2 = await client.callApi(GET_INITIAL_STATE, {});
+            expect(result2.user.hasSeenPreSurveyPrompt).toBe(true);
+
+            await server.close();
+        });
+
+    });
+
 });

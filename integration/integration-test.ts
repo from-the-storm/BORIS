@@ -83,6 +83,8 @@ describe("BORIS Integration tests", () => {
             teamName: "Dream Team",
             organizationName: "Canada TestCo Inc. LLP Limited",
         });
+        // Now we should see the research prompt:
+        await browser.dismissPreSurvey();
         // Now we should see the "Choose Scenario" page:
         expect(await browser.getCurrentPage()).toBe(BorisPage.CHOOSE_SCENARIO);
         // Go back to the home area:
@@ -126,6 +128,12 @@ describe("BORIS Integration tests", () => {
         // Create a team:
         const teamCode = await alex.createTeam({ teamName: "Team Rocket", organizationName: "Prepare For Trouble"});
         await brian.joinTeam(teamCode);
+
+        // Now we should see the research prompt:
+        for (const user of [alex, brian]) {
+            expect(await user.getCurrentPage()).toBe(BorisPage.PRE_SURVEY_PROMPT);
+            await user.dismissPreSurvey();
+        }
 
         // Now we should see the "Choose Scenario" page:
         for (const user of [alex, brian]) {

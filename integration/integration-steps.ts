@@ -23,6 +23,7 @@ export const enum BorisPage {
     JOIN_TEAM = 'JOIN_TEAM',
     CREATE_TEAM = 'CREATE_TEAM',
     CHANGE_TEAM_OR_LOG_OUT = 'CHANGE_TEAM_OR_LOG_OUT',
+    PRE_SURVEY_PROMPT = 'PRE_SURVEY_PROMPT',
     CHOOSE_SCENARIO = 'CHOOSE_SCENARIO',
     SCENARIO_DETAILS = 'SCENARIO_DETAILS',
     CONFIRM_TEAM = 'CONFIRM_TEAM', // Pre-launch page seen before launching a scenario
@@ -52,6 +53,12 @@ export class BorisTestBrowser {
         const currentUrl = await this.driver.getCurrentUrl();
         if (currentUrl !== borisURL) {
             return BorisPage.UNKNOWN;
+        }
+        if ((await this.driver.findElements({css: 'body.ReactModal__Body--open'})).length) {
+            // Some kind of modal popup is open:
+            if ((await this.driver.findElements({css: 'a.research'})).length) {
+                return BorisPage.PRE_SURVEY_PROMPT;
+            }
         }
         const headerText = await getHeaderText(this.driver);
         switch (headerText) {
@@ -185,7 +192,13 @@ export class BorisTestBrowser {
             await this.findElement(elementMatchingWithText('a', "< Back")).click();
             throw new Error(errorMessage);
         }
-        expect(await this.getCurrentPage()).toBe(BorisPage.CHOOSE_SCENARIO);
+    }
+
+    async dismissPreSurvey() {
+        expect(await this.getCurrentPage()).toEqual(BorisPage.PRE_SURVEY_PROMPT);
+        await this.findElement({css: 'a.research.no'}).click();
+        await this.finishUpdates();
+        expect(await this.getCurrentPage()).toEqual(BorisPage.CHOOSE_SCENARIO);
     }
 
     async selectScenarioInfo(scenarioId: number) {

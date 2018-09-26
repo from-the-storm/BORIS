@@ -19,6 +19,7 @@ import * as backfeed from '../other-images/backfeed.png';
 
 // Include our SCSS (via webpack magic)
 import './lobby.scss';
+import { markPreSurveySeen } from '../global/state/user-state-actions';
 
 interface OwnProps {
 }
@@ -27,20 +28,12 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     viewingScenarioDetails: boolean;
     firstName: string;
     userId: number;
+    seenResearchPrompt: boolean;
 }
 interface State {
-    seenResearchPrompt: boolean;
-    showResearchPrompt: boolean;
 }
 
 class _LobbyComponent extends React.PureComponent<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = { 
-            showResearchPrompt: true,
-            seenResearchPrompt: false
-         };
-    }
 
     @bind private handleBackButton() {
         if (this.props.mode === Mode.ChooseScenario && this.props.viewingScenarioDetails) {
@@ -75,24 +68,26 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
                 </div>
             </div>
             <Prompt close={this.handleDeclineResearchPrompt}
-                show={this.state.showResearchPrompt && !this.state.seenResearchPrompt}
+                show={!this.props.seenResearchPrompt}
                 fullscreen
             >
                 <div className="prompt-image"><img width="280" height="450" src={backfeed} alt="Backfeed" /></div>
                 <p>Welcome. Before you begin, why not join a very very ethical research study? It'll only take a few minutes to set up and pays modestly well. Then you can jump right back into the apocalypse training.</p>
                 <div className="button-split">
                     <a className="research no" onClick={this.handleDeclineResearchPrompt}>Not interested</a>
-                    <a className="research" target="_blank" rel="noopener noreferrer" href={`/survey/presurvey`}>TELL ME MORE</a>
+                    <a className="research" target="_blank" rel="noopener noreferrer" href={`/survey/presurvey`} onClick={this.handleResearchLinkClicked}>TELL ME MORE</a>
                 </div>
             </Prompt>
         </RpcConnectionStatusIndicator>;
     }
 
     @bind private handleDeclineResearchPrompt() {
-        this.setState({
-            showResearchPrompt: false,
-            seenResearchPrompt: true
-        });
+        this.props.dispatch(markPreSurveySeen());
+    }
+
+    @bind private handleResearchLinkClicked() {
+        // Whether they choose to do the survey or not, the effect is the same; we close the prompt and don't ask again.
+        this.props.dispatch(markPreSurveySeen());
     }
 }
 
@@ -101,4 +96,5 @@ export const LobbyComponent = connect((state: RootState, ownProps: OwnProps) => 
     viewingScenarioDetails: state.lobbyState.selectedScenario !== null,
     firstName: state.userState.firstName,
     userId: state.userState.id,
+    seenResearchPrompt: state.userState.hasSeenPreSurveyPrompt,
 }))(_LobbyComponent);

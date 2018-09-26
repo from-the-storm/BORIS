@@ -5,6 +5,9 @@ import * as express from 'express';
 import '../express-extended';
 import { Gender } from '../../common/models';
 import { User } from '../db/models';
+import { makeApiHelper, RequireUser } from './api-utils';
+import { PRESURVEY_PROMPT_SEEN } from '../../common/api';
+import { BorisDatabase } from '../db/db';
 
 export const router = express.Router();
 
@@ -48,4 +51,27 @@ router.get('/presurvey', async (req, res) => {
         res.redirect('/');
     }
     res.redirect(buildPreSurveyUrl(req.user));
+});
+
+const apiMethod = makeApiHelper(router, /^\/survey/, RequireUser.Required);
+
+/** Atomically update one field within a user's survey_data JSON blob. */
+async function updateSurveyDataField(db: BorisDatabase, userId: number, fieldName: string, value: any) {
+    const forceCast = typeof value === 'string' ? '::text' : ''; // to_jsonb() needs to know how to interpret a string type.
+    await db.query(
+        // use jsonb_set to guarantee that we don't affect other variables
+        `UPDATE users SET survey_data = jsonb_set(survey_data, $2, to_jsonb($3${forceCast})) WHERE id = $1;`,
+        [userId, `{${fieldName}}`, value], {}
+    );
+}
+
+/**
+ * API endpoint for marking the pre-scenario research survey prompt as having been seen.
+ * Each user is prompted once, when they first register.
+ */
+apiMethod(PRESURVEY_PROMPT_SEEN, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const seen = !!data.seen;
+    updateSurveyDataField(db, user.id, 'hasSeenPreSurveyPrompt', seen);
+    return {result: 'ok'};
 });
