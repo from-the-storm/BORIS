@@ -10,7 +10,7 @@ export class UserState extends Record({
     isLoggedIn: false,
     firstName: "Jamie",
     id: 0,
-    email: "",
+    hasSeenPreSurveyPrompt: false,
 }) {
     // ...
 }
@@ -31,9 +31,11 @@ export function userStateReducer(state?: UserState, action?: AnyAction): UserSta
         return state.merge({
             isLoggedIn: true,
             firstName: action.firstName,
+            hasSeenPreSurveyPrompt: action.hasSeenPreSurveyPrompt,
             id: action.id,
-            email: action.email,
         });
+    case Actions.SEEN_PRESURVEY_PROMPT:
+        return state.set('hasSeenPreSurveyPrompt', true);
     case Actions.LOGOUT:
         // User has logged out:
         return state.clear();

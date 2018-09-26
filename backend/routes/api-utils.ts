@@ -1,8 +1,8 @@
 import * as express from 'express';
 
 import { ApiMethod } from '../../common/api';
-import { UserType } from '../express-extended';
 import { BorisDatabase } from '../db/db';
+import { User } from '../db/models';
 
 /** An error whose message is safe to show to the user */
 export class SafeError extends Error {
@@ -59,7 +59,7 @@ export function makeApiHelper(router: express.Router, mountPath: RegExp, require
         }
     }
 
-    return function apiMethodMaker<RequestType, ResponseType>(def: ApiMethod<RequestType, ResponseType>, fn: (data: RequestType, app: express.Application, user?: UserType) => Promise<ResponseType>) {
+    return function apiMethodMaker<RequestType, ResponseType>(def: ApiMethod<RequestType, ResponseType>, fn: (data: RequestType, app: express.Application, user?: User) => Promise<ResponseType>) {
         const path = def.path.replace(mountPath, '');
         if (def.type === 'POST' || def.type === 'PUT') {
             const handler = apiErrorWrapper(async (req: express.Request, res: express.Response) => {

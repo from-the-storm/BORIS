@@ -36,7 +36,7 @@ export interface InitialStateResponse {
     user?: {
         id: number;
         first_name: string;
-        email: string;
+        hasSeenPreSurveyPrompt: boolean;
     };
     team?: {
         code: string;
@@ -175,3 +175,12 @@ export interface GetSaltinesBalanceResponse {
     saltinesEarnedAllTime: number;
 }
 export const GET_SALTINES_BALANCE: ApiMethod<NoRequestParameters, GetSaltinesBalanceResponse> = {path: '/api/market/saltines', type: 'GET'};
+
+///////////////////////////////////////////////////////////////////////////////
+// survey API methods:
+
+export interface PreSurveyPromptSeenRequest {
+    seen: boolean,
+}
+
+export const PRESURVEY_PROMPT_SEEN: ApiMethod<PreSurveyPromptSeenRequest, EmptyApiResponse> = {path: '/survey/presurvey-seen', type: 'POST'};

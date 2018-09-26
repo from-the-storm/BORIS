@@ -1,11 +1,7 @@
 import * as express from 'express';
 import * as WebSocket from 'ws';
 
-export interface UserType {
-    first_name: string;
-    id: number;
-    email: string;
-}
+import { User } from './db/models';
 
 // Declare our additions to the Express API:
 declare global {
@@ -14,7 +10,7 @@ declare global {
             // Passport.js extensions:
             login: (user: any, callback: (err: any) => void) => void;
             logout: () => void;
-            user: UserType;
+            user: User;
         }
         interface Response { }
         interface Application {

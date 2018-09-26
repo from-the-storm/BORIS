@@ -1,20 +1,18 @@
 /**
  * Routes for logging in, user registration, etc.
  */
-import {randomBytes} from 'crypto';
 import * as express from 'express';
 import * as isEmail from 'validator/lib/isEmail';
 import * as passport from 'passport';
 
-import { Gender, isValidGender } from '../../common/models';
+import { isValidGender } from '../../common/models';
 import {config} from '../config';
 import {BorisDatabase} from '../db/db';
-import {User} from '../db/models';
+import { User } from '../db/models';
 import {alphanumericCodeGenerator} from './login-register-utils';
 import { JOIN_TEAM, LEAVE_TEAM, CREATE_TEAM, REQUEST_LOGIN, REGISTER_USER, KICK_OFF_TEAM } from '../../common/api';
 
 // Declare our additions to the Express API:
-import { UserType } from '../express-extended';
 import { makeApiHelper, RequireUser, SafeError } from './api-utils';
 import { notifyTeamStatusChanged } from '../websocket/team-changed';
 import { readFile } from 'fs';
@@ -74,7 +72,7 @@ postApiMethodAnonymousOnly(REQUEST_LOGIN, async (data, app) => {
  * View for validating and using a login-by-email link
  */
 router.get('/login/:code', (req, res, next) => {
-    passport.authenticate('token', (err: any, user: UserType, info: any) => {
+    passport.authenticate('token', (err: any, user: User, info: any) => {
         if (err) { return next(err); }
         if (user) {
             // The login succeeded:
@@ -123,6 +121,7 @@ function validateUserData(data: any): Partial<User> {
             occupation: data.occupation,
             age: data.age,
             gender: data.gender,
+            hasSeenPreSurveyPrompt: false,
         }
     };
 }

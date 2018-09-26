@@ -15,6 +15,7 @@ import { Server } from 'http';
 
 import {environment, config} from './config';
 import {getDB, BorisDatabase} from './db/db';
+import { User } from './db/models';
 import { getRedisClient, wrapRedis } from './db/redisClient';
 import {router as appAPIRouter} from './routes/app-api';
 import {router as loginRegisterRouter} from './routes/login-register';
@@ -23,13 +24,11 @@ import {router as gameRouter} from './routes/game-api';
 import {router as marketRouter} from './routes/market-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
 import {router as appAdminRouter} from './routes/admin-api';
+import {router as surveysRouter} from './routes/surveys';
 import { subscribeToRedis, getPubSubClient } from './websocket/pub-sub';
 import { rpcHandler } from './websocket/connections';
 import { isAdminUser } from './routes/api-utils';
 import { getFileHashSha1 } from './checksum';
-
-// Declare our additions to the Express API:
-import {UserType} from './express-extended';
 
 const app = express();
 const {getWss} = expressWebsocket(app);
@@ -137,10 +136,10 @@ passport.use(new UniqueTokenStrategy(
 	}
 ));
 
-passport.serializeUser((user: UserType, done: any) => { done(null, user.id); });
+passport.serializeUser((user: User, done: any) => { done(null, user.id); });
 passport.deserializeUser((id: number, done: any) =>{
     const db = app.get('db');
-    db.users.find(id).then((user: UserType) => { done(null, user); }, (err: any) => { done(err, null); });
+    db.users.find(id).then((user: User) => { done(null, user); }, (err: any) => { done(err, null); });
 });
 
 // Configure logging:
@@ -202,6 +201,9 @@ app.use('/api/market', marketRouter);
 
 // Misc. API used by the single page app frontend:
 app.use('/api/app', appAPIRouter);
+
+// Research Survey redirects
+app.use('/survey', surveysRouter);
 
 // The Admin single page React app:
 app.use('/api/admin', appAdminRouter);
