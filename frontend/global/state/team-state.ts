@@ -17,6 +17,9 @@ export class TeamState extends Record({
     saltinesBalance: 0,
     saltinesEarnedAllTime: 0,
     otherTeamMembers: [] as Array<OtherTeamMember>,
+    scenariosComplete: 0,
+    playerIsTheBurdened: false,
+    forceMarket: false,
 }) {
     get hasJoinedTeam(): boolean {
         return this.teamCode !== null;
@@ -50,6 +53,12 @@ export function teamStateReducer(state?: TeamState, action?: AnyAction): TeamSta
         return state.merge({
             saltinesBalance: action.saltinesBalance,
             saltinesEarnedAllTime: action.saltinesEarnedAllTime,
+        });
+    case Actions.UPDATE_MARKET_DATA:
+        return state.merge({
+            scenariosComplete: action.scenariosComplete,
+            playerIsTheBurdened: action.playerIsTheBurdened,
+            forceMarket: action.forceMarket,
         });
     case Actions.LEAVE_TEAM:
         // User has left a team (they're still associated with that team, just not "currently" online for that team):

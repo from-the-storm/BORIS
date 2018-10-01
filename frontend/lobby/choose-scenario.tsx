@@ -11,6 +11,7 @@ import { AutoWayfinder } from '../auto-wayfinder/auto-wayfinder';
 import { MarketButton } from './market-button';
 import { Scenario } from '../../common/models';
 import { AnyAction } from '../global/actions';
+import { updateMarketVars } from '../global/state/team-state-actions';
 
 
 interface OwnProps {
@@ -22,6 +23,7 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     selectedScenarioId: number|null;
     scenariosComplete: number;  // How many scenarios this team has completed.
     playerIsTheBurdened: boolean; // Did this player have the role of "the burdened" on this team's last scenario? (Affects the Marketplace)
+    forceMarket: boolean; // If true, force the user to view the market (lock all other UI elements)
 }
 interface State {
     showMap: boolean;
@@ -32,7 +34,9 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
         super(props);
         this.state = ({
             showMap: false,
-        })
+        });
+        // Update the vars that affect whether we show the market:
+        this.props.dispatch(updateMarketVars());
     }
 
     @bind handleShowMap() {
@@ -80,8 +84,8 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                                 <span>Start at {s.start_point_name}</span>
                             </div>
                             <div className="scenario-buttons">
-                                <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }}>Info?</button>
-                                <button onClick={() => { this.startScenario(s.id); }}>Start!</button>
+                                <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }} disabled={this.props.forceMarket}>Info?</button>
+                                <button onClick={() => { this.startScenario(s.id); }} disabled={this.props.forceMarket}>Start!</button>
                             </div>
                         </div>
                     )}
@@ -115,7 +119,8 @@ export const ChooseScenarioComponent = connect((state: RootState, ownProps: OwnP
         scenarios: state.lobbyState.scenarios,
         scenariosLoadState: state.lobbyState.scenariosState,
         selectedScenarioId,
-        scenariosComplete: 0,
-        playerIsTheBurdened: true,
+        scenariosComplete: state.teamState.scenariosComplete,
+        playerIsTheBurdened: state.teamState.playerIsTheBurdened,
+        forceMarket: state.teamState.forceMarket,
     };
 })(_ChooseScenarioComponent);
