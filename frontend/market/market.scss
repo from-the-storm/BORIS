@@ -1,10 +1,19 @@
 .market {
     height: 100vh;
     background-color: #794a37;
-    background-image: url('./images/marketplace-bg.jpg'), linear-gradient(#794a37, #2d2f43);
+    background-image: url('./images/marketplace-bg.jpg'), linear-gradient(#794a37, #2d2f43); // The gradient matches the image and is shown until the image loads
     background-size: cover;
     background-position: center;
     color: white;
+
+    &.fade-bg {
+        // Once the prelude is complete, this overlay makes the background image whiter
+        background-image:
+            linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)),
+            url('./images/marketplace-bg.jpg'),
+            linear-gradient(#794a37, #2d2f43);
+        color: black;
+      }
 
     header {
         .saltines-balance {
@@ -18,6 +27,29 @@
             color: white;
             span {
                 padding: 0 0.5em;
+            }
+        }
+    }
+
+    .content {
+        height: 100vh;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+    .punchcard-list {
+        .punchcard-option {
+            img.card-illustration {
+                float: right;
+                max-width: 25%;
+            }
+            .cost img {
+                width: 20px;
+            }
+            &::after {
+                clear: right;
+                content: '';
+                display: block;
             }
         }
     }
