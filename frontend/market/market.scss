@@ -1,0 +1,24 @@
+.market {
+    height: 100vh;
+    background-color: #794a37;
+    background-image: url('./images/marketplace-bg.jpg'), linear-gradient(#794a37, #2d2f43);
+    background-size: cover;
+    background-position: center;
+    color: white;
+
+    header {
+        .saltines-balance {
+            img {
+                width: 15px;
+                height: 15px;
+                margin-top: 1px;
+                float: left;
+                filter: invert(1); // Turn the black saltine image white
+            }
+            color: white;
+            span {
+                padding: 0 0.5em;
+            }
+        }
+    }
+}

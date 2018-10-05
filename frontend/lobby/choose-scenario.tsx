@@ -71,7 +71,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
             <h1>Choose Scenario</h1>
             {this.props.scenariosComplete === 0 ? 
                 (<p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>) : 
-                (<MarketButton completedScenarios={this.props.scenariosComplete} isBurdened={this.props.playerIsTheBurdened} />)
+                (<MarketButton completedScenarios={this.props.scenariosComplete} isBurdened={this.props.playerIsTheBurdened} onClick={this.handleMarketButtonClicked} />)
             }
             <div className="scenario-grid">
                 <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
@@ -91,6 +91,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                     )}
                 </LoadingSpinnerComponent>
             </div>
+            {this.props.forceMarket ? <div>Note: The Burdened must visit the market before you can play additonal scenarios.</div> : null}
         </div>;
     }
 
@@ -109,6 +110,10 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
 
     @bind private startScenario(scenarioId: number) {
         this.props.dispatch<AnyAction>({type: Actions.SHOW_PRE_LAUNCH_SCREEN, scenarioId});
+    }
+
+    @bind private handleMarketButtonClicked() {
+        this.props.dispatch<AnyAction>({type: Actions.SHOW_MARKET});
     }
 }
 

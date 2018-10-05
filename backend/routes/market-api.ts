@@ -52,10 +52,10 @@ apiMethod(GET_TEAM_MARKET_VARS, async (data, app, user) => {
     const playerIsTheBurdened = (theBurdenedUserId === user.id);
     // Do we force the Burdened to enter the market?
     const plotDeviceCounter = await getTeamVar(plotDeviceCounterVar, teamId, db);
-    /*const theBurdenedIsStillOnTheTeam = (
+    const theBurdenedIsStillOnTheTeam = (
         theBurdenedUserId !== undefined &&
         (await db.team_members.findOne({team_id: teamId, user_id: theBurdenedUserId, is_active: true })) !== null
-    );*/
-    const forceMarket = scenariosComplete > 0 && plotDeviceCounter === 0 && playerIsTheBurdened;
+    );
+    const forceMarket = scenariosComplete > 0 && plotDeviceCounter === 0 && theBurdenedIsStillOnTheTeam;
     return { scenariosComplete, playerIsTheBurdened, forceMarket };
 });
