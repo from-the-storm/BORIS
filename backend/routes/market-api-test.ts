@@ -1,6 +1,11 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, GET_SALTINES_BALANCE, GET_TEAM_MARKET_VARS } from '../../common/api';
+import { CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, GET_SALTINES_BALANCE, GET_TEAM_MARKET_VARS, BUY_PUNCHCARD } from '../../common/api';
+import { punchcards } from '../../common/market';
+import { getTeamVar, setTeamVar } from '../game/team-vars';
+import { getDB } from '../db/db';
+import { activePunchcardVar } from './market-api';
+import { getSaltinesStatus, SALTINES_EARNED_ALL_TIME } from '../game/steps/award-saltines';
 
 describe("Game API tests", () => {
     let server: TestServer;
@@ -53,6 +58,42 @@ describe("Game API tests", () => {
         });
 
         // The rest of this is best tested via integration tests.
+
+    });
+
+    describe("BUY_PUNCHCARD", async () => {
+
+        it("Requires the user to be on a team", async () => {
+            await client1.callApi(LEAVE_TEAM, {});
+            await client1.callApiExpectError(BUY_PUNCHCARD, {}, "You are not on a team, so cannot do this.");
+        });
+
+        const punchcard = punchcards[0];
+
+        it("Does not allow a team with no saltines to buy", async () => {
+            await client1.callApiExpectError(BUY_PUNCHCARD, {punchcardId: punchcard.id}, "Insufficient saltines balance for that purchase.");
+        });
+
+        it("Allows purchasing a card", async () => {
+            expect(punchcard.saltinesCost).toBeGreaterThan(0);
+            const db = await getDB();
+            const teamId = (await db.teams.findOne({code: team.teamCode})).id;
+            expect(await getTeamVar(activePunchcardVar, teamId, db)).toBe(null);
+            await setTeamVar(SALTINES_EARNED_ALL_TIME, v => v+100, teamId, db);
+            expect((await getSaltinesStatus(teamId, db)).balance).toBe(100);
+
+            // Purchase a card:
+            const result = await client1.callApi(BUY_PUNCHCARD, {punchcardId: punchcard.id});
+
+            // Check the results:
+            const status = await getSaltinesStatus(teamId, db);
+            expect(status.balance).toBe(100 - punchcard.saltinesCost);
+            expect(result.saltinesBalance).toBe(100 - punchcard.saltinesCost);
+            expect(result.saltinesEarnedAllTime).toBe(status.earned);
+
+            // And the punchcard should be active:
+            expect(await getTeamVar(activePunchcardVar, teamId, db)).toBe(punchcard.id);
+        });
 
     });
 });

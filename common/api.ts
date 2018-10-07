@@ -185,6 +185,12 @@ export interface GetTeamMarketVars {
 }
 export const GET_TEAM_MARKET_VARS: ApiMethod<NoRequestParameters, GetTeamMarketVars> = {path: '/api/market/gtmv', type: 'GET'};
 
+/** Buy a punchcard */
+export interface BuyPunchcardRequest {
+    punchcardId: string;
+}
+export const BUY_PUNCHCARD: ApiMethod<BuyPunchcardRequest, GetSaltinesBalanceResponse> = {path: '/api/market/buy', type: 'POST'};
+
 ///////////////////////////////////////////////////////////////////////////////
 // survey API methods:
 
