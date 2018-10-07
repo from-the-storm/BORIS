@@ -9,6 +9,7 @@ import * as taped from './images/market/move.png';
 interface Props {
     completedScenarios: number;
     isBurdened: boolean;
+    alreadyPurchasedPunchcard: boolean;
     onClick: () => void;
 }
 
@@ -26,7 +27,7 @@ export class MarketButton extends React.PureComponent<Props> {
     }
     @bind private handleMarketClicked() {
         if (this.props.isBurdened) {
-            if (this.props.completedScenarios < 3) {
+            if (this.props.completedScenarios < 3 && !this.props.alreadyPurchasedPunchcard) {
                 this.props.onClick();
             }
         }
@@ -34,7 +35,7 @@ export class MarketButton extends React.PureComponent<Props> {
     private setImage() {
         if (this.props.isBurdened) {
             if (this.props.completedScenarios < 3) {
-                return open;
+                return this.props.alreadyPurchasedPunchcard ? boarded : open;
             }
             return actualized;
         } else if (this.props.completedScenarios >= 3) {

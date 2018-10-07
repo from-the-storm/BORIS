@@ -181,6 +181,7 @@ export const GET_SALTINES_BALANCE: ApiMethod<NoRequestParameters, GetSaltinesBal
 export interface GetTeamMarketVars {
     scenariosComplete: number;
     playerIsTheBurdened: boolean;
+    allowMarket: boolean;
     forceMarket: boolean; // If true, The Burdened is forced to go buy a card from the market before they can do anything else.
 }
 export const GET_TEAM_MARKET_VARS: ApiMethod<NoRequestParameters, GetTeamMarketVars> = {path: '/api/market/gtmv', type: 'GET'};

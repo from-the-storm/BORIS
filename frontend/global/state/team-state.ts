@@ -19,6 +19,7 @@ export class TeamState extends Record({
     otherTeamMembers: [] as Array<OtherTeamMember>,
     scenariosComplete: 0,
     playerIsTheBurdened: false,
+    allowMarket: false,
     forceMarket: false,
 }) {
     get hasJoinedTeam(): boolean {
@@ -58,6 +59,7 @@ export function teamStateReducer(state?: TeamState, action?: AnyAction): TeamSta
         return state.merge({
             scenariosComplete: action.scenariosComplete,
             playerIsTheBurdened: action.playerIsTheBurdened,
+            allowMarket: action.allowMarket,
             forceMarket: action.forceMarket,
         });
     case Actions.LEAVE_TEAM:

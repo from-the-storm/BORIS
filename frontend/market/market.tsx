@@ -6,7 +6,7 @@ import { RootState } from '../global/state';
 import { Actions as LobbyActions } from '../lobby/lobby-state-actions';
 import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
-import { updateSaltinesBalance } from '../global/state/team-state-actions';
+import { updateSaltinesBalance, updateMarketVars } from '../global/state/team-state-actions';
 import { punchcards } from '../../common/market';
 
 import * as back from '../lobby/images/back.svg';
@@ -28,6 +28,9 @@ const punchcardImages: {[k: string]: string} = {
 
 // Include our SCSS (via webpack magic)
 import './market.scss';
+import { callApi } from '../api';
+import { BUY_PUNCHCARD } from '../../common/api';
+import { MessagesStateActions } from '../global/state/messages-state-actions';
 
 interface OwnProps {
 }
@@ -104,7 +107,7 @@ class _MarketComponent extends React.PureComponent<Props, State> {
                             <div>
                                 <h3>{showCardDetails.name}</h3>
                                 <p>{showCardDetails.description}</p>
-                                Punchcard details.
+                                <button onClick={() => { this.buyPunchcard(showCardDetails.id); }}>BUY</button>
                             </div>
                         :// If not showing the prelude or a specific punchcard, show the list of punchcards:
                             <div className="punchcard-list">
@@ -116,7 +119,9 @@ class _MarketComponent extends React.PureComponent<Props, State> {
                                             <img src={saltine} alt="Saltines cost: " />
                                             {card.saltinesCost}
                                         </div>
+                                        <br/><br/>
                                         <button onClick={() => { this.showPunchcardDetails(card.id); }}>INFO</button>
+                                        <button onClick={() => { this.buyPunchcard(card.id); }}>BUY</button>
                                     </div>
                                 ))}
                             </div>
@@ -129,6 +134,26 @@ class _MarketComponent extends React.PureComponent<Props, State> {
     @bind showPunchcardDetails(cardId: string) {
         this.setState({
             showPunchcardDetails: cardId,
+        });
+    }
+
+    @bind async buyPunchcard(cardId: string) {
+        try {
+            await callApi(BUY_PUNCHCARD, {punchcardId: cardId});
+        } catch (err) {
+            this.props.dispatch<AnyAction>({
+                type: MessagesStateActions.SHOW_ERROR,
+                title: "Cannot Buy Punchcard",
+                errorHtml: err.message,
+            });
+            return;
+        }
+        this.props.dispatch(updateMarketVars());
+        this.props.dispatch<AnyAction>({type: LobbyActions.SHOW_SCENARIOS_LIST});
+        this.props.dispatch<AnyAction>({
+            type: MessagesStateActions.SHOW_INFO,
+            title: "Punchcard Activated",
+            infoHtml: "Your punchcard has been purchased and will be active during the next scenario.",
         });
     }
 }

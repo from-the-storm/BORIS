@@ -39,6 +39,7 @@ interface UpdateMarketData {
     type: TeamStateActions.UPDATE_MARKET_DATA;
     scenariosComplete: number;
     playerIsTheBurdened: boolean;
+    allowMarket: boolean;
     forceMarket: boolean;
 }
 
@@ -73,6 +74,7 @@ export function updateMarketVars() {
             type: Actions.UPDATE_MARKET_DATA,
             scenariosComplete: data.scenariosComplete,
             playerIsTheBurdened: data.playerIsTheBurdened,
+            allowMarket: data.allowMarket,
             forceMarket: data.forceMarket,
         });
     };

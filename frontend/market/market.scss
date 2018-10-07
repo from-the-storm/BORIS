@@ -42,14 +42,27 @@
             img.card-illustration {
                 float: right;
                 max-width: 25%;
+                max-height: 150px;
             }
-            .cost img {
-                width: 20px;
+            .cost {
+                display: inline-block;
+                background: black;
+                color: white;
+                padding: 6px;
+                img {
+                    width: 16px;
+                    margin-right: 6px;
+                    margin-bottom: -1px;
+                    filter: invert(1);
+                }
             }
             &::after {
                 clear: right;
                 content: '';
                 display: block;
+            }
+            button {
+                margin-right: 1em;
             }
         }
     }

@@ -48,6 +48,8 @@ apiMethod(GET_TEAM_MARKET_VARS, async (data, app, user) => {
     const teamId = (await requireActiveTeamMembership(db, user.id)).team_id;
     // Count how many scenarios this team has completed:
     const scenariosComplete = Number(await db.games.count({team_id: teamId, 'finished is not': null}));
+    // Don't allow access to the market if no scenarios are completed, _or_ if the team already bought a punchcard.
+    const allowMarket = scenariosComplete > 0 && (await getTeamVar(activePunchcardVar, teamId, db)) === null;
     // Check if the current user is "The Burdened" as of the last game:
     const theBurdenedUserId = await getUserIdWithRoleForTeam('B', teamId, db);
     const playerIsTheBurdened = (theBurdenedUserId === user.id);
@@ -58,7 +60,7 @@ apiMethod(GET_TEAM_MARKET_VARS, async (data, app, user) => {
         (await db.team_members.findOne({team_id: teamId, user_id: theBurdenedUserId, is_active: true })) !== null
     );
     const forceMarket = scenariosComplete > 0 && plotDeviceCounter === 0 && theBurdenedIsStillOnTheTeam;
-    return { scenariosComplete, playerIsTheBurdened, forceMarket };
+    return { scenariosComplete, playerIsTheBurdened, allowMarket, forceMarket };
 });
 
 
