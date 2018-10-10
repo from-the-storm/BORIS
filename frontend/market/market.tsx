@@ -104,24 +104,33 @@ class _MarketComponent extends React.PureComponent<Props, State> {
                                 ].slice(0, this.state.numPreludeMessagesShown)}
                             </div>
                         :showCardDetails ?
-                            <div>
-                                <h3>{showCardDetails.name}</h3>
-                                <p>{showCardDetails.description}</p>
-                                <button onClick={() => { this.buyPunchcard(showCardDetails.id); }}>BUY</button>
+                            <div className="punchcard-details">
+                                <h1>{showCardDetails.name}</h1>
+                                <div>
+                                    <img className="card-illustration" src={punchcardImages[showCardDetails.id]} alt="" />
+                                    <div className="cost">
+                                        <img src={saltine} alt="Saltines cost: " />
+                                        {showCardDetails.saltinesCost}
+                                    </div>
+                                    <p>{showCardDetails.description}</p>
+                                    <button onClick={() => { this.buyPunchcard(showCardDetails.id); }}>BUY IT!</button>
+                                </div>
                             </div>
                         :// If not showing the prelude or a specific punchcard, show the list of punchcards:
                             <div className="punchcard-list">
                                 {punchcards.map(card => (
                                     <div key={card.id} className="punchcard-option">
-                                        <h2>{card.name}</h2>
-                                        <img className="card-illustration" src={punchcardImages[card.id]} alt="" />
-                                        <div className="cost">
-                                            <img src={saltine} alt="Saltines cost: " />
-                                            {card.saltinesCost}
+                                        <div className="punchcard-info">
+                                            <h2>{card.name}</h2>
+                                            <div className="cost">
+                                                <img src={saltine} alt="Saltines cost: " />
+                                                {card.saltinesCost}
+                                            </div>
+                                            <br/><br/>
+                                            <button className="hollow" onClick={() => { this.showPunchcardDetails(card.id); }}>INFO?</button>
+                                            <button onClick={() => { this.buyPunchcard(card.id); }}>BUY!</button>
                                         </div>
-                                        <br/><br/>
-                                        <button onClick={() => { this.showPunchcardDetails(card.id); }}>INFO</button>
-                                        <button onClick={() => { this.buyPunchcard(card.id); }}>BUY</button>
+                                        <img className="card-illustration" src={punchcardImages[card.id]} alt="" />
                                     </div>
                                 ))}
                             </div>

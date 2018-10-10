@@ -1,17 +1,14 @@
+@import '../global/variables-mixins';
+
 .market {
-    height: 100vh;
     background-color: #794a37;
     background-image: url('./images/marketplace-bg.jpg'), linear-gradient(#794a37, #2d2f43); // The gradient matches the image and is shown until the image loads
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
     color: white;
 
     &.fade-bg {
-        // Once the prelude is complete, this overlay makes the background image whiter
-        background-image:
-            linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)),
-            url('./images/marketplace-bg.jpg'),
-            linear-gradient(#794a37, #2d2f43);
         color: black;
       }
 
@@ -32,38 +29,77 @@
     }
 
     .content {
-        height: 100vh;
+        min-height: 100vh;
         box-sizing: border-box;
-        overflow-y: auto;
     }
 
     .punchcard-list {
+        .punchcard-info {
+            float: left;
+            max-width: 66%;
+        }
         .punchcard-option {
+            margin-bottom: 1rem;
+            padding: 0.5rem 0.75rem;
+            background: transparentize($white, 0.15);
+            overflow: auto;
             img.card-illustration {
                 float: right;
-                max-width: 25%;
+                max-width: 33%;
                 max-height: 150px;
             }
-            .cost {
-                display: inline-block;
-                background: black;
-                color: white;
-                padding: 6px;
-                img {
-                    width: 16px;
-                    margin-right: 6px;
-                    margin-bottom: -1px;
-                    filter: invert(1);
-                }
+            h2 {
+                margin-top: 0;
+                font-size: 1.4em;
             }
             &::after {
                 clear: right;
                 content: '';
                 display: block;
             }
-            button {
-                margin-right: 1em;
-            }
         }
+    }
+
+    .punchcard-details {
+        padding: 0.5rem 1rem;
+        background: transparentize($white, 0.15);
+        overflow: auto;
+            img.card-illustration {
+                float: left;
+                max-width: 40%;
+                max-height: 230px;
+                margin-right: 0.5rem;
+            }
+            .cost {
+                margin: 0.5rem 0;
+            }
+            button {
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+    }
+
+    .cost {
+        display: inline-block;
+        background: $black;
+        color: $white;
+        padding: 6px;
+        img {
+            width: 16px;
+            margin-right: 6px;
+            margin-bottom: -1px;
+            filter: invert(1);
+        }
+    }
+
+    button {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        border: 2px solid $black;
+        font-size: 1.2em;
+            &.hollow {
+                background: none;
+                color: $black;
+            }
     }
 }
