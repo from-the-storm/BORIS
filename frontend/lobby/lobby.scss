@@ -274,16 +274,19 @@
 
     // Prompt about the Burdened needing to visit the market
     .forced-capitalism {
-        padding: 1rem 1.5rem;
         position: absolute;
-        top: 25%;
-        transform: rotate(-15deg);
-        background: $black;
-        border: 10px solid $purple;
+        top: 0;
+        bottom: 8px;
+        background: transparentize($black, 0.40);
             p {
                 color: $white;
                 font-family: $consolefont;
+                margin-top: 35% !important;
                 margin-bottom: 0;  
+                transform: rotate(-15deg);
+                background: $black;
+                padding: 1rem 1.5rem;
+                margin: 0.5rem;
             }
     }
 
