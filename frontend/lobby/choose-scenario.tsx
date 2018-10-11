@@ -91,8 +91,8 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                         </div>
                     )}
                 </LoadingSpinnerComponent>
+                {this.props.forceMarket ? <div className="forced-capitalism"><p>>> ALERT FROM THE NAMELESS ORGANIZATION: We kindly "suggest" that your team's BURDENED visit the market prior to beginning another scenario. We need to discuss a few things.</p></div> : null}
             </div>
-            {this.props.forceMarket ? <div>Note: The Burdened must visit the market before you can play additonal scenarios.</div> : null}
         </div>;
     }
 

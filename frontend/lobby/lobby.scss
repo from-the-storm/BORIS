@@ -42,6 +42,8 @@
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
+        position: relative;
+        overflow: hidden;
             .scenario-choice {
                 flex-basis: 50%;
                 box-sizing: border-box;
@@ -269,6 +271,23 @@
             }
         }
     }
+
+    // Prompt about the Burdened needing to visit the market
+    .forced-capitalism {
+        padding: 1rem 1.5rem;
+        position: absolute;
+        top: 25%;
+        transform: rotate(-15deg);
+        background: $black;
+        border: 10px solid $purple;
+            p {
+                color: $white;
+                font-family: $consolefont;
+                margin-bottom: 0;  
+            }
+    }
+
+
 }
 
 @-webkit-keyframes fade {
