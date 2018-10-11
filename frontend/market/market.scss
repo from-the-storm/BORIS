@@ -10,7 +10,7 @@
 
     &.fade-bg {
         color: black;
-      }
+    }
 
     header {
         .saltines-balance {
@@ -34,6 +34,16 @@
     }
 
     .punchcard-list {
+        button {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid $black;
+            font-size: 1.2em;
+                &.hollow {
+                    background: none;
+                    color: $black;
+                }
+        }
         .punchcard-info {
             float: left;
             max-width: 66%;
@@ -92,14 +102,18 @@
         }
     }
 
-    button {
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-        border: 2px solid $black;
-        font-size: 1.2em;
-            &.hollow {
-                background: none;
-                color: $black;
+    .market-prelude div {
+        opacity: 0;
+        -webkit-animation: 0s 4s reverse forwards fade;
+        animation: 0s 4s reverse forwards fade;
+            &:first-child {
+                -webkit-animation: 0s 1.5s reverse forwards fade;
+                animation: 0s 1.5s reverse forwards fade;
+            }
+            &:nth-child(3), &:last-child {
+                -webkit-animation: 0s 6.5s reverse forwards fade;
+                animation: 0s 6.5s reverse forwards fade;
             }
     }
+
 }

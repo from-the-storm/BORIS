@@ -71,7 +71,7 @@ class _MarketComponent extends React.PureComponent<Props, State> {
         this.setState({
             numPreludeMessagesShown: this.state.numPreludeMessagesShown + 1,
         });
-        if (this.state.numPreludeMessagesShown < 5) {
+        if (this.state.numPreludeMessagesShown < 4) {
             setTimeout(this.showNextPreludeMessage, 1000);
         }
     }
@@ -96,11 +96,10 @@ class _MarketComponent extends React.PureComponent<Props, State> {
                         this.state.showingPreludeConversation ?
                             <div className="market-prelude">
                                 {[
-                                    <div key={1} className="chat-segment clarence"><p>Prelude messages</p></div>,
-                                    <div key={2} className="chat-segment clarence"><p>go here</p></div>,
-                                    <div key={3} className="chat-segment clarence"><p>and here</p></div>,
-                                    <div key={4} className="chat-segment clarence"><p>like this</p></div>,
-                                    <div key={5} className="response-segment multi-choice"><button onClick={this.handleDonePrelude}>Let's commerce!</button></div>
+                                    <div key={1} className="chat-segment clarence"><p>Welcome to the Nameless Market. I’m CLARENCE. Hope you had no trouble finding us.</p></div>,
+                                    <div key={2} className="chat-segment clarence"><p>We exchange saltines for bootleg punchcards that’ll hack into BORIS and give your team bonuses. Cards are automatically applied during the next scenario you play.</p><p>If enough teams do this, we believe the BORIS core will get so gunked up that we can finally crack its archive and expose the truth.</p></div>,
+                                    <div key={3} className="chat-segment clarence"><p>Okay, choose a punchcard. Then we'll unlock the other scenarios and you can do as you wish. We promise.</p></div>,
+                                    <div key={4} className="response-segment multi-choice"><button onClick={this.handleDonePrelude}>Fine, I'll choose one.</button></div>
                                 ].slice(0, this.state.numPreludeMessagesShown)}
                             </div>
                         :showCardDetails ?
