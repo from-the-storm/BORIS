@@ -39,8 +39,8 @@ async function sendLoginLinkToUser(app: express.Application, email: string) {
     // Load the template file:
     const htmlTemplate = String(await readFileAsync(`${__dirname}/login-template.html`));
     const html = (htmlTemplate
-        .replace('{{login_url}}', `${config.app_url}/auth/login/${code}`)
-        .replace('{{first_name}}', user.first_name)
+        .replace(/{{login_url}}/g, `${config.app_url}/auth/login/${code}`)
+        .replace(/{{first_name}}/g, user.first_name)
     );
     // And send it out via email:
     await sendMail({
