@@ -169,28 +169,30 @@ export const STEP_RESPONSE: ApiMethod<StepResponseRequest, EmptyApiResponse> = {
 // market-api methods:
 
 
-/** GET_SALTINES_BALANCE Request */
-export interface GetSaltinesBalanceResponse {
+/** GET_TEAM_MARKET_VARS Request: Get some data that affects the market */
+export const enum MarketStatus {
+    Hidden = 'H', // The team has not completed any scenarios yet so won't see any sign of the market
+    Forced = 'B', // The current player is the Burdened and MUST buy a punchcard from the market before the team can play again
+    ForcedForOtherPlayer = 'F', // The current player is locked out of the game until the person who is The Burdened buys a punchcard
+    Open = 'O', // The market is open and the current player may go buy a punchcard if they wish to
+    AlreadyBought = 'A', // The player is the burdened and has _just_ purchased a punchard
+    Taped = 'T', // The player is not the burdened so cannot enter the market
+    Boarded = 'X', // The team has completed at least 3 scenarios so are permanently locked out of the market.
+    Actualized = 'Z', // The current user is "The Burdened" and the team has completed at least 3 scenarios so are permanently locked out of the market.
+};
+
+export interface GetTeamMarketVarsResponse {
     saltinesBalance: number;
     saltinesEarnedAllTime: number;
+    status: MarketStatus;
 }
-export const GET_SALTINES_BALANCE: ApiMethod<NoRequestParameters, GetSaltinesBalanceResponse> = {path: '/api/market/saltines', type: 'GET'};
-
-
-/** GET_TEAM_MARKET_VARS Request: Get some data that affects the market */
-export interface GetTeamMarketVars {
-    scenariosComplete: number;
-    playerIsTheBurdened: boolean;
-    allowMarket: boolean;
-    forceMarket: boolean; // If true, The Burdened is forced to go buy a card from the market before they can do anything else.
-}
-export const GET_TEAM_MARKET_VARS: ApiMethod<NoRequestParameters, GetTeamMarketVars> = {path: '/api/market/gtmv', type: 'GET'};
+export const GET_TEAM_MARKET_VARS: ApiMethod<NoRequestParameters, GetTeamMarketVarsResponse> = {path: '/api/market/gtmv', type: 'GET'};
 
 /** Buy a punchcard */
 export interface BuyPunchcardRequest {
     punchcardId: string;
 }
-export const BUY_PUNCHCARD: ApiMethod<BuyPunchcardRequest, GetSaltinesBalanceResponse> = {path: '/api/market/buy', type: 'POST'};
+export const BUY_PUNCHCARD: ApiMethod<BuyPunchcardRequest, GetTeamMarketVarsResponse> = {path: '/api/market/buy', type: 'POST'};
 
 ///////////////////////////////////////////////////////////////////////////////
 // survey API methods:

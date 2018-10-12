@@ -9,7 +9,7 @@ import { RpcClientConnectionStatus } from '../rpc-client/rpc-client-actions';
 import { Prompt } from '../prompt/prompt';
 
 import * as saltine from './images/saltine.svg';
-import { updateSaltinesBalance } from '../global/state/team-state-actions';
+import { updateMarketVars } from '../global/state/team-state-actions';
 import { KICK_OFF_TEAM } from '../../common/api';
 import { callApi } from '../api';
 
@@ -124,7 +124,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
         });
 
         // Update the saltines balance:
-        this.props.dispatch(updateSaltinesBalance());
+        this.props.dispatch(updateMarketVars());
     }
 
     public render() {

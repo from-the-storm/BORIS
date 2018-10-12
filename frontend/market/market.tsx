@@ -6,7 +6,7 @@ import { RootState } from '../global/state';
 import { Actions as LobbyActions } from '../lobby/lobby-state-actions';
 import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
-import { updateSaltinesBalance, updateMarketVars } from '../global/state/team-state-actions';
+import { updateMarketVars } from '../global/state/team-state-actions';
 import { punchcards } from '../../common/market';
 
 import * as back from '../lobby/images/back.svg';
@@ -29,7 +29,7 @@ const punchcardImages: {[k: string]: string} = {
 // Include our SCSS (via webpack magic)
 import './market.scss';
 import { callApi } from '../api';
-import { BUY_PUNCHCARD } from '../../common/api';
+import { BUY_PUNCHCARD, MarketStatus } from '../../common/api';
 import { MessagesStateActions } from '../global/state/messages-state-actions';
 
 interface OwnProps {
@@ -53,7 +53,7 @@ class _MarketComponent extends React.PureComponent<Props, State> {
             showingPreludeConversation: props.shouldShowPrelude,
             numPreludeMessagesShown: 0,
         });
-        this.props.dispatch(updateSaltinesBalance());
+        this.props.dispatch(updateMarketVars());
         if (props.shouldShowPrelude) {
             setTimeout(this.showNextPreludeMessage, 100);
         }
@@ -166,6 +166,6 @@ class _MarketComponent extends React.PureComponent<Props, State> {
 }
 
 export const MarketComponent = connect((state: RootState, ownProps: OwnProps) => ({
-    shouldShowPrelude: state.teamState.scenariosComplete <= 1,
+    shouldShowPrelude: state.teamState.marketStatus == MarketStatus.Forced,
     saltinesBalance: state.teamState.saltinesBalance,
 }))(_MarketComponent);
