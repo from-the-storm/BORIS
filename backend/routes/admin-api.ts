@@ -102,7 +102,7 @@ defineMethod(GET_TEAM, async (data, app, user) => {
     };
 });
 
-/** Reset the game vars (saltines earned, role assignments, etc.) for the given team. Obviously dangerous/destructive. */
+/** Reset the game vars (saltines earned, role assignments, game history, etc.) for the given team. Obviously dangerous/destructive. */
 export const RESET_TEAM_VARS: ApiMethod<{id: string}, {}> = {path: `/api/admin/teams/:id/reset-vars`, type: 'POST'};
 defineMethod(RESET_TEAM_VARS, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
@@ -115,6 +115,7 @@ defineMethod(RESET_TEAM_VARS, async (data, app, user) => {
         throw new SafeError(`Team ${id} not found.`, 404);
     }
     await db.teams.update({id,}, {game_vars: {}});
+    await db.games.destroy({team_id: id});
     return {result: 'ok'};
 });
 
