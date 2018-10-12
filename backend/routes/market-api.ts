@@ -14,7 +14,6 @@ import { punchcards } from '../../common/market';
 
 export const router = express.Router();
 
-export const plotDeviceCounterVar: GameVar<number> = {key: 'plot-device', scope: GameVarScope.Team, default: 0};
 export const activePunchcardVar: GameVar<string|null> = {key: 'active-punchcard', scope: GameVarScope.Team, default: null};
 
 const apiMethod = makeApiHelper(router, /^\/api\/market/, RequireUser.Required);
@@ -49,17 +48,17 @@ apiMethod(GET_TEAM_MARKET_VARS, async (data, app, user) => {
     // Count how many scenarios this team has completed:
     const scenariosComplete = Number(await db.games.count({team_id: teamId, 'finished is not': null}));
     // Don't allow access to the market if no scenarios are completed, _or_ if the team already bought a punchcard.
-    const allowMarket = scenariosComplete > 0 && (await getTeamVar(activePunchcardVar, teamId, db)) === null;
+    const aPunchcardIsActive = (await getTeamVar(activePunchcardVar, teamId, db)) !== null;
+    const allowMarket = scenariosComplete > 0 && !aPunchcardIsActive;
     // Check if the current user is "The Burdened" as of the last game:
     const theBurdenedUserId = await getUserIdWithRoleForTeam('B', teamId, db);
     const playerIsTheBurdened = (theBurdenedUserId === user.id);
     // Do we force the Burdened to enter the market?
-    const plotDeviceCounter = await getTeamVar(plotDeviceCounterVar, teamId, db);
     const theBurdenedIsStillOnTheTeam = (
         theBurdenedUserId !== undefined &&
         (await db.team_members.findOne({team_id: teamId, user_id: theBurdenedUserId, is_active: true })) !== null
     );
-    const forceMarket = scenariosComplete > 0 && plotDeviceCounter === 0 && theBurdenedIsStillOnTheTeam;
+    const forceMarket = scenariosComplete == 1 && !aPunchcardIsActive && theBurdenedIsStillOnTheTeam;
     return { scenariosComplete, playerIsTheBurdened, allowMarket, forceMarket };
 });
 
