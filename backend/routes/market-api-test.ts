@@ -1,6 +1,6 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, GET_SALTINES_BALANCE, GET_TEAM_MARKET_VARS, BUY_PUNCHCARD } from '../../common/api';
+import { CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, GET_TEAM_MARKET_VARS, BUY_PUNCHCARD, MarketStatus } from '../../common/api';
 import { punchcards } from '../../common/market';
 import { getTeamVar, setTeamVar } from '../game/team-vars';
 import { getDB } from '../db/db';
@@ -28,20 +28,6 @@ describe("Game API tests", () => {
     afterAll(async () => {
         await server.close();
     });
-    describe("GET_SALTINES_BALANCE", async () => {
-
-        it("Requires the user to be on a team", async () => {
-            await client1.callApi(LEAVE_TEAM, {});
-            await client1.callApiExpectError(GET_SALTINES_BALANCE, {}, "You are not on a team, so cannot do this.");
-        });
-
-        it("Returns zeroes for a new team", async () => {
-            const status = await client1.callApi(GET_SALTINES_BALANCE, {});
-            expect(status.saltinesBalance).toBe(0);
-            expect(status.saltinesEarnedAllTime).toBe(0);
-        });
-
-    });
 
     describe("GET_TEAM_MARKET_VARS", async () => {
 
@@ -51,10 +37,10 @@ describe("Game API tests", () => {
         });
 
         it("Returns the expected state for a new team", async () => {
-            const status = await client1.callApi(GET_TEAM_MARKET_VARS, {});
-            expect(status.forceMarket).toBe(false);
-            expect(status.playerIsTheBurdened).toBe(false);
-            expect(status.scenariosComplete).toBe(0);
+            const result = await client1.callApi(GET_TEAM_MARKET_VARS, {});
+            expect(result.status).toBe(MarketStatus.Hidden);
+            expect(result.saltinesBalance).toBe(0);
+            expect(result.saltinesEarnedAllTime).toBe(0);
         });
 
         // The rest of this is best tested via integration tests.
@@ -90,6 +76,7 @@ describe("Game API tests", () => {
             expect(status.balance).toBe(100 - punchcard.saltinesCost);
             expect(result.saltinesBalance).toBe(100 - punchcard.saltinesCost);
             expect(result.saltinesEarnedAllTime).toBe(status.earned);
+            expect(result.status).toBe(MarketStatus.AlreadyBought);
 
             // And the punchcard should be active:
             expect(await getTeamVar(activePunchcardVar, teamId, db)).toBe(punchcard.id);

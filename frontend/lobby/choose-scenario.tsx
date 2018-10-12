@@ -12,6 +12,7 @@ import { MarketButton } from './market-button';
 import { Scenario } from '../../common/models';
 import { AnyAction } from '../global/actions';
 import { updateMarketVars } from '../global/state/team-state-actions';
+import { MarketStatus } from '../../common/api';
 
 
 interface OwnProps {
@@ -21,10 +22,9 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     scenarios: List<Scenario>;
     scenariosLoadState: LoadingState;
     selectedScenarioId: number|null;
-    scenariosComplete: number;  // How many scenarios this team has completed.
-    playerIsTheBurdened: boolean; // Did this player have the role of "the burdened" on this team's last scenario? (Affects the Marketplace)
-    alreadyPurchasedPunchcard: boolean; // Did the player just purchase a card? If so we close the market until they complete another scenario
-    forceMarket: boolean; // If true, force the user to view the market (lock all other UI elements)
+    allowMarket: boolean;
+    forceMarket: boolean;
+    marketStatus: MarketStatus;
 }
 interface State {
     showMap: boolean;
@@ -70,9 +70,9 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
 
         return <div>
             <h1>Choose Scenario</h1>
-            {this.props.scenariosComplete === 0 ? 
+            {this.props.marketStatus === MarketStatus.Hidden ? 
                 (<p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>) : 
-                (<MarketButton completedScenarios={this.props.scenariosComplete} isBurdened={this.props.playerIsTheBurdened} alreadyPurchasedPunchcard={this.props.alreadyPurchasedPunchcard} onClick={this.handleMarketButtonClicked} />)
+                (<MarketButton status={this.props.marketStatus} onClick={this.handleMarketButtonClicked} />)
             }
             <div className="scenario-grid">
                 <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
@@ -114,7 +114,9 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     }
 
     @bind private handleMarketButtonClicked() {
-        this.props.dispatch<AnyAction>({type: Actions.SHOW_MARKET});
+        if (this.props.allowMarket) {
+            this.props.dispatch<AnyAction>({type: Actions.SHOW_MARKET});
+        }
     }
 }
 
@@ -125,9 +127,8 @@ export const ChooseScenarioComponent = connect((state: RootState, ownProps: OwnP
         scenarios: state.lobbyState.scenarios,
         scenariosLoadState: state.lobbyState.scenariosState,
         selectedScenarioId,
-        scenariosComplete: state.teamState.scenariosComplete,
-        playerIsTheBurdened: state.teamState.playerIsTheBurdened,
-        alreadyPurchasedPunchcard: !state.teamState.allowMarket,
+        allowMarket: state.teamState.allowMarket,
         forceMarket: state.teamState.forceMarket,
+        marketStatus: state.teamState.marketStatus,
     };
 })(_ChooseScenarioComponent);

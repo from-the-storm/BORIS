@@ -5,6 +5,7 @@ import {TeamStateActions as Actions} from './team-state-actions';
 import {UserStateActions} from './user-state-actions';
 import { AnyAction } from '../actions';
 import { OtherTeamMember } from '../../../common/models';
+import { MarketStatus } from '../../../common/api';
 
 /**
  * State of the team (has the user joined a team, etc.)
@@ -17,13 +18,16 @@ export class TeamState extends Record({
     saltinesBalance: 0,
     saltinesEarnedAllTime: 0,
     otherTeamMembers: [] as Array<OtherTeamMember>,
-    scenariosComplete: 0,
-    playerIsTheBurdened: false,
-    allowMarket: false,
-    forceMarket: false,
+    marketStatus: MarketStatus.Hidden,
 }) {
     get hasJoinedTeam(): boolean {
         return this.teamCode !== null;
+    }
+    get allowMarket(): boolean {
+        return this.marketStatus === MarketStatus.Forced || this.marketStatus === MarketStatus.Open;
+    }
+    get forceMarket(): boolean {
+        return this.marketStatus === MarketStatus.Forced || this.marketStatus === MarketStatus.ForcedForOtherPlayer;
     }
 }
 
@@ -50,17 +54,11 @@ export function teamStateReducer(state?: TeamState, action?: AnyAction): TeamSta
             isTeamAdmin: action.isTeamAdmin,
             otherTeamMembers: action.otherTeamMembers,
         });
-    case Actions.UPDATE_SALTINES_BALANCE:
+    case Actions.UPDATE_MARKET_DATA:
         return state.merge({
             saltinesBalance: action.saltinesBalance,
             saltinesEarnedAllTime: action.saltinesEarnedAllTime,
-        });
-    case Actions.UPDATE_MARKET_DATA:
-        return state.merge({
-            scenariosComplete: action.scenariosComplete,
-            playerIsTheBurdened: action.playerIsTheBurdened,
-            allowMarket: action.allowMarket,
-            forceMarket: action.forceMarket,
+            marketStatus: action.marketStatus,
         });
     case Actions.LEAVE_TEAM:
         // User has left a team (they're still associated with that team, just not "currently" online for that team):

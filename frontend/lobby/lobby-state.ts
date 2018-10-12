@@ -6,6 +6,7 @@ import { Actions } from './lobby-state-actions';
 import { AnyAction } from '../global/actions';
 import { LoadingState } from '../loading/loading-state';
 import { Scenario } from '../../common/models';
+import { GameStateActions } from '../global/state/game-state-actions';
 
 export const enum Mode {
     ChooseScenario,
@@ -49,6 +50,8 @@ export function lobbyStateReducer(state?: LobbyState, action?: AnyAction): Lobby
             scenariosState: LoadingState.FAILED,
         })
     case Actions.SHOW_SCENARIOS_LIST:
+    case GameStateActions.ABANDON_GAME:
+    case GameStateActions.REVIEW_COMPLETE:
         return state.merge({
             selectedScenario: null,
             mode: Mode.ChooseScenario,
