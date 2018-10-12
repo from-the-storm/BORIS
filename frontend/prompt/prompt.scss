@@ -23,7 +23,7 @@
     padding: 0.5rem 1rem 1rem;
     margin: 1rem;
     position: relative;
-    line-height: 1.6;
+    line-height: 1.2;
         &.fullscreen {
             height: 100%;
             width: 100%;
@@ -32,7 +32,6 @@
             background: $black;
             color: $white;
                 #prompt-description button {
-                    margin-top: 1rem;
                     border: 1px solid $white;
                 }
                 .prompt-image {
@@ -68,6 +67,12 @@
                         }
                 }
         }
+        #prompt-description {
+            line-height: 1.4;
+            button {
+                margin-top: 1rem;
+            }
+        }
         h1 {
             margin-right: 2.5rem;
             font-size: 1.8em;
@@ -78,6 +83,5 @@
             right: 0;
             background: $red;
             padding: 0.5rem 0.75rem;
-        }
-       
+        }       
 }

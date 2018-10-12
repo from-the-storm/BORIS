@@ -78,12 +78,7 @@ apiMethod(BUY_PUNCHCARD, async (data, app, user) => {
     }
 
     if (status.balance < punchcard.saltinesCost) {
-        throw new SafeError("Insufficient saltines balance for that purchase.");
-    }
-
-    // If this is the first punchcard purchases, increase the plot device counter:
-    if ((await getTeamVar(plotDeviceCounterVar, teamId, db)) === 0) {
-        await setTeamVar(plotDeviceCounterVar, () => 1, teamId, db);
+        throw new SafeError("You don't have enough saltines for that!");
     }
 
     // Record this as the active punchcard:

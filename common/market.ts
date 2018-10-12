@@ -34,6 +34,6 @@ export const punchcards: Punchard[] = [
         id: 'paper',
         name: "Liquid Paper",
         saltinesCost: 110,
-        description: "Reveals a much higher percentage of confidential and redacted information when BORIS leaks information.",
+        description: "Reveals a much higher percentage of confidential and redacted information that's sure to help you get to the bottom of things.",
     },
 ];

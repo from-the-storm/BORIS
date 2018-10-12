@@ -71,7 +71,7 @@ class _MarketComponent extends React.PureComponent<Props, State> {
         this.setState({
             numPreludeMessagesShown: this.state.numPreludeMessagesShown + 1,
         });
-        if (this.state.numPreludeMessagesShown < 4) {
+        if (this.state.numPreludeMessagesShown < 3) {
             setTimeout(this.showNextPreludeMessage, 1000);
         }
     }
@@ -97,9 +97,8 @@ class _MarketComponent extends React.PureComponent<Props, State> {
                             <div className="market-prelude">
                                 {[
                                     <div key={1} className="chat-segment clarence"><p>Welcome to the Nameless Market. I’m CLARENCE. Hope you had no trouble finding us.</p></div>,
-                                    <div key={2} className="chat-segment clarence"><p>We exchange saltines for bootleg punchcards that’ll hack into BORIS and give your team bonuses. Cards are automatically applied during the next scenario you play.</p><p>If enough teams do this, we believe the BORIS core will get so gunked up that we can finally crack its archive and expose the truth.</p></div>,
-                                    <div key={3} className="chat-segment clarence"><p>Okay, choose a punchcard. Then we'll unlock the other scenarios and you can do as you wish. We promise.</p></div>,
-                                    <div key={4} className="response-segment multi-choice"><button onClick={this.handleDonePrelude}>Fine, I'll choose one.</button></div>
+                                    <div key={2} className="chat-segment clarence"><p>We exchange saltines for bootleg punchcards that’ll hack into BORIS and give your team bonuses.</p><p>If enough teams do this, the BORIS core should get so gunked up that we can finally crack its archive and expose the truth.</p><p>Okay, choose a punchcard. Then we'll unlock the other scenarios and you can do as you wish. We promise.</p></div>,
+                                    <div key={3} className="response-segment multi-choice"><button onClick={this.handleDonePrelude}>Fine, let's see them.</button></div>
                                 ].slice(0, this.state.numPreludeMessagesShown)}
                             </div>
                         :showCardDetails ?
@@ -151,7 +150,7 @@ class _MarketComponent extends React.PureComponent<Props, State> {
         } catch (err) {
             this.props.dispatch<AnyAction>({
                 type: MessagesStateActions.SHOW_ERROR,
-                title: "Cannot Buy Punchcard",
+                title: "ERROR",
                 errorHtml: err.message,
             });
             return;
@@ -161,7 +160,7 @@ class _MarketComponent extends React.PureComponent<Props, State> {
         this.props.dispatch<AnyAction>({
             type: MessagesStateActions.SHOW_INFO,
             title: "Punchcard Activated",
-            infoHtml: "Your punchcard has been purchased and will be active during the next scenario.",
+            infoHtml: "Thanks! Your punchcard will be active during the next scenario.",
         });
     }
 }

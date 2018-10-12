@@ -3,8 +3,9 @@
 .market {
     background-color: #794a37;
     background-image: url('./images/marketplace-bg.jpg'), linear-gradient(#794a37, #2d2f43); // The gradient matches the image and is shown until the image loads
+    background-repeat: no-repeat;
     background-size: cover;
-    background-position: center;
+    background-position: center center;
     background-attachment: fixed;
     color: white;
 
@@ -104,15 +105,15 @@
 
     .market-prelude div {
         opacity: 0;
-        -webkit-animation: 0s 4s reverse forwards fade;
-        animation: 0s 4s reverse forwards fade;
-            &:first-child {
-                -webkit-animation: 0s 1.5s reverse forwards fade;
-                animation: 0s 1.5s reverse forwards fade;
+        -webkit-animation: 0s 1.5s reverse forwards fade;
+        animation: 0s 1.5s reverse forwards fade;
+            &:nth-child(2) {
+                -webkit-animation: 0s 3.5s reverse forwards fade;
+                animation: 0s 3.5s reverse forwards fade;
             }
-            &:nth-child(3), &:last-child {
-                -webkit-animation: 0s 6.5s reverse forwards fade;
-                animation: 0s 6.5s reverse forwards fade;
+            &:last-child {
+                -webkit-animation: 0s 8.5s reverse forwards fade;
+                animation: 0s 8.5s reverse forwards fade;
             }
     }
 
