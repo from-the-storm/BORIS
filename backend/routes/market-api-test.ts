@@ -71,7 +71,7 @@ describe("Game API tests", () => {
         const punchcard = punchcards[0];
 
         it("Does not allow a team with no saltines to buy", async () => {
-            await client1.callApiExpectError(BUY_PUNCHCARD, {punchcardId: punchcard.id}, "You don't have enough saltines!");
+            await client1.callApiExpectError(BUY_PUNCHCARD, {punchcardId: punchcard.id}, "You don't have enough saltines for that!");
         });
 
         it("Allows purchasing a card", async () => {
