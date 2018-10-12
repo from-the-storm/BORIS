@@ -29,6 +29,13 @@ export function handleNotification(store: Store<RootState>, event: AnyNotificati
             type: GameStateActions.GAME_STATUS_CHANGED,
             newStatus: event,
         });
+    } else if (event.type === NotificationType.MARKET_STATUS_CHANGED) {
+        store.dispatch<AnyAction>({
+            type: TeamStateActions.UPDATE_MARKET_DATA,
+            saltinesBalance: event.saltinesBalance,
+            saltinesEarnedAllTime: event.saltinesEarnedAllTime,
+            marketStatus: event.status,
+        })
     } else if (event.type === NotificationType.GAME_ERROR) {
         console.error("Game error:");
         console.error(event.debuggingInfoForConsole);

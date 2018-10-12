@@ -90,5 +90,8 @@ apiMethod(BUY_PUNCHCARD, async (data, app, user) => {
     // Mark those saltines as spent:
     const statusAfter = await spendSaltines(punchcard.saltinesCost, teamId, db);
 
+    // Push the result out to everyone on the team:
+    await notifyTeamMarketStatusChanged(app, teamId);
+
     return { saltinesBalance: statusAfter.balance, saltinesEarnedAllTime: statusAfter.earned, };
 });

@@ -1,10 +1,12 @@
 import * as express from 'express';
 
 import { BorisDatabase } from '../db/db';
-import { publishEventToTeam } from './pub-sub';
+import { publishEventToTeam, publishEventToUsers } from './pub-sub';
 import { NotificationType } from '../../common/notifications';
 import { OtherTeamMember } from '../../common/models';
 import { isUserOnline } from './online-users';
+import { getMarketStatus } from '../routes/market-api';
+import { getSaltinesStatus } from '../game/steps/award-saltines';
 
 /**
  * Notify all users on the given team that the team has changed.
@@ -37,5 +39,27 @@ export async function notifyTeamStatusChangedForUser(app: express.Application, u
     const membership = await db.team_members.findOne({user_id: userId, is_active: true});
     if (membership !== null) {
         notifyTeamStatusChanged(app, membership.team_id);
+    }
+}
+
+/**
+ * Tell all connected users from this team that the market status may have changed
+ * (e.g. a punchcard was purchased.)
+ */
+export async function notifyTeamMarketStatusChanged(app: express.Application, teamId: number) {
+    const db: BorisDatabase = app.get("db");
+    const queryResult = await db.query(
+        `SELECT user_id FROM team_members WHERE team_id = $1 AND is_active = 'true'`,
+        [teamId], {}
+    );
+    const saltinesStatus = await getSaltinesStatus(teamId, db);
+    for (const row of queryResult) {
+        const marketStatus = await getMarketStatus(teamId, row.user_id, db);
+        const data = {
+            saltinesBalance: saltinesStatus.balance,
+            saltinesEarnedAllTime: saltinesStatus.earned,
+            status: marketStatus,
+        }
+        publishEventToUsers([row.user_id], {type: NotificationType.MARKET_STATUS_CHANGED, ...data});
     }
 }

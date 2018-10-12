@@ -1,12 +1,13 @@
 import { OtherTeamMember } from "./models";
 import { AnyUiState } from "./game";
-import { GameDetailedStatus } from "./api";
+import { GameDetailedStatus, GetTeamMarketVarsResponse } from "./api";
 
 /**
  * The types of notifications that can be sent over the websocket connection
  */
 export enum NotificationType {
     TEAM_CHANGED = 'TC',
+    MARKET_STATUS_CHANGED = 'MSC',
     GAME_UI_UPDATE = 'GUU',
     GAME_STATUS_CHANGED = 'GSC',
     GAME_ERROR = 'GE',
@@ -18,6 +19,10 @@ export enum NotificationType {
 export interface TeamChangedNotification {
     type: NotificationType.TEAM_CHANGED;
     teamMembers: OtherTeamMember[];
+}
+
+export interface MarketStatusChanged extends GetTeamMarketVarsResponse {
+    type: NotificationType.MARKET_STATUS_CHANGED;
 }
 
 export interface GameStatusChangedNotification extends GameDetailedStatus {
@@ -48,6 +53,7 @@ export interface GameErrorNotification {
 
 export type AnyNotification = (
     |TeamChangedNotification
+    |MarketStatusChanged
     |GameStatusChangedNotification
     |GameUiChangedNotification
     |GameErrorNotification
