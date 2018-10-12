@@ -92,7 +92,7 @@
     animation: 1.5s forwards fade;
 }
 
-.game {
+.game, .market-prelude {
     .content {
         &::after {
             // We need a non-floated element at the end to force .content to have a height > 0
@@ -115,6 +115,7 @@
         float: left;
         clear: both;
             p {
+                color: black;
                 background: $grey;
                 padding: 0.4em 0.5rem;
                 margin: 0;

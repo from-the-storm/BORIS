@@ -27,32 +27,24 @@ describe("Game API tests", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});
-            const call = client1.callApi(START_GAME, {scenarioId: scenarioId});
-            await expect(call).rejects.toHaveProperty('statusCode', 400);
-            await expect(call).rejects.toHaveProperty('response.body.error', "You are not on a team, so cannot do this.");
+            await client1.callApiExpectError(START_GAME, {scenarioId: scenarioId}, "You are not on a team, so cannot do this.");
         });
 
         it("Throws an error if there aren't enough people on the team", async () => {
             await client2.callApi(LEAVE_TEAM, {});
             expect((await client1.callApi(GET_INITIAL_STATE, {})).team.otherTeamMembers).toHaveLength(0);
             // User1 is now the only user on the team, and tries to start a game by themself:
-            const call = client1.callApi(START_GAME, {scenarioId: scenarioId});
-            await expect(call).rejects.toHaveProperty('statusCode', 400);
-            await expect(call).rejects.toHaveProperty('response.body.error', "You must have at least two people on your team to play.");
+            await client1.callApiExpectError(START_GAME, {scenarioId: scenarioId}, "You must have at least two people on your team to play.");
         });
 
         it("Throws an error if the scenario ID is invalid", async () => {
-            const call = client1.callApi(START_GAME, {scenarioId: 328947298375});
-            await expect(call).rejects.toHaveProperty('statusCode', 400);
-            await expect(call).rejects.toHaveProperty('response.body.error', "Invalid scenario.");
+            await client1.callApiExpectError(START_GAME, {scenarioId: 328947298375}, "Invalid scenario.");
         });
 
         it("Throws an error if starting a game twice", async () => {
             const firstCall = client1.callApi(START_GAME, {scenarioId,});
             await expect(firstCall).resolves.toHaveProperty('scenarioId', scenarioId);
-            const secondCall = client1.callApi(START_GAME, {scenarioId,});
-            await expect(secondCall).rejects.toHaveProperty('statusCode', 400);
-            await expect(secondCall).rejects.toHaveProperty('response.body.error', "Unable to start playing. Did the game already start?");
+            await client1.callApiExpectError(START_GAME, {scenarioId,}, "Unable to start playing. Did the game already start?");
         });
 
         it("Starts the game", async () => {
@@ -127,9 +119,7 @@ describe("Game API tests", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});
-            const call = client1.callApi(ABANDON_GAME, {});
-            await expect(call).rejects.toHaveProperty('statusCode', 400);
-            await expect(call).rejects.toHaveProperty('response.body.error', "You are not on a team, so cannot do this.");
+            await client1.callApiExpectError(ABANDON_GAME, {}, "You are not on a team, so cannot do this.");
         });
 
         it("Is a no-op if no game has started", async () => {

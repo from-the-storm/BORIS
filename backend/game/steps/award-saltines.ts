@@ -2,7 +2,7 @@ import { StepType } from "../../../common/game";
 import { SafeError } from "../../routes/api-utils";
 import { Step } from "../step";
 import { GameVar, GameVarScope } from "../vars";
-import { getTeamVar } from "../team-vars";
+import { getTeamVar, setTeamVar } from "../team-vars";
 import { BorisDatabase } from "../../db/db";
 import { GameManager } from "../manager";
 
@@ -25,6 +25,20 @@ export async function getSaltinesStatus(teamId: number, db: BorisDatabase) {
         spent,
     }
 }
+
+export async function spendSaltines(numSaltinesToSpend: number, teamId: number, db: BorisDatabase) {
+    const earned = await getTeamVar(SALTINES_EARNED_ALL_TIME, teamId, db);
+    const spent = await getTeamVar(SALTINES_SPENT, teamId, db);
+    if (numSaltinesToSpend < 0) {
+        throw new Error("Can't spend negative saltines.");
+    }
+    if ((earned - spent) < numSaltinesToSpend) {
+        throw new Error("Insufficient balance.");
+    }
+    await setTeamVar(SALTINES_SPENT, v => v + numSaltinesToSpend, teamId, db);
+    return await getSaltinesStatus(teamId, db);
+}
+
 export function getSaltinesEarnedInGame(gameManager: GameManager) {
     const earnedThisGame = gameManager.getVar(SALTINES_EARNED_THIS_GAME);
     const possibleThisGame = gameManager.getVar(SALTINES_POSSIBLE_THIS_GAME);

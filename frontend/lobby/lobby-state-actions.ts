@@ -21,6 +21,8 @@ export enum Actions {
     SHOW_TEAM_DETAILS = 'LS_TEAM',
     // Show the pre-launch screen before playing a scenario (screen to make sure everyone on the team is online)
     SHOW_PRE_LAUNCH_SCREEN = 'LS_PRELAUNCH',
+    // Show the punchcard market
+    SHOW_MARKET = 'LS_MARKET',
 }
 
 interface ScenariosLoadingAction { type: Actions.SCENARIOS_LOADING; }
@@ -33,6 +35,7 @@ interface ShowScenariosListAction { type: Actions.SHOW_SCENARIOS_LIST; }
 interface ShowScenarioDetailsAction { type: Actions.SHOW_SCENARIO_DETAILS; scenarioId: number; }
 interface ShowTeamDetailsAction { type: Actions.SHOW_TEAM_DETAILS; }
 interface ShowPreLaunchScreenAction { type: Actions.SHOW_PRE_LAUNCH_SCREEN; scenarioId: number; }
+interface ShowMarketAction { type: Actions.SHOW_MARKET; }
 
 export type LobbyStateActionsType = (
     |ScenariosLoadingAction
@@ -42,6 +45,7 @@ export type LobbyStateActionsType = (
     |ShowScenarioDetailsAction
     |ShowTeamDetailsAction
     |ShowPreLaunchScreenAction
+    |ShowMarketAction
 );
 
 //// Action Creators

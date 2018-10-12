@@ -15,7 +15,7 @@
     #market-button-container {
         max-width: 800px;
         margin: 0 auto 0.5rem;
-            button.market {
+            button.market-button {
                 background: none;
                 overflow: hidden;
                 padding: 0;
@@ -42,6 +42,8 @@
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
+        position: relative;
+        overflow: hidden;
             .scenario-choice {
                 flex-basis: 50%;
                 box-sizing: border-box;
@@ -269,6 +271,26 @@
             }
         }
     }
+
+    // Prompt about the Burdened needing to visit the market
+    .forced-capitalism {
+        position: absolute;
+        top: 0;
+        bottom: 8px;
+        background: transparentize($black, 0.40);
+            p {
+                color: $white;
+                font-family: $consolefont;
+                margin-top: 35% !important;
+                margin-bottom: 0;  
+                transform: rotate(-15deg);
+                background: $black;
+                padding: 1rem 1.5rem;
+                margin: 0.5rem;
+            }
+    }
+
+
 }
 
 @-webkit-keyframes fade {

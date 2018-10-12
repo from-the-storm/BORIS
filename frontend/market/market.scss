@@ -1,0 +1,120 @@
+@import '../global/variables-mixins';
+
+.market {
+    background-color: #794a37;
+    background-image: url('./images/marketplace-bg.jpg'), linear-gradient(#794a37, #2d2f43); // The gradient matches the image and is shown until the image loads
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    color: white;
+
+    &.fade-bg {
+        color: black;
+    }
+
+    header {
+        .saltines-balance {
+            img {
+                width: 15px;
+                height: 15px;
+                margin-top: 1px;
+                float: left;
+                filter: invert(1); // Turn the black saltine image white
+            }
+            color: white;
+            span {
+                padding: 0 0.5em;
+            }
+        }
+    }
+
+    .content {
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .punchcard-list {
+        button {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid $black;
+            font-size: 1.2em;
+                &.hollow {
+                    background: none;
+                    color: $black;
+                }
+        }
+        .punchcard-info {
+            float: left;
+            max-width: 66%;
+        }
+        .punchcard-option {
+            margin-bottom: 1rem;
+            padding: 0.5rem 0.75rem;
+            background: transparentize($white, 0.15);
+            overflow: auto;
+            img.card-illustration {
+                float: right;
+                max-width: 33%;
+                max-height: 150px;
+            }
+            h2 {
+                margin-top: 0;
+                font-size: 1.4em;
+            }
+            &::after {
+                clear: right;
+                content: '';
+                display: block;
+            }
+        }
+    }
+
+    .punchcard-details {
+        padding: 0.5rem 1rem;
+        background: transparentize($white, 0.15);
+        overflow: auto;
+            img.card-illustration {
+                float: left;
+                max-width: 40%;
+                max-height: 230px;
+                margin-right: 0.5rem;
+            }
+            .cost {
+                margin: 0.5rem 0;
+            }
+            button {
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+    }
+
+    .cost {
+        display: inline-block;
+        background: $black;
+        color: $white;
+        padding: 6px;
+        img {
+            width: 16px;
+            margin-right: 6px;
+            margin-bottom: -1px;
+            filter: invert(1);
+        }
+    }
+
+    .market-prelude div {
+        opacity: 0;
+        -webkit-animation: 0s 1.5s reverse forwards fade;
+        animation: 0s 1.5s reverse forwards fade;
+            &:nth-child(2) {
+                -webkit-animation: 0s 3.5s reverse forwards fade;
+                animation: 0s 3.5s reverse forwards fade;
+            }
+            &:last-child {
+                -webkit-animation: 0s 8.5s reverse forwards fade;
+                animation: 0s 8.5s reverse forwards fade;
+            }
+    }
+
+}

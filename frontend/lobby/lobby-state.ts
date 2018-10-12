@@ -11,6 +11,7 @@ export const enum Mode {
     ChooseScenario,
     TeamDetails,
     PreLaunch, // A user has chosen to start a particular scenario; this screen will confirm that their team is all online.
+    Market,
 }
 
 /**
@@ -52,6 +53,8 @@ export function lobbyStateReducer(state?: LobbyState, action?: AnyAction): Lobby
             selectedScenario: null,
             mode: Mode.ChooseScenario,
         });
+    case Actions.SHOW_MARKET:
+        return state.set('mode', Mode.Market);
     case Actions.SHOW_SCENARIO_DETAILS:
         return state.set('selectedScenario', action.scenarioId);
     case Actions.SHOW_PRE_LAUNCH_SCREEN:

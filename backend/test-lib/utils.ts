@@ -87,6 +87,23 @@ export class TestClient {
         return body;
     }
 
+    async callApiExpectError<RequestType, ResponseType>(method: ApiMethod<RequestType, ResponseType>, data: RequestType, errorMessage: string, statusCodeExpected: number = 400): Promise<void> {
+        this.callApi(method, data).then(value => {
+            throw new Error(`Expected API call to ${method.path} to fail with an error!`);
+        }, error => {
+            if (error.statusCode !== statusCodeExpected) {
+                throw new Error(`Expected API call to ${method.path} to fail with status code ${statusCodeExpected}, but got ${error.statusCode}!`);
+            }
+            let body = error.response.body;
+            if (method.type === 'GET') {
+                body = JSON.parse(body);
+            }
+            if (body.error !== errorMessage) {
+                throw new Error(`Expected API call to ${method.path} to fail with error message "${errorMessage}", but got "${body.error}"!`);
+            }
+        });
+    }
+
     async registerUser(): Promise<TestUserData> {
         const request: RegisterUserRequest = {
             hasConsented: true,

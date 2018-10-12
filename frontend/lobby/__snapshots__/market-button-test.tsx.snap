@@ -5,8 +5,9 @@ exports[`<MarketButton> Component When 1 scenario(s) have been completed Shows '
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="open"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"
@@ -21,8 +22,9 @@ exports[`<MarketButton> Component When 1 scenario(s) have been completed Shows '
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="move"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"
@@ -37,8 +39,9 @@ exports[`<MarketButton> Component When 2 scenario(s) have been completed Shows '
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="open"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"
@@ -53,8 +56,9 @@ exports[`<MarketButton> Component When 2 scenario(s) have been completed Shows '
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="move"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"
@@ -69,8 +73,9 @@ exports[`<MarketButton> Component When 3 scenario(s) have been completed Shows "
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="actualized"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"
@@ -85,8 +90,9 @@ exports[`<MarketButton> Component When 3 scenario(s) have been completed Shows '
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="closed"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"
@@ -101,8 +107,9 @@ exports[`<MarketButton> Component When 4 scenario(s) have been completed Shows "
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="actualized"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"
@@ -117,8 +124,9 @@ exports[`<MarketButton> Component When 4 scenario(s) have been completed Shows '
   id="market-button-container"
 >
   <button
-    className="market"
+    className="market-button"
     id="closed"
+    onClick={[Function]}
   >
     <img
       alt="Market Button"

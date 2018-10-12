@@ -169,12 +169,28 @@ export const STEP_RESPONSE: ApiMethod<StepResponseRequest, EmptyApiResponse> = {
 // market-api methods:
 
 
-/** GET_UI_STATE Request */
+/** GET_SALTINES_BALANCE Request */
 export interface GetSaltinesBalanceResponse {
     saltinesBalance: number;
     saltinesEarnedAllTime: number;
 }
 export const GET_SALTINES_BALANCE: ApiMethod<NoRequestParameters, GetSaltinesBalanceResponse> = {path: '/api/market/saltines', type: 'GET'};
+
+
+/** GET_TEAM_MARKET_VARS Request: Get some data that affects the market */
+export interface GetTeamMarketVars {
+    scenariosComplete: number;
+    playerIsTheBurdened: boolean;
+    allowMarket: boolean;
+    forceMarket: boolean; // If true, The Burdened is forced to go buy a card from the market before they can do anything else.
+}
+export const GET_TEAM_MARKET_VARS: ApiMethod<NoRequestParameters, GetTeamMarketVars> = {path: '/api/market/gtmv', type: 'GET'};
+
+/** Buy a punchcard */
+export interface BuyPunchcardRequest {
+    punchcardId: string;
+}
+export const BUY_PUNCHCARD: ApiMethod<BuyPunchcardRequest, GetSaltinesBalanceResponse> = {path: '/api/market/buy', type: 'POST'};
 
 ///////////////////////////////////////////////////////////////////////////////
 // survey API methods:
