@@ -93,5 +93,9 @@ apiMethod(BUY_PUNCHCARD, async (data, app, user) => {
     // Push the result out to everyone on the team:
     await notifyTeamMarketStatusChanged(app, teamId);
 
-    return { saltinesBalance: statusAfter.balance, saltinesEarnedAllTime: statusAfter.earned, };
+    return {
+        saltinesBalance: statusAfter.balance,
+        saltinesEarnedAllTime: statusAfter.earned,
+        status: await getMarketStatus(teamId, user.id, db),
+    };
 });

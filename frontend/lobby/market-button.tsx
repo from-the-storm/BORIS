@@ -42,7 +42,7 @@ export class MarketButton extends React.PureComponent<Props> {
             case MarketStatus.Open: return open;
             case MarketStatus.ForcedForOtherPlayer: return taped;
             case MarketStatus.Taped: return taped;
-            case MarketStatus.Hidden: return {url: "", id: ""};
+            default: return {url: "", id: ""};
         }
     }
 }
