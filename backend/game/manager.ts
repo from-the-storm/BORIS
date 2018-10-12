@@ -554,8 +554,8 @@ export class GameManager implements GameManagerStepInterface {
             }
             interpreter.setProperty(scope, 'NAME_WITH_ROLE', interpreter.createNativeFunction(playerNameWithRole));
             interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
-            const getTimeElapsed = (callback: Function) => {
-                return Math.round(this.getElapsedTime() / 60.0);
+            const getTimeElapsed = () => {
+                return interpreter.nativeToPseudo(Math.round(this.getElapsedTime() / 60.0));
             }
             interpreter.setProperty(scope, 'ELAPSED_MINUTES', interpreter.createNativeFunction(getTimeElapsed));
         });
