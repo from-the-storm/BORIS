@@ -40,7 +40,7 @@ export function buildPreSurveyUrl(user: User): string {
     else if (user.survey_data.age <= 120) { params.age = '65+'; }
     // Redirect them:
     const queryString = buildQueryString(params);
-    return `http://dev.propelsurveysolutions.ca/registration/en/activity/197/1605/?${queryString}`;
+    return `https://propelsurveysolutions.ca/registration/en/activity/197/1605/?${queryString}`;
 }
 
 /**
