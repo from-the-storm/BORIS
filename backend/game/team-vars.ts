@@ -39,12 +39,18 @@ export async function setTeamVar<T>(variable: GameVar<T>, updater: (value: T) =>
     const newValue = await db.instance.tx('update_team_var', async (task) => {
         const origData = await task.one('SELECT game_vars FROM teams WHERE id = $1 FOR UPDATE', [teamId]);
         const origValue: T = variable.key in origData.game_vars ? origData.game_vars[variable.key] : variable.default;
-        const newValue = updater(origValue);
-        const forceCast = typeof newValue === 'string' ? '::text' : ''; // to_jsonb() needs to know how to interpret a string type.
+        const newValue: any = updater(origValue);
+        let insertValue = newValue, forceCast = '';
+        if (newValue === null) { // Storing NULL is tricky:
+            insertValue = 'null';
+            forceCast = '::jsonb';
+        } else if (typeof newValue === 'string') {
+            forceCast = '::text'; // to_jsonb() needs to know how to interpret a string type.
+        }
         await task.none(
             // use jsonb_set to guarantee that we don't affect other variables
             `UPDATE teams SET game_vars = jsonb_set(game_vars, $2, to_jsonb($3${forceCast})) WHERE id = $1`,
-            [teamId, `{${variable.key}}`, newValue],
+            [teamId, `{${variable.key}}`, insertValue],
         );
         return newValue;
     });
