@@ -288,6 +288,12 @@
             margin-bottom: 0;
         }
     }
+    .doc {
+        font-family: $consolefont;
+    }
+    .redact {
+        background: $black;
+    }
     hr {
         float: left;
         clear: both;
