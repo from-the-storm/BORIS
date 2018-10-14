@@ -554,8 +554,8 @@ export class GameManager implements GameManagerStepInterface {
             }
             interpreter.setProperty(scope, 'NAME_WITH_ROLE', interpreter.createNativeFunction(playerNameWithRole));
             interpreter.setProperty(scope, 'NUM_PLAYERS', interpreter.nativeToPseudo(this.playerIds.length));
-            const getTimeElapsed = (callback: Function) => {
-                return Math.round(this.getElapsedTime() / 60.0);
+            const getTimeElapsed = () => {
+                return interpreter.nativeToPseudo(Math.round(this.getElapsedTime() / 60.0));
             }
             interpreter.setProperty(scope, 'ELAPSED_MINUTES', interpreter.createNativeFunction(getTimeElapsed));
         });
@@ -696,8 +696,14 @@ export class GameManager implements GameManagerStepInterface {
             await task.one('SELECT pg_advisory_xact_lock($1, $2)', [this.gameId, hashKey(`g${variable.key}`)]);
             const origData = await task.one('SELECT game_vars FROM games WHERE id = $1', [this.gameId]);
             const origValue: T = variable.key in origData.game_vars ? origData.game_vars[variable.key] : variable.default;
-            const newValue = updater(origValue);
-            const forceCast = typeof newValue === 'string' ? '::text' : ''; // to_jsonb() needs to know how to interpret a string type.
+            let newValue: any = updater(origValue);
+            let forceCast = '';
+            if (newValue === null) { // Storing NULL is tricky:
+                newValue = 'null';
+                forceCast = '::jsonb';
+            } else if (typeof newValue === 'string') {
+                forceCast = '::text'; // to_jsonb() needs to know how to interpret a string type.
+            }
             const result = await task.one(
                 // use jsonb_set to guarantee that we don't affect other variables
                 `UPDATE games SET game_vars = jsonb_set(game_vars, $2, to_jsonb($3${forceCast}))
@@ -705,7 +711,7 @@ export class GameManager implements GameManagerStepInterface {
                 [this.gameId, `{${variable.key}}`, newValue]
             );
             this.gameVars = result.game_vars;
-            return newValue;
+            return this.gameVars[variable.key];
         });
         const timeTaken = (+new Date()) - startTime;
         if (timeTaken > 500) {
@@ -744,8 +750,14 @@ export class GameManager implements GameManagerStepInterface {
                 variable.key in this.teamVars ? this.teamVars[variable.key] :
                 variable.default
             );
-            const newValue = updater(origValue);
-            const forceCast = typeof newValue === 'string' ? '::text' : ''; // to_jsonb() needs to know how to interpret a string type.
+            let newValue: any = updater(origValue);
+            let forceCast = '';
+            if (newValue === null) { // Storing NULL is tricky:
+                newValue = 'null';
+                forceCast = '::jsonb';
+            } else if (typeof newValue === 'string') {
+                forceCast = '::text'; // to_jsonb() needs to know how to interpret a string type.
+            }
             const result = await task.one(
                 // use jsonb_set to guarantee that we don't affect other variables
                 `UPDATE games SET pending_team_vars = jsonb_set(pending_team_vars, $2, to_jsonb($3${forceCast}))
@@ -753,7 +765,7 @@ export class GameManager implements GameManagerStepInterface {
                 [this.gameId, `{${variable.key}}`, newValue]
             );
             this.pendingTeamVars = result.pending_team_vars;
-            return newValue;
+            return this.pendingTeamVars[variable.key];
         });
         const timeTaken = (+new Date()) - startTime;
         if (timeTaken > 500) {

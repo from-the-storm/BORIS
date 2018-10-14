@@ -7,7 +7,9 @@ import { GameStatus } from './manager-defs';
 import { getTeamVar } from './team-vars';
 
 const teamVarNumber: GameVar<number> = {key: 'teamVarNumber', scope: GameVarScope.Team, default: 10};
+const teamVarAny: GameVar<any> = {key: 'teamVarAny', scope: GameVarScope.Team, default: null};
 const gameVarNumber: GameVar<number> = {key: 'gameVarNumber', scope: GameVarScope.Game, default: 15};
+const gameVarAny: GameVar<any> = {key: 'gameVarAny', scope: GameVarScope.Game, default: null};
 const stepVarString: GameVar<string> = {key: 'stepVarNumber', scope: GameVarScope.Step, default: ""};
 
 describe("GameManager tests", () => {
@@ -50,6 +52,15 @@ describe("GameManager tests", () => {
                     expect(gameManager.getVar(teamVarNumber)).toEqual(43);
                 });
 
+                it("Can store null values", async () => {
+                    expect(gameManager.getVar(teamVarAny)).toBe(null); // Since null is the default
+                    await gameManager.setVar(teamVarAny, val => 42);
+                    expect(gameManager.getVar(teamVarAny)).toEqual(42);
+                    const setResult = await gameManager.setVar(teamVarAny, val => null);
+                    expect(setResult).toBe(null);
+                    expect(gameManager.getVar(teamVarAny)).toBe(null);
+                });
+
                 it("Does not permanently affect the team vars if the game is abandoned", async() => {
                     expect(await getTeamVar(teamVarNumber, teamId, db)).toEqual(10); // Default value
                     await gameManager.setVar(teamVarNumber, val => 42);
@@ -87,6 +98,15 @@ describe("GameManager tests", () => {
                     expect(gameManager.getVar(gameVarNumber)).toEqual(42);
                     await gameManager.setVar(gameVarNumber, val => ++val);
                     expect(gameManager.getVar(gameVarNumber)).toEqual(43);
+                });
+
+                it("Can store null values", async () => {
+                    expect(gameManager.getVar(gameVarAny)).toBe(null); // Since null is the default
+                    await gameManager.setVar(gameVarAny, val => 42);
+                    expect(gameManager.getVar(gameVarAny)).toEqual(42);
+                    const setResult = await gameManager.setVar(gameVarAny, val => null);
+                    expect(setResult).toBe(null);
+                    expect(gameManager.getVar(gameVarAny)).toBe(null);
                 });
 
             });
