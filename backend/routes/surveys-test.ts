@@ -26,7 +26,7 @@ describe("Survey link tests", () => {
             };
 
             expect(buildPreSurveyUrl(user)).toBe(
-                "http://dev.propelsurveysolutions.ca/registration/en/activity/197/1605/?email=brian_test%40example.com&foreignid=12345&firstname=Bri%C3%A1n&gender=male&age=25-34"
+                "https://propelsurveysolutions.ca/registration/en/activity/197/1605/?email=brian_test%40example.com&foreignid=12345&firstname=Bri%C3%A1n&gender=male&age=25-34"
             );
         });
 
@@ -46,7 +46,7 @@ describe("Survey link tests", () => {
             };
 
             expect(buildPreSurveyUrl(user)).toBe(
-                "http://dev.propelsurveysolutions.ca/registration/en/activity/197/1605/?email=gen_test%40example.com&foreignid=5678&firstname=Genderless&age=15-24"
+                "https://propelsurveysolutions.ca/registration/en/activity/197/1605/?email=gen_test%40example.com&foreignid=5678&firstname=Genderless&age=15-24"
             );
         });
     });
