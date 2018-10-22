@@ -103,12 +103,17 @@ defineMethod(GET_TEAM, async (data, app, user) => {
     if (team === null) {
         throw new SafeError(`Team ${id} not found.`, 404);
     }
+    const members = await db.query(
+        `SELECT user_id, first_name, email FROM team_members tm, users u WHERE tm.team_id = $1 AND is_active = 'true' AND u.id = tm.user_id`,
+        [team.id], {}
+    );
     return {
         id: team.id,
         name: team.name,
         organization: team.organization,
         code: team.code,
         created: team.created,
+        members,
         game_vars: team.game_vars,
     };
 });
