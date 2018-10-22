@@ -1,5 +1,21 @@
 import * as React from 'react';
-import { List, Datagrid, NumberField, TextField, DateField, ShowButton, ShowController, ShowView, SimpleShowLayout, CardActions, ListButton, RefreshButton, Button } from 'react-admin';
+import {
+    List,
+    Datagrid,
+    ArrayField,
+    NumberField,
+    TextField,
+    DateField,
+    EmailField,
+    ShowButton,
+    ShowController,
+    ShowView,
+    SimpleShowLayout,
+    CardActions,
+    ListButton,
+    RefreshButton,
+    Button,
+} from 'react-admin';
 
 export const TeamList = (props: any) => (
     <List title="All teams" {...props}>
@@ -53,6 +69,13 @@ export const TeamShow = (props: any) => (
                     <TextField source="organization" />
                     <TextField source="code" />
                     <DateField source="created" />
+                    <ArrayField source="members">
+                        <Datagrid>
+                            <NumberField source="user_id" />
+                            <TextField source="first_name" />
+                            <EmailField source="email" />
+                        </Datagrid>
+                    </ArrayField>
                     {controllerProps.record && controllerProps.record.game_vars && Object.keys(controllerProps.record.game_vars).map(k =>
                         <TextField key={k} source={`game_vars.${k}`} label={k} />
                     )}

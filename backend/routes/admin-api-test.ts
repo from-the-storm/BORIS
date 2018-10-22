@@ -76,7 +76,7 @@ describe("Admin API tests", () => {
             checkSecurity(GET_TEAM, {id: "1"});
 
             it("Returns team data", async () => {
-                const {team, teamId} = await createTeam(server.app.get("db") as BorisDatabase, 3);
+                const {team, teamId, user1, user2, user3} = await createTeam(server.app.get("db") as BorisDatabase, 3);
                 const response = await client.callApi(GET_TEAM, {id: String(teamId)});
                 expect(response).toEqual({
                     id: teamId,
@@ -84,6 +84,11 @@ describe("Admin API tests", () => {
                     organization: team.organization,
                     code: team.code,
                     created: JSON.stringify(team.created).replace(/"/g, ''),
+                    members: [
+                        {user_id: user1.id, first_name: user1.first_name, email: user1.email},
+                        {user_id: user2.id, first_name: user2.first_name, email: user2.email},
+                        {user_id: user3.id, first_name: user3.first_name, email: user3.email},
+                    ],
                     game_vars: team.game_vars,
                 });
             });

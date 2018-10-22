@@ -20,13 +20,14 @@ import {App} from './app';
 import { RootLoadingSpinnerComponent } from './loading/root-loading-spinner';
 import { InitStateActions } from './global/state/init-state-actions';
 import { UserStateActions } from './global/state/user-state-actions';
-import { InitialStateResponse, GET_INITIAL_STATE } from '../common/api';
+import { GET_INITIAL_STATE } from '../common/api';
 import { TeamStateActions } from './global/state/team-state-actions';
+import { GameStateActions, refreshGameUiState } from './global/state/game-state-actions';
+import { leadersStateReducer } from './global/state/leaders-state';
 import { callApi } from './api';
 import { AnyAction } from './global/actions';
 import { rpcClientMiddleware } from './rpc-client/manager';
 import { Middleware } from 'redux';
-import { GameStateActions, refreshGameUiState } from './global/state/game-state-actions';
 
 
 export const store = createStore(
@@ -39,6 +40,7 @@ export const store = createStore(
         lobbyState: lobbyStateReducer,
         rpcClientState: rpcClientStateReducer,
         gameState: gameStateReducer,
+        leadersState: leadersStateReducer,
     }),
     applyMiddleware(thunk, rpcClientMiddleware as Middleware),
 );

@@ -121,6 +121,20 @@ export interface ScenariosResponse {
 
 export const GET_SCENARIOS: ApiMethod<NoRequestParameters, ScenariosResponse> = {path: '/api/lobby/scenarios', type: 'GET'};
 
+export interface LeaderboardEntry {
+    teamName: string;
+    organization: string;
+    scenariosCompleted: number;
+    score: number;
+    rank: number;
+}
+
+export interface LeaderboardsResponse {
+    leaders: LeaderboardEntry[],
+}
+
+export const GET_LEADERS: ApiMethod<NoRequestParameters, LeaderboardsResponse> = {path: '/api/lobby/leaderboards', type: 'GET'};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // game-api methods:

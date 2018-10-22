@@ -91,6 +91,7 @@ async function convertHTTPResponseToDataProvider(response: Response, type: strin
 
     switch (type) {
     case GET_LIST:
+    case GET_MANY:
         return {
             data: json.data,
             total: json.count,
