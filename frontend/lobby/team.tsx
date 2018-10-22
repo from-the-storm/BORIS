@@ -1,6 +1,7 @@
 import bind from 'bind-decorator';
 import * as React from 'react';
 import { connect, DispatchProp } from 'react-redux';
+import { List } from 'immutable';
 
 import { RootState } from '../global/state';
 import { OtherTeamMember } from '../../common/models';
@@ -10,7 +11,8 @@ import { Prompt } from '../prompt/prompt';
 
 import * as saltine from './images/saltine.svg';
 import { updateMarketVars } from '../global/state/team-state-actions';
-import { KICK_OFF_TEAM } from '../../common/api';
+import { KICK_OFF_TEAM, LeaderboardEntry } from '../../common/api';
+import { updateLeaderboards } from '../global/state/leaders-state-actions';
 import { callApi } from '../api';
 
 interface TeamRowProps {
@@ -107,6 +109,7 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     isTeamAdmin: boolean;
     isOnline: boolean;
     otherTeamMembers: Array<OtherTeamMember>;
+    leaders: List<LeaderboardEntry>;
 }
 interface State {
     teamView: boolean,
@@ -125,6 +128,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
 
         // Update the saltines balance:
         this.props.dispatch(updateMarketVars());
+        this.props.dispatch(updateLeaderboards());
     }
 
     public render() {
@@ -161,24 +165,25 @@ class _TeamComponent extends React.PureComponent<Props, State> {
             }
             { !teamView &&
                 <div>
-                    <h1>Vancouver</h1>
-                    <p>Leaderboards will be activated when the beta is over!</p>
-                    {/* <table className="leaderboards">
+                    <h1>Top Teams</h1>
+                    <table className="leaderboards">
                         <thead>
                             <tr>
                                 <th>Rank</th>
                                 <th>Team</th>
+                                <th>Scenarios</th>
                                 <th>Score</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Jellied Cranberries<span>Organization</span></td>
-                                <td>568</td>
-                            </tr>
+                            {this.props.leaders.map((entry, key) => <tr key={key}>
+                                <td>{entry.rank}</td>
+                                <td>{entry.teamName} <span>{entry.organization}</span></td>
+                                <td>{entry.scenariosCompleted}</td>
+                                <td>{entry.score}</td>
+                            </tr>)}
                         </tbody>
-                    </table> */}
+                    </table>
                 </div>
             }
         </div>;
@@ -209,5 +214,6 @@ export const TeamComponent = connect((state: RootState, ownProps: OwnProps) => {
         saltinesBalance: state.teamState.saltinesBalance,
         saltinesBalanceAllTime: state.teamState.saltinesEarnedAllTime,
         otherTeamMembers: state.teamState.otherTeamMembers,
+        leaders: state.leadersState.leaders,
     };
 })(_TeamComponent);

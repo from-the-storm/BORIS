@@ -6,6 +6,7 @@ import { RegistrationStateActionsType } from '../registration/registration-state
 import { RpcClientStateActionType } from '../rpc-client/rpc-client-actions';
 import { GameStateActionsType } from './state/game-state-actions';
 import { MessagesStateActionsType } from './state/messages-state-actions';
+import { LeadersStateActionsType } from './state/leaders-state-actions';
 
 
 export type AnyAction = (
@@ -17,4 +18,5 @@ export type AnyAction = (
     |RegistrationStateActionsType
     |RpcClientStateActionType
     |GameStateActionsType
+    |LeadersStateActionsType
 );
