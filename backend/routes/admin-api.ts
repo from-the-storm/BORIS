@@ -38,9 +38,16 @@ function defineListMethod<T>(path: string, fn: (criteria: any, queryOptions: mas
         const db: BorisDatabase = app.get("db");
         const limit = Math.max(1, data.perPage ? parseInt(data.perPage, 10) : 100);
         const offset = Math.max(0, data.page ? (parseInt(data.page, 10) - 1) * limit : 0);
-        const criteria = {};
+        let filter: any = null;
+        if (data.filter) {
+            try {
+                filter = JSON.parse(data.filter);
+            } catch (err) {
+                throw new SafeError("Unable to parse filter value.");
+            }
+        }
         const queryOptions = {offset, limit};
-        const result: ListResponse<T> = await fn(criteria, queryOptions, db, user, app);
+        const result: ListResponse<T> = await fn(filter, queryOptions, db, user, app);
         return result;
     });
     return methodDefinition;
@@ -71,12 +78,12 @@ async function queryWithCount<T>(table: massive.Table<T>, criteria: any, _option
     }
 }
 
-export const LIST_USERS = defineListMethod<BasicUser>('users', async (criteria, queryOptions, db, app, user) => {
-    return queryWithCount(db.users, criteria, {...queryOptions, fields: ['id', 'first_name', 'email', 'created']});
+export const LIST_USERS = defineListMethod<BasicUser>('users', async (filter, queryOptions, db, app, user) => {
+    return queryWithCount(db.users, {}, {...queryOptions, fields: ['id', 'first_name', 'email', 'created']});
 });
 
-export const LIST_TEAMS = defineListMethod<Team>('teams', async (criteria, queryOptions, db, app, user) => {
-    return queryWithCount(db.teams, criteria, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
+export const LIST_TEAMS = defineListMethod<Team>('teams', async (filter, queryOptions, db, app, user) => {
+    return queryWithCount(db.teams, {}, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
 });
 
 
@@ -123,9 +130,9 @@ interface ScenarioWithScript extends Scenario {
     script: string;
 }
 
-export const LIST_SCENARIOS = defineListMethod<ScenarioWithScript>('scenarios', async (criteria, queryOptions, db, app, user) => {
+export const LIST_SCENARIOS = defineListMethod<ScenarioWithScript>('scenarios', async (filter, queryOptions, db, app, user) => {
     const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'is_active', 'script', 'description_html', 'start_point', ];
-    const {data, count} = await queryWithCount(db.scenarios, {...criteria}, {...queryOptions, fields});
+    const {data, count} = await queryWithCount(db.scenarios, {}, {...queryOptions, fields});
     const scenarios = data.map( s => ({...s, start_point: {lat: s.start_point.x, lng: s.start_point.y}}) );
     return { data: scenarios, count, };
 });
@@ -216,8 +223,8 @@ defineMethod(EDIT_SCENARIO, async (data, app, user) => {
 });
 
 
-export const LIST_SCRIPTS = defineListMethod<{name: string}>('scripts', async (criteria, queryOptions, db, app, user) => {
-    return queryWithCount(db.scripts, criteria, {...queryOptions, fields: ['name']});
+export const LIST_SCRIPTS = defineListMethod<{name: string}>('scripts', async (filter, queryOptions, db, app, user) => {
+    return queryWithCount(db.scripts, {}, {...queryOptions, fields: ['name']});
 });
 
 export const GET_SCRIPT: ApiMethod<{id: string}, {name: string, script_yaml: string}> = {path: `/api/admin/scripts/:id`, type: 'GET'};
@@ -266,8 +273,19 @@ defineMethod(EDIT_SCRIPT, async (data, app, user) => {
     return { name, script_yaml: data.script_yaml};
 });
 
-export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (criteria, queryOptions, db, app, user) => {
+export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (filter, queryOptions, db, app, user) => {
     const fields = ['id', 'team_id', 'scenario_id', 'started', 'is_active', 'finished'];
-    const {data, count} = await queryWithCount(db.games, {...criteria}, {...queryOptions, fields});
+    const criteria: any = {};
+    if (filter && filter.statusFilter !== undefined) {
+        if (filter.statusFilter === 'active') {
+            criteria.is_active = true;
+        } else if (filter.statusFilter === 'completed') {
+            criteria['finished IS NOT'] = null;
+        } else if (filter.statusFilter === 'abandoned') {
+            criteria.is_active = false;
+            criteria['finished IS'] = null;
+        }
+    }
+    const {data, count} = await queryWithCount(db.games, criteria, {...queryOptions, fields});
     return { data, count, };
 });
