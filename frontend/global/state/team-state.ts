@@ -24,7 +24,7 @@ export class TeamState extends Record({
         return this.teamCode !== null;
     }
     get allowMarket(): boolean {
-        return this.marketStatus === MarketStatus.Forced || this.marketStatus === MarketStatus.Open;
+        return this.marketStatus === MarketStatus.Forced || this.marketStatus === MarketStatus.Open || this.marketStatus === MarketStatus.Actualized;
     }
     get forceMarket(): boolean {
         return this.marketStatus === MarketStatus.Forced || this.marketStatus === MarketStatus.ForcedForOtherPlayer;

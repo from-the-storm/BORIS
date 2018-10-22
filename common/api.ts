@@ -177,8 +177,8 @@ export const enum MarketStatus {
     Open = 'O', // The market is open and the current player may go buy a punchcard if they wish to
     AlreadyBought = 'A', // The player is the burdened and has _just_ purchased a punchard
     Taped = 'T', // The player is not the burdened so cannot enter the market
-    Boarded = 'X', // The team has completed at least 3 scenarios so are permanently locked out of the market.
-    Actualized = 'Z', // The current user is "The Burdened" and the team has completed at least 3 scenarios so are permanently locked out of the market.
+    Boarded = 'X', // The team has completed at least 4 scenarios so are permanently locked out of the market.
+    Actualized = 'Z', // The current user is "The Burdened" and the team has completed at least 3 scenarios. The Burdened can still enter the market.
 };
 
 export interface GetTeamMarketVarsResponse {
