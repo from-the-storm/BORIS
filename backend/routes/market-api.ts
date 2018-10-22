@@ -47,8 +47,10 @@ export async function getMarketStatus(teamId: number, userId: number, db: BorisD
         status = playerIsTheBurdened ? MarketStatus.Forced : MarketStatus.ForcedForOtherPlayer;
     } else if (scenariosComplete > 1 && scenariosComplete < 3) {
         status = playerIsTheBurdened ? MarketStatus.Open : MarketStatus.Taped;
-    } else if (scenariosComplete >= 3) {
-        status = playerIsTheBurdened ? MarketStatus.Actualized : MarketStatus.Boarded;
+    } else if (scenariosComplete == 3) {
+        status = playerIsTheBurdened ? MarketStatus.Actualized : MarketStatus.Taped;
+    } else if (scenariosComplete >= 4) {
+        status = MarketStatus.Boarded;
     }
     return status;
 }
