@@ -72,10 +72,10 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
                 fullscreen
             >
                 <div className="prompt-image"><img width="280" height="450" src={backfeed} alt="Backfeed" /></div>
-                <p>Welcome. Before you begin, why not join a very very ethical research study? It'll only take a few minutes to set up and pays modestly well. Then you can jump right back into the apocalypse training.</p>
+                <p>Welcome. Before you begin, why not join a very very ethical research study? It'll only take a few minutes to set up. Then you can jump right back into the apocalypse training.</p>
                 <div className="button-split">
                     <a className="research no" onClick={this.handleDeclineResearchPrompt}>Not interested</a>
-                    <a className="research" target="_blank" rel="noopener noreferrer" href={`/survey/presurvey`} onClick={this.handleResearchLinkClicked}>TELL ME MORE</a>
+                    <a className="research" href={`/survey/presurvey`} onClick={this.handleResearchLinkClicked}>TELL ME MORE</a>
                 </div>
             </Prompt>
         </RpcConnectionStatusIndicator>;

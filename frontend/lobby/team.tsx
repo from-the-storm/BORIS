@@ -178,7 +178,7 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <tbody>
                             {this.props.leaders.map((entry, key) => <tr key={key}>
                                 <td>{entry.rank}</td>
-                                <td>{entry.teamName} <span>{entry.organization}</span></td>
+                                <td>{entry.teamName}{entry.organization ? <span>{entry.organization}</span> : ''}</td>
                                 <td>{entry.scenariosCompleted}</td>
                                 <td>{entry.score}</td>
                             </tr>)}
