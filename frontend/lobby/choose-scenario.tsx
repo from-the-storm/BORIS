@@ -34,16 +34,18 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = ({
-            showMap: false,
+            showMap: true,
         });
         // Update the vars that affect whether we show the market:
         this.props.dispatch(updateMarketVars());
     }
 
     @bind handleShowMap() {
-        this.setState({ showMap: true, });
+        this.setState(prevState => ({
+            showMap: !prevState.showMap
+        }))
     }
-
+    
     public render() {
         if (this.props.teamCode === null) {
             return <div>Error: you must have joined a team to see the scenario list.</div>;
@@ -58,7 +60,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                 <div className="scenario-info details">
                     <span className={selectedScenario.difficulty}>{selectedScenario.difficulty}</span>
                     <span>{selectedScenario.duration_min} mins</span><br />
-                    <span>Start at {selectedScenario.start_point_name}. <a title="View on map" onClick={this.handleShowMap}>(View on Map)</a></span>
+                    <span>Start at {selectedScenario.start_point_name}. <a title="Toggle map" onClick={this.handleShowMap}>(Toggle Map)</a></span>
                     {this.state.showMap &&
                         <AutoWayfinder lat={selectedScenario.start_point.lat} lng={selectedScenario.start_point.lng} zoom={14} />
                     }
@@ -105,7 +107,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     }
 
     @bind private showScenarioDetails(scenarioId: number) {
-        this.setState({showMap: false});
+        this.setState({showMap: true});
         this.props.dispatch<AnyAction>({type: Actions.SHOW_SCENARIO_DETAILS, scenarioId});
     }
 

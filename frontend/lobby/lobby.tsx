@@ -15,7 +15,6 @@ import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator
 
 import * as back from './images/back.svg';
 import * as teams from './images/teams-icon.svg';
-import * as backfeed from '../other-images/backfeed.png';
 
 // Include our SCSS (via webpack magic)
 import './lobby.scss';
@@ -69,13 +68,11 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
             </div>
             <Prompt close={this.handleDeclineResearchPrompt}
                 show={!this.props.seenResearchPrompt}
-                fullscreen
             >
-                <div className="prompt-image"><img width="280" height="450" src={backfeed} alt="Backfeed" /></div>
-                <p>Welcome. Before you begin, why not join a very very ethical research study? It'll only take a few minutes to set up and pays modestly well. Then you can jump right back into the apocalypse training.</p>
-                <div className="button-split">
+                <p className="research">Before you begin, why not join an <strong>optional</strong> but very very ethical research study? It'll only take a few minutes to set up. Then you can come right back to <a href="https://play.apocalypsemadeeasy.com">play.apocalypsemadeeasy.com</a> to resume training.</p>
+                <div className="button-split research">
                     <a className="research no" onClick={this.handleDeclineResearchPrompt}>Not interested</a>
-                    <a className="research" target="_blank" rel="noopener noreferrer" href={`/survey/presurvey`} onClick={this.handleResearchLinkClicked}>TELL ME MORE</a>
+                    <a className="research" href={`/survey/presurvey`} onClick={this.handleResearchLinkClicked}>TELL ME MORE</a>
                 </div>
             </Prompt>
         </RpcConnectionStatusIndicator>;

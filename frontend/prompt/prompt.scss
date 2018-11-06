@@ -12,7 +12,7 @@
     max-width: 32em;
     margin: 0 auto;
     z-index: 2;
-    background: transparentize($black, 0.1);
+    background: transparentize($black, 0.15);
 }
 
 .prompt-content {
@@ -34,13 +34,6 @@
                 #prompt-description button {
                     border: 1px solid $white;
                 }
-                .prompt-image {
-                    text-align: center;
-                        img {
-                            height: auto;
-                            margin-top: 1rem;
-                        }
-                }
                 h1 {
                     margin-top: 1.5rem;
                 }
@@ -49,22 +42,30 @@
                     color: $red;
                     padding-top: 0.75rem;
                 }
-                a.research {
-                    background: white;
-                    display: inline-block;
-                    font-family: $fancyfont;
-                    text-decoration: none;
-                    line-height: 40px;
-                    padding: 0.5rem 0.75rem;
-                    font-size: 1.2em;
-                    margin-top: 0.75rem;
-                        &.no {
-                            font-family: $textfont;
-                            font-size: 1em;
-                            background: none;
-                            color: $white;
-                            padding-left: 0;
-                        }
+        }
+        p.research {
+            margin-right: 40px;
+            margin-top: 0.5rem;
+        }
+        .button-split.research {
+            margin: 1rem 0 0;
+        }
+        a.research {
+            background: $black;
+            color: $white;
+            display: inline-block;
+            font-family: $fancyfont;
+            text-decoration: none;
+            line-height: 40px;
+            padding: 0.5rem 0.75rem;
+            font-size: 1.2em;
+            margin-top: 0.75rem;
+                &.no {
+                    font-family: $textfont;
+                    font-size: 1em;
+                    background: none;
+                    color: $black;
+                    border: 1px solid;
                 }
         }
         #prompt-description {

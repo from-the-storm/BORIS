@@ -41,7 +41,7 @@ class _PreLaunchComponent extends React.PureComponent<Props, State> {
         return <div className="pre-launch">
             <h1>{this.props.scenario.name}</h1>
             <h2>Confirm your team</h2>
-            <p>Before you start, make sure everyone is ready (and that their phones are charged).</p>
+            <p>Before you begin, make sure you're all at the starting point (and that your phones are charged).</p>
             <h3>Team Members Ready to Play</h3>
             <ul className="team online">
                 {this.props.onlineTeamMembers.map(member =>
