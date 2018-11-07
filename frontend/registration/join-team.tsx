@@ -10,6 +10,7 @@ import { TeamStateActions } from '../global/state/team-state-actions';
 import { CreateOrJoinTeamResponse, JOIN_TEAM } from '../../common/api';
 import { AnyAction } from '../global/actions';
 
+import * as pie from './images/pie-trap.jpg';
 
 interface OwnProps {
 }
@@ -51,6 +52,8 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
         } else {
             return <div>
                 <h1>Join/Create Team</h1>
+                <p>Apocalypse Made Easy! requires a team of 2-5 people. Do what it takes to get your friends involved.</p>
+                <img src={pie} alt="Apocalypse Made Easy! | Wrangle Your Friends" />
                 <div className="button-split full">
                     <button onClick={this.handleJoinTeam}>Join a Team</button>
                     <button onClick={this.handleCreateTeam}>Create a Team</button>
