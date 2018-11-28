@@ -69,7 +69,7 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
             <Prompt close={this.handleDeclineResearchPrompt}
                 show={!this.props.seenResearchPrompt}
             >
-                <p className="research">Before you begin, why not join an <strong>optional</strong> but very very ethical research study? It'll only take a few minutes to set up. Then you can come right back to <a href="https://play.apocalypsemadeeasy.com">play.apocalypsemadeeasy.com</a> to resume training.</p>
+                <p className="research">Before you begin, why not join an optional research study about social connectedness? It'll only take a few minutes to set up. Then you can come right back to <a href="https://play.apocalypsemadeeasy.com">play.apocalypsemadeeasy.com</a> to resume training.</p>
                 <div className="button-split research">
                     <a className="research no" onClick={this.handleDeclineResearchPrompt}>Not interested</a>
                     <a className="research" href={`/survey/presurvey`} onClick={this.handleResearchLinkClicked}>TELL ME MORE</a>
