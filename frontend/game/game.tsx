@@ -87,8 +87,9 @@ class _GameComponent extends React.PureComponent<Props, State> {
                 heading="Help"
                 show={this.state.showHelpPrompt}
             >
+                <p>If you're having technical issues, try refreshing your browser. You should be brought back to where you were when it reloads.</p>
                 <p><strong>If you're lost</strong> try retracing your steps to the last challenge. If you <strong>can't figure out a challenge</strong> just answer any old thing and move on.</p>
-                <p>If you're convinced that a challenge is not just challenging but physically impossible, <a href="mailto:info@apocalypsemadeeasy.com">email us</a> and let us know. If your story checks out we'll email you some non saltine-based currency as a thanks.</p>
+                <p>If you're convinced that a challenge is impossible, <a href="mailto:info@apocalypsemadeeasy.com">email us</a> and let us know. If it checks out we'll email you some non saltine-based currency as a thanks.</p>
             </Prompt>
         </RpcConnectionStatusIndicator>;
     }
