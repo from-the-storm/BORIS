@@ -60,8 +60,9 @@
     -webkit-animation: 1s 4.5s forwards fade;
     animation: 1s 4.5s forwards fade;
     div {
-        padding: 0 2rem;
+        padding: 0.5rem 2rem;
         opacity: 0;
+        overflow-y: auto;
         -webkit-animation: 1s 0.5s reverse forwards fade;
         animation: 1s 0.5s reverse forwards fade;
         img {
