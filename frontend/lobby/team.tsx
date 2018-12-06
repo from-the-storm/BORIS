@@ -141,6 +141,9 @@ class _TeamComponent extends React.PureComponent<Props, State> {
             { teamView &&
                 <div>
                     <h1>{this.props.teamName}</h1>
+                    {this.props.otherTeamMembers.length < 4 && 
+                        <p className="callout">Share your team code <span className="mono">{this.props.teamCode}</span> to recruit more team members. Your team has room for 5 players in total.</p>
+                    }
                     <div className="saltines-count">
                         <h3>Saltines</h3>
                         <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.saltinesBalance}</span>(current balance)</p>
@@ -158,9 +161,6 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                             <TeamMemberRow key={member.id} details={member} editable={this.state.editingTeam} isMe={false} />
                         )}
                     </ul>
-                    {this.props.otherTeamMembers.length < 4 && 
-                        <p className="callout">Share your team code <span className="mono">{this.props.teamCode}</span> to recruit more team members. Your team has room for 5 players in total.</p>
-                    }
                 </div>
             }
             { !teamView &&
