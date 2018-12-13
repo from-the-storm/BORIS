@@ -42,15 +42,9 @@ export async function getMarketStatus(teamId: number, userId: number, db: BorisD
     let status = MarketStatus.Hidden;
     if (aPunchcardIsActive) {
         status = MarketStatus.AlreadyBought;
-    } else if (scenariosComplete === 1) {
-        // The team has completed one scenario
-        status = playerIsTheBurdened ? MarketStatus.Forced : MarketStatus.ForcedForOtherPlayer;
-    } else if (scenariosComplete > 1 && scenariosComplete < 3) {
+    } else if (scenariosComplete >= 1) {
+        // The team has completed at least one scenario
         status = playerIsTheBurdened ? MarketStatus.Open : MarketStatus.Taped;
-    } else if (scenariosComplete == 3) {
-        status = playerIsTheBurdened ? MarketStatus.Actualized : MarketStatus.Taped;
-    } else if (scenariosComplete >= 4) {
-        status = MarketStatus.Boarded;
     }
     return status;
 }
