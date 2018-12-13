@@ -34,7 +34,7 @@ apiMethod(GET_LEADERS, async (data, app, user) => {
         INNER JOIN (
             SELECT team_id, COUNT(games.id) AS completed FROM games WHERE finished IS NOT NULL GROUP BY team_id
         ) g ON g.team_id = t.id
-        WHERE t.game_vars->>'saltines' IS NOT NULL ORDER BY score DESC LIMIT 10;
+        WHERE t.game_vars->>'saltines' IS NOT NULL ORDER BY score DESC LIMIT 25;
     `, [], {});
 
     const leaders: LeaderboardEntry[] = [];
