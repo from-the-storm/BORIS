@@ -36,7 +36,6 @@ interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {
     saltinesBalance: number;
-    shouldShowPrelude: boolean;
 }
 interface State {
     showPunchcardDetails: string|null; // Which punchard the user selected to see details of
@@ -50,13 +49,11 @@ class _MarketComponent extends React.PureComponent<Props, State> {
         super(props);
         this.state = ({
             showPunchcardDetails: null,
-            showingPreludeConversation: props.shouldShowPrelude,
+            showingPreludeConversation: true,
             numPreludeMessagesShown: 0,
         });
         this.props.dispatch(updateMarketVars());
-        if (props.shouldShowPrelude) {
-            setTimeout(this.showNextPreludeMessage, 500);
-        }
+        setTimeout(this.showNextPreludeMessage, 500);
     }
 
     @bind private handleBackButton() {
@@ -165,6 +162,5 @@ class _MarketComponent extends React.PureComponent<Props, State> {
 }
 
 export const MarketComponent = connect((state: RootState, ownProps: OwnProps) => ({
-    shouldShowPrelude: state.teamState.marketStatus == MarketStatus.Open,
     saltinesBalance: state.teamState.saltinesBalance,
 }))(_MarketComponent);
