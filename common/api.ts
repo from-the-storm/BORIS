@@ -186,13 +186,9 @@ export const STEP_RESPONSE: ApiMethod<StepResponseRequest, EmptyApiResponse> = {
 /** GET_TEAM_MARKET_VARS Request: Get some data that affects the market */
 export const enum MarketStatus {
     Hidden = 'H', // The team has not completed any scenarios yet so won't see any sign of the market
-    Forced = 'B', // The current player is the Burdened and MUST buy a punchcard from the market before the team can play again
-    ForcedForOtherPlayer = 'F', // The current player is locked out of the game until the person who is The Burdened buys a punchcard
     Open = 'O', // The market is open and the current player may go buy a punchcard if they wish to
     AlreadyBought = 'A', // The player is the burdened and has _just_ purchased a punchard
     Taped = 'T', // The player is not the burdened so cannot enter the market
-    Boarded = 'X', // The team has completed at least 4 scenarios so are permanently locked out of the market.
-    Actualized = 'Z', // The current user is "The Burdened" and the team has completed at least 3 scenarios. The Burdened can still enter the market.
 };
 
 export interface GetTeamMarketVarsResponse {

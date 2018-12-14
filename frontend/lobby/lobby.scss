@@ -27,14 +27,6 @@
                             animation: 1.5s steps(2) infinite cycle;
                         }
                     }
-                    &#actualized {
-                        img {
-                            width: 300%;
-                            max-width: none;
-                            -webkit-animation: 1s steps(3) infinite cycle;
-                            animation: 1s steps(3) infinite cycle;
-                        }
-                    }
             }
     }
 
@@ -271,25 +263,6 @@
             }
         }
     }
-
-    // Prompt about the Burdened needing to visit the market
-    .forced-capitalism {
-        position: absolute;
-        top: 0;
-        bottom: 8px;
-        background: transparentize($black, 0.40);
-            p {
-                color: $white;
-                font-family: $consolefont;
-                margin-top: 35% !important;
-                margin-bottom: 0;  
-                transform: rotate(-15deg);
-                background: $black;
-                padding: 1rem 1.5rem;
-                margin: 0.5rem;
-            }
-    }
-
 
 }
 

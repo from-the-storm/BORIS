@@ -32,6 +32,7 @@
     .content {
         min-height: 100vh;
         box-sizing: border-box;
+        overflow: auto;
     }
 
     .punchcard-list {
@@ -101,20 +102,6 @@
             margin-bottom: -1px;
             filter: invert(1);
         }
-    }
-
-    .market-prelude div {
-        opacity: 0;
-        -webkit-animation: 0s 1.5s reverse forwards fade;
-        animation: 0s 1.5s reverse forwards fade;
-            &:nth-child(2) {
-                -webkit-animation: 0s 3.5s reverse forwards fade;
-                animation: 0s 3.5s reverse forwards fade;
-            }
-            &:last-child {
-                -webkit-animation: 0s 8.5s reverse forwards fade;
-                animation: 0s 8.5s reverse forwards fade;
-            }
     }
 
 }

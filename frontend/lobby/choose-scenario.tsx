@@ -23,7 +23,6 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     scenariosLoadState: LoadingState;
     selectedScenarioId: number|null;
     allowMarket: boolean;
-    forceMarket: boolean;
     marketStatus: MarketStatus;
 }
 interface State {
@@ -87,13 +86,12 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                                 <span>Start at {s.start_point_name}</span>
                             </div>
                             <div className="scenario-buttons">
-                                <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }} disabled={this.props.forceMarket}>Info?</button>
-                                <button onClick={() => { this.startScenario(s.id); }} disabled={this.props.forceMarket}>Start!</button>
+                                <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }}>Info?</button>
+                                <button onClick={() => { this.startScenario(s.id); }}>Start!</button>
                             </div>
                         </div>
                     )}
                 </LoadingSpinnerComponent>
-                {this.props.forceMarket ? <div className="forced-capitalism"><p>>> ALERT FROM THE NAMELESS ORGANIZATION: We kindly "suggest" that your team's BURDENED visit the market and ACQUIRE A PUNCHCARD prior to beginning another scenario.</p></div> : null}
             </div>
         </div>;
     }
@@ -130,7 +128,6 @@ export const ChooseScenarioComponent = connect((state: RootState, ownProps: OwnP
         scenariosLoadState: state.lobbyState.scenariosState,
         selectedScenarioId,
         allowMarket: state.teamState.allowMarket,
-        forceMarket: state.teamState.forceMarket,
         marketStatus: state.teamState.marketStatus,
     };
 })(_ChooseScenarioComponent);
