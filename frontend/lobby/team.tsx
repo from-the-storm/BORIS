@@ -149,11 +149,6 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                         <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.saltinesBalance}</span>(current balance)</p>
                         <p><img height="20" width="20" src={saltine} alt="Saltine" /><span>{this.props.saltinesBalanceAllTime}</span>(earned all-time)</p>
                     </div>
-                    {/* <div className="rankings-snapshot">
-                        <h3>Rank</h3>
-                        <button onClick={this.switchTab}><sup>#</sup>2<span>in Vancouver</span></button>
-                        <button onClick={this.switchTab}><sup>#</sup>78<span>in Canada</span></button>
-                    </div> */}
                     <h3>Your team {this.props.isTeamAdmin && <button onClick={this.editTeam}>{this.state.editingTeam ? 'Done Editing' : 'Edit Team'}</button>}</h3>
                     <ul className="team">
                         <TeamMemberRow isMe={true} details={{name: this.props.myName, id: 0, online: this.props.isOnline, isAdmin: this.props.isTeamAdmin}} editable={false} />

@@ -27,6 +27,7 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 }
 interface State {
     showMap: boolean;
+    showVancouver: boolean;
 }
 
 class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
@@ -34,6 +35,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
         super(props);
         this.state = ({
             showMap: true,
+            showVancouver: true,
         });
         // Update the vars that affect whether we show the market:
         this.props.dispatch(updateMarketVars());
@@ -46,6 +48,7 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     }
     
     public render() {
+        const { showVancouver } = this.state;
         if (this.props.teamCode === null) {
             return <div>Error: you must have joined a team to see the scenario list.</div>;
         }
@@ -70,29 +73,33 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
         }
 
         return <div>
-            <h1>Choose Scenario</h1>
-            {this.props.marketStatus === MarketStatus.Hidden ? 
-                (<p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose a scenario and head to its start point!</p>) : 
-                (<MarketButton status={this.props.marketStatus} onClick={this.handleMarketButtonClicked} />)
-            }
-            <div className="scenario-grid">
-                <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
-                    {this.props.scenarios.map(s =>
-                        <div key={s.id} className={'scenario-choice id-' + s.id}>
-                            <div className="scenario-info">
-                                <span className={s.difficulty}>{s.difficulty}</span><br />
-                                <span>{s.duration_min} mins</span>
-                                <h4>{s.name}</h4>
-                                <span>Start at {s.start_point_name}</span>
-                            </div>
-                            <div className="scenario-buttons">
-                                <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }}>Info?</button>
-                                <button onClick={() => { this.startScenario(s.id); }}>Start!</button>
-                            </div>
-                        </div>
-                    )}
-                </LoadingSpinnerComponent>
-            </div>
+          <h1>Choose Scenario</h1>
+          {this.props.marketStatus === MarketStatus.Hidden ? 
+            (<p>Share your team code <span className='mono'>{this.props.teamCode}</span> to recruit more team members. You'll need 2-5 people to play. Then choose your city, pick a scenario, and head to its start point!</p>) : 
+            (<MarketButton status={this.props.marketStatus} onClick={this.handleMarketButtonClicked} />)
+          }
+          <nav className="tabs city">
+            <button value="vancouver" onClick={this.chooseCity} className={showVancouver ? 'active' : ''}>Vancouver</button>
+            <button onClick={this.chooseCity} className={showVancouver ? '' : 'active'}>Kelowna</button>
+          </nav>
+          <div className={showVancouver ? 'scenario-grid vancouver' : 'scenario-grid kelowna'}>
+            <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
+              {this.props.scenarios.map(s =>
+                <div key={s.id} className={'scenario-choice id-' + s.id}>
+                  <div className="scenario-info">
+                    <span className={s.difficulty}>{s.difficulty}</span><br />
+                    <span>{s.duration_min} mins</span>
+                    <h4>{s.name}</h4>
+                    <span>Start at {s.start_point_name}</span>
+                  </div>
+                  <div className="scenario-buttons">
+                    <button className="inverted" onClick={() => { this.showScenarioDetails(s.id); }}>Info?</button>
+                      <button onClick={() => { this.startScenario(s.id); }}>Start!</button>
+                    </div>
+                  </div>
+              )}
+            </LoadingSpinnerComponent>
+          </div>
         </div>;
     }
 
@@ -118,6 +125,12 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
             this.props.dispatch<AnyAction>({type: Actions.SHOW_MARKET});
         }
     }
+
+    @bind private chooseCity(event: React.MouseEvent<HTMLButtonElement>) {
+      const vancouver = event.currentTarget.value;
+      vancouver ? this.setState({ showVancouver: true }) : this.setState({ showVancouver: false })
+
+  }
 }
 
 export const ChooseScenarioComponent = connect((state: RootState, ownProps: OwnProps) => {
