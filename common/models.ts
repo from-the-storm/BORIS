@@ -17,6 +17,7 @@ export interface BaseScenario {
     difficulty: 'easy'|'med'|'hard';
     start_point_name: string;
     description_html: string;
+    city: string;
 }
 
 export interface Scenario extends BaseScenario {

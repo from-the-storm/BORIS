@@ -123,6 +123,7 @@ describe("Admin API tests", () => {
                     script: "test-script",
                     start_point: {lat: 49.273373, lng: -123.102657},
                     start_point_name: "SE False Creek",
+                    city: 'vancouver',
                 });
             });
         });
@@ -139,6 +140,7 @@ describe("Admin API tests", () => {
                     start_point: {lat: 15.2, lng: 35.15},
                     start_point_name: 'a place',
                     script: 'test-script',
+                    city: 'vancouver',
                 });
                 expect(typeof createResponse.id).toBe('number');
                 expect(createResponse.name).toEqual("A New Test Scenario");
@@ -160,6 +162,7 @@ describe("Admin API tests", () => {
                     is_active: false,
                     start_point: {lat: 15.2, lng: 35.15},
                     description_html: 'test description',
+                    city: 'vancouver',
                 });
                 expect(createResponse.is_active).toBe(false);
                 const updateResponse = await client.callApi(EDIT_SCENARIO, {
@@ -167,12 +170,14 @@ describe("Admin API tests", () => {
                     name: "A Modified Test Scenario",
                     is_active: true,
                     start_point: {lat: 18.2, lng: 15.15},
+                    city: 'kelowna',
                     // We don't specify a script nor description_html which should leave it unchanged.
                 });
                 expect(updateResponse.id).toEqual(createResponse.id);
                 expect(updateResponse.name).toEqual("A Modified Test Scenario");
                 expect(updateResponse.is_active).toBe(true);
                 expect(updateResponse.start_point).toEqual({lat: 18.2, lng: 15.15});
+                expect(updateResponse.city).toEqual('kelowna');
                 expect(updateResponse.script).toEqual('test-script');
                 expect(updateResponse.description_html).toEqual('test description');
                 const getResponse = await client.callApi(GET_SCENARIO, {id: String(createResponse.id)});
