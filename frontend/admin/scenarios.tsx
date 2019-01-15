@@ -29,6 +29,7 @@ export const ScenarioList = (props: any) => (
             <BooleanField source="is_active" />
             <NumberField source="duration_min" />
             <TextField source="difficulty" />
+            <TextField source="city" />
             <ShowButton />
             <EditButton />
         </Datagrid>
@@ -47,6 +48,7 @@ export const ScenarioShow = (props: any) => (
             <BooleanField source="is_active" />
             <NumberField source="duration_min" />
             <TextField source="difficulty" />
+            <TextField source="city" />
         </SimpleShowLayout>
     </Show>
 );
@@ -66,6 +68,11 @@ const editForm = <SimpleForm redirect={false}>
         { id: 'easy', name: 'easy' },
         { id: 'med', name: 'med' },
         { id: 'hard', name: 'hard' },
+    ]} />
+    <SelectInput source="city" choices={[
+        { id: 'vancouver', name: 'vancouver' },
+        { id: 'kelowna', name: 'kelowna' },
+        { id: 'hidden', name: 'hidden' },
     ]} />
 </SimpleForm>;
 

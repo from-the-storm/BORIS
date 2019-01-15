@@ -172,7 +172,7 @@ function adminScenarioFromDBScenario(scenarioData: DBScenario): AdminScenario {
 
 function cleanScenarioDataForInsertOrUpdate(data: Partial<AdminScenarioNoId>): Partial<DBScenarioForInsertOrUpdate> {
     const cleanData: Partial<DBScenarioForInsertOrUpdate> = {};
-    for (const field of ['name', 'is_active', 'script', 'start_point_name', 'duration_min', 'description_html']) {
+    for (const field of ['name', 'is_active', 'script', 'start_point_name', 'duration_min', 'description_html', 'city']) {
         if ((data as any)[field] !== undefined) { (cleanData as any)[field] = (data as any)[field]; };
     }
     if (data.start_point !== undefined) {

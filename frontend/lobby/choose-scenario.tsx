@@ -27,15 +27,17 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 }
 interface State {
     showMap: boolean;
-    showVancouver: boolean;
+    chosenCity: string;
 }
+
+const LAST_CITY = 'last-city'; // Key to remember which city the user chose via localStorage
 
 class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = ({
             showMap: true,
-            showVancouver: true,
+            chosenCity: localStorage.getItem(LAST_CITY) || 'vancouver',
         });
         // Update the vars that affect whether we show the market:
         this.props.dispatch(updateMarketVars());
@@ -48,7 +50,6 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     }
     
     public render() {
-        const { showVancouver } = this.state;
         if (this.props.teamCode === null) {
             return <div>Error: you must have joined a team to see the scenario list.</div>;
         }
@@ -71,6 +72,8 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
                 <div className="scenario-description" dangerouslySetInnerHTML={{__html: selectedScenario.description_html}}></div>
             </div>
         }
+        
+        const { chosenCity } = this.state;
 
         return <div>
           <h1>Choose Scenario</h1>
@@ -79,12 +82,13 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
             (<MarketButton status={this.props.marketStatus} onClick={this.handleMarketButtonClicked} />)
           }
           <nav className="tabs city">
-            <button value="vancouver" onClick={this.chooseCity} className={showVancouver ? 'active' : ''}>Vancouver</button>
-            <button onClick={this.chooseCity} className={showVancouver ? '' : 'active'}>Kelowna</button>
+            <button value="vancouver" onClick={this.chooseCity} className={chosenCity === 'vancouver' ? 'active' : ''}>Vancouver</button>
+            <button value="kelowna" onClick={this.chooseCity} className={chosenCity === 'kelowna' ? 'active' : ''}>Kelowna</button>
+            {/* <button value="hidden" onClick={this.chooseCity} className={chosenCity === 'hidden' ? 'active' : ''}>Hidden</button> */}
           </nav>
-          <div className={showVancouver ? 'scenario-grid vancouver' : 'scenario-grid kelowna'}>
+          <div className='scenario-grid'>
             <LoadingSpinnerComponent state={this.props.scenariosLoadState} onTryAgain={this.tryLoadingScenarios}>
-              {this.props.scenarios.map(s =>
+              {this.props.scenarios.filter(s => s.city === chosenCity).map(s =>
                 <div key={s.id} className={'scenario-choice id-' + s.id}>
                   <div className="scenario-info">
                     <span className={s.difficulty}>{s.difficulty}</span><br />
@@ -127,9 +131,9 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
     }
 
     @bind private chooseCity(event: React.MouseEvent<HTMLButtonElement>) {
-      const vancouver = event.currentTarget.value;
-      vancouver ? this.setState({ showVancouver: true }) : this.setState({ showVancouver: false })
-
+      const city = event.currentTarget.value;
+      this.setState({ chosenCity: city });
+      localStorage.setItem(LAST_CITY, city);
   }
 }
 

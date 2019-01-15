@@ -50,11 +50,13 @@
           }
           button.active {
             border-top: 1px solid lighten($black, 30%);
+            border-left: 1px solid lighten($black, 30%);
+            border-right: 1px solid lighten($black, 30%);
               &:first-child {
-                border-right: 1px solid lighten($black, 30%);
+                border-left: 0 none;
               }
               &:last-child {
-                border-left: 1px solid lighten($black, 30%);
+                border-right: 0 none;
               }
           }
       }
@@ -95,22 +97,6 @@
                             }
                     }
             }
-        &.kelowna {
-          // When Kelowna is active, hide Vancouver scenarios
-          .scenario-choice {
-            &.id-1, &.id-2, &.id-3, &.id-4 {
-              display: none;
-            }
-          }
-        }
-        &.vancouver {
-          .scenario-choice {
-            &.id-6, &.id-7, &.id-8, &.id-9 {
-              display: none;
-            }
-          }
-        }
-
     }
 
     p {
@@ -187,10 +173,6 @@
     }
     .id-4 {
         background-image: url('./images/bg-home.svg')
-    }
-    // Hide testing scenario
-    .id-5 {
-        display: none !important;
     }
 
     .teams {
