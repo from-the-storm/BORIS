@@ -86,6 +86,26 @@ export const LIST_USERS = defineListMethod<BasicUser>('users', async (filter, cr
     return queryWithCount(db.users, criteria, {...queryOptions, fields: ['id', 'first_name', 'email', 'created']});
 });
 
+export const GET_USER: ApiMethod<{id: string}, User> = {path: `/api/admin/users/:id`, type: 'GET'};
+defineMethod(GET_USER, async (data, app, admin_user) => {
+    const db: BorisDatabase = app.get("db");
+    const id = parseInt(data.id, 10);
+    if (isNaN(id)) {
+        throw new SafeError(`Invalid user ID.`);
+    }
+    const user = await db.users.findOne(id);
+    if (user === null) {
+        throw new SafeError(`Team ${id} not found.`, 404);
+    }
+    return {
+        id: user.id,
+        first_name: user.first_name,
+        email: user.email,
+        created: user.created,
+        survey_data: user.survey_data,
+    };
+});
+
 export const LIST_TEAMS = defineListMethod<Team>('teams', async (filter, criteria, queryOptions, db, app, user) => {
     return queryWithCount(db.teams, criteria, {...queryOptions, fields: ['id', 'name', 'organization', 'code', 'created']});
 });
@@ -133,6 +153,18 @@ defineMethod(RESET_TEAM_VARS, async (data, app, user) => {
     await db.teams.update({id,}, {game_vars: {}});
     await db.games.destroy({team_id: id});
     return {result: 'ok'};
+});
+
+export const DELETE_TEAM: ApiMethod<{id: string}, {}> = {path: `/api/admin/teams/:id`, type: 'DELETE'};
+defineMethod(DELETE_TEAM, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const teamId = parseInt(data.id, 10);
+    try {
+        await db.teams.destroy({id: teamId});
+    } catch (err) {
+        throw new SafeError(`Unable to delete team ${teamId}.`, 400);
+    }
+    return {};
 });
 
 interface ScenarioWithScript extends Scenario {
@@ -219,7 +251,7 @@ defineMethod(CREATE_SCENARIO, async (data, app, user) => {
 export const EDIT_SCENARIO: ApiMethod<{id: string}&Partial<AdminScenarioNoId>, AdminScenario> = {path: `/api/admin/scenarios/:id`, type: 'PUT'};
 defineMethod(EDIT_SCENARIO, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
-    const scenarioId = parseInt(data.id, 20);
+    const scenarioId = parseInt(data.id, 10);
     const dbData = cleanScenarioDataForInsertOrUpdate(data);
 
     let scenario: DBScenario;
@@ -229,6 +261,18 @@ defineMethod(EDIT_SCENARIO, async (data, app, user) => {
         throw new SafeError(`Unable to save scenario "${data.name}"`, 400);
     }
     return adminScenarioFromDBScenario(scenario);
+});
+
+export const DELETE_SCENARIO: ApiMethod<{id: string}, {}> = {path: `/api/admin/scenarios/:id`, type: 'DELETE'};
+defineMethod(DELETE_SCENARIO, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const scenarioId = parseInt(data.id, 10);
+    try {
+        await db.scenarios.destroy({id: scenarioId});
+    } catch (err) {
+        throw new SafeError(`Unable to delete scenario ${scenarioId}.`, 400);
+    }
+    return {};
 });
 
 
@@ -280,6 +324,18 @@ defineMethod(EDIT_SCRIPT, async (data, app, user) => {
         throw new SafeError(`Unable to save script "${data.id}".`, 400);
     }
     return { name, script_yaml: data.script_yaml};
+});
+
+export const DELETE_SCRIPT: ApiMethod<{id: string}, {}> = {path: `/api/admin/scripts/:id`, type: 'DELETE'};
+defineMethod(DELETE_SCRIPT, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const name = data.id;
+    try {
+        await db.scripts.destroy({name: data.id});
+    } catch (err) {
+        throw new SafeError(`Unable to delete script "${data.id}".`, 400);
+    }
+    return {};
 });
 
 export const LIST_GAMES = defineListMethod<Partial<Game>>('games', async (filter, criteria, queryOptions, db, app, user) => {

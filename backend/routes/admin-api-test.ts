@@ -1,7 +1,25 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
 import { BorisDatabase } from '../db/db';
-import { LIST_USERS, LIST_TEAMS, LIST_SCENARIOS, LIST_GAMES, LIST_SCRIPTS, CREATE_SCRIPT, EDIT_SCRIPT, GET_SCRIPT, GET_SCENARIO, CREATE_SCENARIO, EDIT_SCENARIO, GET_TEAM, RESET_TEAM_VARS } from './admin-api';
+import {
+    LIST_USERS,
+    LIST_TEAMS,
+    LIST_SCENARIOS,
+    LIST_GAMES,
+    LIST_SCRIPTS,
+    CREATE_SCRIPT,
+    EDIT_SCRIPT,
+    GET_SCRIPT,
+    GET_SCENARIO,
+    CREATE_SCENARIO,
+    EDIT_SCENARIO,
+    GET_TEAM,
+    RESET_TEAM_VARS,
+    GET_USER,
+    DELETE_TEAM,
+    DELETE_SCENARIO,
+    DELETE_SCRIPT,
+} from './admin-api';
 import { ApiMethod } from '../../common/api';
 import { createTeam, TEST_SCENARIO_ID } from '../test-lib/test-data';
 
@@ -10,6 +28,7 @@ describe("Admin API tests", () => {
     let client: TestClient;
     let clientRegularUser: TestClient;
     let adminUser: TestUserData;
+    let regularUser: TestUserData;
     beforeAll(async () => {
         server = new TestServer();
         await server.ready();
@@ -23,7 +42,7 @@ describe("Admin API tests", () => {
         // Create two more users: an admin user and a regular user
         adminUser = await client.registerAndLogin();
         await db.admin_users.insert({user_id: adminUser.id});
-        await clientRegularUser.registerAndLogin();
+        regularUser = await clientRegularUser.registerAndLogin();
     });
     beforeEach(async () => {
     });
@@ -63,6 +82,20 @@ describe("Admin API tests", () => {
                 expect(allResults.data.find(u => u.email === adminUser.email)).not.toBeUndefined();
             });
         });
+
+        describe("Get User (GET /api/admin/users/:id)", async () => {
+
+            checkSecurity(GET_USER);
+
+            it("Returns information about a user", async () => {
+                const userInfo = await client.callApi(GET_USER, {id: String(regularUser.id)});
+                expect(userInfo.id).toBe(regularUser.id);
+                expect(userInfo.first_name).toBe(regularUser.firstName);
+                expect(userInfo.survey_data.age).toBe(regularUser.age);
+                expect(userInfo.survey_data.gender).toBe(regularUser.gender);
+                expect(userInfo.survey_data.occupation).toBe(regularUser.occupation);
+            });
+        });
     });
 
     describe("Teams", async () => {
@@ -97,6 +130,11 @@ describe("Admin API tests", () => {
         describe("Team Var Reset (POST /api/admin/teams/:id/reset)", async () => {
 
             checkSecurity(RESET_TEAM_VARS, {id: "1"});
+
+        });
+        describe("Delete Team (DELETE /api/admin/teams/:id)", async () => {
+
+            checkSecurity(DELETE_TEAM, {id: "1"});
 
         });
     });
@@ -183,6 +221,26 @@ describe("Admin API tests", () => {
                 const getResponse = await client.callApi(GET_SCENARIO, {id: String(createResponse.id)});
                 expect(getResponse).toEqual(updateResponse);
             });
+        });
+        describe("Delete Scenario (DELETE /api/admin/scenarios/:id)", async () => {
+
+            checkSecurity(DELETE_SCENARIO, {id: "1"});
+
+            it("Can delete a scenario", async () => {
+                // Create the scenario:
+                const createResponse = await client.callApi(CREATE_SCENARIO, {
+                    name: "A New Test Scenario",
+                    is_active: false,
+                    start_point: {lat: 15.2, lng: 35.15},
+                    start_point_name: 'a place',
+                    script: 'test-script',
+                    city: 'vancouver',
+                });
+                await client.callApi(DELETE_SCENARIO, {id: String(createResponse.id)});
+                const promise = client.callApi(GET_SCENARIO, {id: String(createResponse.id)});
+                await expect(promise).rejects.toHaveProperty('statusCode', 404);
+            });
+
         });
     });
 
@@ -281,6 +339,11 @@ describe("Admin API tests", () => {
                 const newYaml = (await client.callApi(GET_SCRIPT, {id: newScriptId})).script_yaml;
                 expect(newYaml).toEqual(MINIMAL_SCRIPT);
             });
+
+        });
+        describe("Delete Script (DELETE /api/admin/scripts/:id)", async () => {
+
+            checkSecurity(DELETE_SCRIPT, {id: "script35"});
 
         });
     });

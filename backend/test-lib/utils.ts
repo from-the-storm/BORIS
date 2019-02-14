@@ -83,6 +83,9 @@ export class TestClient {
         } else if (method.type === 'PUT') {
             response = await this.httpClient.put(path, {json: data});
             body = response.body;
+        } else if (method.type === 'DELETE') {
+            response = await this.httpClient.delete(path, {json: data});
+            body = response.body;
         }
         return body;
     }
