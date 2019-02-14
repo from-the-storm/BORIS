@@ -61,10 +61,10 @@ export function makeApiHelper(router: express.Router, mountPath: RegExp, require
 
     return function apiMethodMaker<RequestType, ResponseType>(def: ApiMethod<RequestType, ResponseType>, fn: (data: RequestType, app: express.Application, user?: User) => Promise<ResponseType>) {
         const path = def.path.replace(mountPath, '');
-        if (def.type === 'POST' || def.type === 'PUT') {
+        if (def.type === 'POST' || def.type === 'PUT' || def.type === 'DELETE') {
             const handler = apiErrorWrapper(async (req: express.Request, res: express.Response) => {
                 await checkUserLoggedIn(req);
-                if (!req.body) {
+                if (!req.body && def.type !== 'DELETE') {
                     throw new SafeError("Missing JSON body.");
                 }
                 const data: RequestType = {...req.body, ...req.params};
@@ -75,6 +75,8 @@ export function makeApiHelper(router: express.Router, mountPath: RegExp, require
                 router.post(path, handler);
             } else if (def.type === 'PUT') {
                 router.put(path, handler);
+            } else if (def.type === 'DELETE') {
+                router.delete(path, handler);
             }
         } else if (def.type === 'GET') {
             router.get(path, apiErrorWrapper(async (req: express.Request, res: express.Response) => {

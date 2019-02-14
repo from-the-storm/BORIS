@@ -14,6 +14,7 @@ import {
     CardActions,
     ListButton,
     RefreshButton,
+    DeleteButton,
     Button,
 } from 'react-admin';
 
@@ -53,6 +54,7 @@ const TeamShowActions = (props: any) => (
     <CardActions style={cardActionStyle}>
         <ListButton basePath={props.basePath} />
         <RefreshButton />
+        <DeleteButton basePath={props.basePath} record={props.data} resource={props.resource} />
         {/* Add your custom actions */}
         <Button color="secondary" onClick={() => { resetTeam(props.data.id); }}>Reset Vars (!)</Button>
     </CardActions>

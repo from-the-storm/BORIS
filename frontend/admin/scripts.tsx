@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { List, Datagrid, TextField, EditButton, Edit, Create, SimpleForm, TextInput, LongTextInput } from 'react-admin';
+import { List, Datagrid, TextField, EditButton, Edit, Create, Show, ShowButton, SimpleShowLayout, SimpleForm, TextInput, LongTextInput } from 'react-admin';
 
 export const ScriptsList = (props: any) => (
     <List title="All Scripts" {...props}>
         <Datagrid>
             <TextField source="name" />
+            <ShowButton />
             <EditButton />
         </Datagrid>
     </List>
@@ -22,6 +23,14 @@ export const ScriptCreate = (props: any) => (
     </div>
 );
 
+export const ScriptShow = (props: any) => (
+    <Show {...props}>
+        <SimpleShowLayout>
+            <TextField source="name" />
+            <TextField source="script_yaml" />
+        </SimpleShowLayout>
+    </Show>
+);
 
 export const ScriptEdit = (props: any) => (
     <div>

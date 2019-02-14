@@ -16,7 +16,7 @@ export interface ApiErrorResponse {
 
 export interface ApiMethod<RequestType, ResponseType> {
     path: string;
-    type: 'POST'|'GET'|'PUT';
+    type: 'POST'|'GET'|'PUT'|'DELETE';
 }
 
 ///////////////////////////////////////////////////////////////////////////////
