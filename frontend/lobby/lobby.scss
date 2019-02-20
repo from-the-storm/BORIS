@@ -163,16 +163,19 @@
     }
         
     .id-1 {
-        background-image: url('./images/bg-quake.svg')
+        background-image: url('./images/bg-quake.svg');
     }
-    .id-2 {
-        background-image: url('./images/bg-water.svg')
+    .id-2, .id-6 {
+        background-image: url('./images/bg-water.svg');
     }
-    .id-3 {
-        background-image: url('./images/bg-dynamics.svg')
+    .id-3, .id-9 {
+        background-image: url('./images/bg-dynamics.svg');
     }
-    .id-4 {
-        background-image: url('./images/bg-home.svg')
+    .id-4, .id-7 {
+        background-image: url('./images/bg-home.svg');
+    }
+    .id-8 {
+        background-image: url('./images/bg-fire.svg');
     }
 
     .teams {
