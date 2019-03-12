@@ -17,7 +17,7 @@ interface ConnectionState {
     user: User;
     index: number;  // A unique number to represent this connection
     sharedState: {allConnections: Set<ConnectionState>, nextConnectionIndex: number};
-    pingTimer: NodeJS.Timer;  // Used to avoid socket disconnecting after 60s
+    pingTimer: NodeJS.Timer|null;  // Used to avoid socket disconnecting after 60s
     peer: any;
 }
 
@@ -38,11 +38,7 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
         user: req.user,
         index: sharedWebSocketClientState.nextConnectionIndex++,
         sharedState: sharedWebSocketClientState,
-        pingTimer: setInterval(() => {
-            try {
-                ws.ping();
-            } catch {}
-        }, 50000),  // Used to avoid socket disconnecting after 60s
+        pingTimer: null,
         peer: null,
     };
     // Mark the user as being online now,
@@ -69,9 +65,12 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
         });
     });
     ws.on('close', () => {
+        peer.failPendingRequests("connection lost");
         sharedWebSocketClientState.allConnections.delete(connectionState);
-        clearInterval(connectionState.pingTimer);
-        connectionState.pingTimer = null;
+        if (connectionState.pingTimer !== null) {
+            clearInterval(connectionState.pingTimer);
+            connectionState.pingTimer = null;
+        }
         const userHasOtherActiveConnections = () => {
             for (const otherConnection of sharedWebSocketClientState.allConnections.values()) {
                 if (otherConnection.user.id === connectionState.user.id) {
@@ -87,6 +86,21 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
         }
         console.log(`${connectionState.user.first_name} has disconnected from the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
     });
+    // Send a ping every 30s to keep clients from disconnecting, and so they can 
+    // know the connection is still working (or not). Some browsers seem to disconnect
+    // after as little as 60s of inactivity on the websocket.
+    // Since our client code running in the browser cannot be aware of the websocket
+    // ping/pong messages, we have to send it as a JSON RPC message
+    connectionState.pingTimer = setInterval(async () => {
+        try {
+            console.log(`sending ping`);
+            const reply = await peer.notify('ping');
+        } catch (err) {
+            console.error(`Error while sending ws ping: ${err}`);
+            ws.close();
+        }
+    }, 30_000);
+
     console.log(`${connectionState.user.first_name} has connected to the websocket (${connectionState.index}). There are now ${sharedWebSocketClientState.allConnections.size} active connections.`);
     peer.notify('connection_ready'); // Clients can/should wait for this before sending data (which will be more reliable than sending immediately after an 'open' event)
 }
