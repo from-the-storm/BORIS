@@ -78,6 +78,13 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
         </RpcConnectionStatusIndicator>;
     }
 
+    public componentDidUpdate(prevProps: Props, prevState: State) {
+        if (this.props.mode != prevProps.mode) {
+            // When the screen changes, scroll back to the top.
+            window.scrollTo({top: 0});
+        }
+    }
+
     @bind private handleDeclineResearchPrompt() {
         this.props.dispatch(markPreSurveySeen());
     }
