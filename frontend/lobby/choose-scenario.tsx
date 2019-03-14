@@ -111,6 +111,13 @@ class _ChooseScenarioComponent extends React.PureComponent<Props, State> {
         this.tryLoadingScenarios();
     }
 
+    public componentDidUpdate(prevProps: Props, prevState: State) {
+        if (this.props.selectedScenarioId !== prevProps.selectedScenarioId) {
+            // When the screen changes, scroll back to the top.
+            window.scrollTo({top: 0});
+        }
+    }
+
     @bind private tryLoadingScenarios() {
         this.props.dispatch(loadScenarios());
     }

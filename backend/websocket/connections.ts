@@ -46,7 +46,6 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
     setUserOnline(req.user.id).then(() => {
         notifyTeamStatusChangedForUser(app, req.user.id);
     });
-    ws.on('pong', () => { setUserOnline(req.user.id); });
     // This sharedWebSocketClientState is local to this node.js process so may not be aware of ALL connections,
     // which is the responsibility of the redis USERS_ONLINE tracker.
     sharedWebSocketClientState.allConnections.add(connectionState);
@@ -93,8 +92,9 @@ export function rpcHandler(ws: WebSocket, req: express.Request) {
     // ping/pong messages, we have to send it as a JSON RPC message
     connectionState.pingTimer = setInterval(async () => {
         try {
-            console.log(`sending ping`);
-            const reply = await peer.notify('ping');
+            //console.log(`sending ping to peer ${connectionState.index}`);
+            await peer.notify('ping');
+            setUserOnline(req.user.id);
         } catch (err) {
             console.error(`Error while sending ws ping: ${err}`);
             ws.close();
