@@ -208,7 +208,7 @@ app.use('/survey', surveysRouter);
 // The Admin single page React app:
 app.use('/api/admin', appAdminRouter);
 app.get(/\/admin(\/.*)?/, async (req, res, next) => {
-    if (!await isAdminUser(req)) {
+    if (!req.user || !await isAdminUser(req)) {
         return next();
     }
     res.render('react-admin-app');
