@@ -24,14 +24,14 @@ describe("App API tests", () => {
         it("Returns user info when a user is logged in", async () => {
             const userInfo = await client.registerAndLogin();
             const result = await client.callApi(GET_INITIAL_STATE, {});
-            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id, hasSeenPreSurveyPrompt: false});
+            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
             expect(result.team).toBeUndefined();
         });
         it("Returns user info when a user is logged and on a team", async () => {
             const userInfo = await client.registerAndLogin();
             await client.callApi(CREATE_TEAM, { teamName: "Test Team", organizationName: ""});
             const result = await client.callApi(GET_INITIAL_STATE, {});
-            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id, hasSeenPreSurveyPrompt: false});
+            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
             expect(result.team.name).toEqual("Test Team");
             expect(result.team.code).toHaveLength(5);
             expect(result.team.isTeamAdmin).toBe(true);
@@ -48,7 +48,7 @@ describe("App API tests", () => {
             await client2.callApi(JOIN_TEAM, {code: teamInfo.teamCode});
             // Now, the original user gets the initial state:
             const result = await client.callApi(GET_INITIAL_STATE, {});
-            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id, hasSeenPreSurveyPrompt: false});
+            expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
             expect(result.team.name).toEqual("Test Team");
             expect(result.team.code).toHaveLength(5);
             expect(result.team.isTeamAdmin).toBe(true);

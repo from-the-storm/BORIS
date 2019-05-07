@@ -36,7 +36,6 @@ export interface InitialStateResponse {
     user?: {
         id: number;
         first_name: string;
-        hasSeenPreSurveyPrompt: boolean;
     };
     team?: {
         code: string;
@@ -203,12 +202,3 @@ export interface BuyPunchcardRequest {
     punchcardId: string;
 }
 export const BUY_PUNCHCARD: ApiMethod<BuyPunchcardRequest, GetTeamMarketVarsResponse> = {path: '/api/market/buy', type: 'POST'};
-
-///////////////////////////////////////////////////////////////////////////////
-// survey API methods:
-
-export interface PreSurveyPromptSeenRequest {
-    seen: boolean,
-}
-
-export const PRESURVEY_PROMPT_SEEN: ApiMethod<PreSurveyPromptSeenRequest, EmptyApiResponse> = {path: '/survey/presurvey-seen', type: 'POST'};
