@@ -30,6 +30,7 @@ export const ScenarioList = (props: any) => (
             <NumberField source="duration_min" />
             <TextField source="difficulty" />
             <TextField source="city" />
+            <NumberField source="order" />
             <ShowButton />
             <EditButton />
         </Datagrid>
@@ -49,6 +50,7 @@ export const ScenarioShow = (props: any) => (
             <NumberField source="duration_min" />
             <TextField source="difficulty" />
             <TextField source="city" />
+            <NumberField source="order" />
         </SimpleShowLayout>
     </Show>
 );
@@ -74,6 +76,7 @@ const editForm = <SimpleForm redirect={false}>
         { id: 'kelowna', name: 'kelowna' },
         { id: 'hidden', name: 'hidden' },
     ]} />
+    <NumberInput source="order" />
 </SimpleForm>;
 
 export const ScenarioEdit = (props: any) => (

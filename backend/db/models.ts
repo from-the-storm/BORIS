@@ -56,6 +56,7 @@ export function scenarioFromDbScenario(s: DBScenario): Scenario {
         description_html: s.description_html,
         start_point: {lat: s.start_point.x, lng: s.start_point.y},
         city: s.city,
+        order: s.order,
     };
 }
 

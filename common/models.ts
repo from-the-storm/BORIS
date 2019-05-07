@@ -18,6 +18,7 @@ export interface BaseScenario {
     start_point_name: string;
     description_html: string;
     city: string;
+    order: number;
 }
 
 export interface Scenario extends BaseScenario {

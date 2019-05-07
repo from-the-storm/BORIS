@@ -162,6 +162,7 @@ describe("Admin API tests", () => {
                     start_point: {lat: 49.273373, lng: -123.102657},
                     start_point_name: "SE False Creek",
                     city: 'vancouver',
+                    order: 100,
                 });
             });
         });
@@ -179,6 +180,7 @@ describe("Admin API tests", () => {
                     start_point_name: 'a place',
                     script: 'test-script',
                     city: 'vancouver',
+                    order: 15,
                 });
                 expect(typeof createResponse.id).toBe('number');
                 expect(createResponse.name).toEqual("A New Test Scenario");
@@ -201,6 +203,7 @@ describe("Admin API tests", () => {
                     start_point: {lat: 15.2, lng: 35.15},
                     description_html: 'test description',
                     city: 'vancouver',
+                    order: 50,
                 });
                 expect(createResponse.is_active).toBe(false);
                 const updateResponse = await client.callApi(EDIT_SCENARIO, {
@@ -218,6 +221,7 @@ describe("Admin API tests", () => {
                 expect(updateResponse.city).toEqual('kelowna');
                 expect(updateResponse.script).toEqual('test-script');
                 expect(updateResponse.description_html).toEqual('test description');
+                expect(updateResponse.order).toEqual(50);
                 const getResponse = await client.callApi(GET_SCENARIO, {id: String(createResponse.id)});
                 expect(getResponse).toEqual(updateResponse);
             });
@@ -235,6 +239,7 @@ describe("Admin API tests", () => {
                     start_point_name: 'a place',
                     script: 'test-script',
                     city: 'vancouver',
+                    order: 500,
                 });
                 await client.callApi(DELETE_SCENARIO, {id: String(createResponse.id)});
                 const promise = client.callApi(GET_SCENARIO, {id: String(createResponse.id)});

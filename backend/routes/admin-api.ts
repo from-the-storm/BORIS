@@ -172,8 +172,9 @@ interface ScenarioWithScript extends Scenario {
 }
 
 export const LIST_SCENARIOS = defineListMethod<ScenarioWithScript>('scenarios', async (filter, criteria, queryOptions, db, app, user) => {
-    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'is_active', 'script', 'description_html', 'start_point', ];
-    const {data, count} = await queryWithCount(db.scenarios, criteria, {...queryOptions, fields});
+    const fields = ['id', 'name', 'duration_min', 'difficulty', 'start_point_name', 'is_active', 'script', 'description_html', 'start_point', 'city', 'order'];
+    const defaultOrder = {order: [{field: 'city'}, {field: 'order'}, {field: 'name'}]};
+    const {data, count} = await queryWithCount(db.scenarios, criteria, {...defaultOrder, ...queryOptions, fields});
     const scenarios = data.map( s => ({...s, start_point: {lat: s.start_point.x, lng: s.start_point.y}}) );
     return { data: scenarios, count, };
 });
@@ -204,7 +205,7 @@ function adminScenarioFromDBScenario(scenarioData: DBScenario): AdminScenario {
 
 function cleanScenarioDataForInsertOrUpdate(data: Partial<AdminScenarioNoId>): Partial<DBScenarioForInsertOrUpdate> {
     const cleanData: Partial<DBScenarioForInsertOrUpdate> = {};
-    for (const field of ['name', 'is_active', 'script', 'start_point_name', 'duration_min', 'description_html', 'city']) {
+    for (const field of ['name', 'is_active', 'script', 'start_point_name', 'duration_min', 'description_html', 'city', 'order']) {
         if ((data as any)[field] !== undefined) { (cleanData as any)[field] = (data as any)[field]; };
     }
     if (data.start_point !== undefined) {
