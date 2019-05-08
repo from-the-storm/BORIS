@@ -15,8 +15,6 @@ export interface User extends BasicUser {
         occupation: string,
         age: number|null,
         gender: Gender|null,
-        // Has the user seen the pre-survey research prompt (the one shown before they've played any scenario?)
-        hasSeenPreSurveyPrompt?: boolean,
     };
 }
 

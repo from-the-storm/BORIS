@@ -24,7 +24,6 @@ import {router as gameRouter} from './routes/game-api';
 import {router as marketRouter} from './routes/market-api';
 import {router as testHelperRouter} from './routes/test-helper-api';
 import {router as appAdminRouter} from './routes/admin-api';
-import {router as surveysRouter} from './routes/surveys';
 import { subscribeToRedis, getPubSubClient } from './websocket/pub-sub';
 import { rpcHandler } from './websocket/connections';
 import { isAdminUser } from './routes/api-utils';
@@ -202,13 +201,10 @@ app.use('/api/market', marketRouter);
 // Misc. API used by the single page app frontend:
 app.use('/api/app', appAPIRouter);
 
-// Research Survey redirects
-app.use('/survey', surveysRouter);
-
 // The Admin single page React app:
 app.use('/api/admin', appAdminRouter);
 app.get(/\/admin(\/.*)?/, async (req, res, next) => {
-    if (!await isAdminUser(req)) {
+    if (!req.user || !await isAdminUser(req)) {
         return next();
     }
     res.render('react-admin-app');

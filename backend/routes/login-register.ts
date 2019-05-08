@@ -121,7 +121,6 @@ function validateUserData(data: any): Partial<User> {
             occupation: data.occupation,
             age: data.age,
             gender: data.gender,
-            hasSeenPreSurveyPrompt: false,
         }
     };
 }

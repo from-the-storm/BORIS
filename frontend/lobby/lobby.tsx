@@ -18,7 +18,6 @@ import * as teams from './images/teams-icon.svg';
 
 // Include our SCSS (via webpack magic)
 import './lobby.scss';
-import { markPreSurveySeen } from '../global/state/user-state-actions';
 
 interface OwnProps {
 }
@@ -27,7 +26,6 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     viewingScenarioDetails: boolean;
     firstName: string;
     userId: number;
-    seenResearchPrompt: boolean;
 }
 interface State {
 }
@@ -66,15 +64,6 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
                     }
                 </div>
             </div>
-            <Prompt close={this.handleDeclineResearchPrompt}
-                show={!this.props.seenResearchPrompt}
-            >
-                <p className="research">Before you begin, want to help with our (optional) research study on social connectedness? It'll only take a few minutes to set up. Then you can come right back to <a href="https://play.apocalypsemadeeasy.com">play.apocalypsemadeeasy.com</a> to resume training.</p>
-                <div className="button-split research">
-                    <a className="research no" onClick={this.handleDeclineResearchPrompt}>Not interested</a>
-                    <a className="research" href={`/survey/presurvey`} onClick={this.handleResearchLinkClicked}>TELL ME MORE</a>
-                </div>
-            </Prompt>
         </RpcConnectionStatusIndicator>;
     }
 
@@ -84,15 +73,6 @@ class _LobbyComponent extends React.PureComponent<Props, State> {
             window.scrollTo({top: 0});
         }
     }
-
-    @bind private handleDeclineResearchPrompt() {
-        this.props.dispatch(markPreSurveySeen());
-    }
-
-    @bind private handleResearchLinkClicked() {
-        // Whether they choose to do the survey or not, the effect is the same; we close the prompt and don't ask again.
-        this.props.dispatch(markPreSurveySeen());
-    }
 }
 
 export const LobbyComponent = connect((state: RootState, ownProps: OwnProps) => ({
@@ -100,5 +80,4 @@ export const LobbyComponent = connect((state: RootState, ownProps: OwnProps) => 
     viewingScenarioDetails: state.lobbyState.selectedScenario !== null,
     firstName: state.userState.firstName,
     userId: state.userState.id,
-    seenResearchPrompt: state.userState.hasSeenPreSurveyPrompt,
 }))(_LobbyComponent);
