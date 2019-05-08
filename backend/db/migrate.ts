@@ -20,6 +20,7 @@ export async function migrate() {
             '002-admin-users',
             '003-scripts',
             '004-scenario-city',
+            '005-scenario-order',
         ];
         for (const migrationId of migrations) {
             const filePath = path.join(__dirname, 'schema', `${migrationId}.sql`);

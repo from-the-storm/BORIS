@@ -1,0 +1,1 @@
+ALTER TABLE scenarios ADD COLUMN "order" integer NOT NULL DEFAULT 100;

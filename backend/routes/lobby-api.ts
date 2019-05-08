@@ -19,7 +19,10 @@ const apiMethod = makeApiHelper(router, /^\/api\/lobby/, RequireUser.Required);
  */
 apiMethod(GET_SCENARIOS, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");
-    const scenarios = await db.scenarios.find({is_active: true});
+    const scenarios = await db.scenarios.find(
+        {is_active: true},
+        {order: [{field: 'order'}, {field: 'name'}]} as any, // TODO: Fix massive.js type definitions 'order' field
+    );
     const cleanedScenarios: Array<Scenario> = scenarios.map( scenarioFromDbScenario );
     return {scenarios: cleanedScenarios};
 });
