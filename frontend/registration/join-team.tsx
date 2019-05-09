@@ -7,7 +7,7 @@ import { RootState } from '../global/state';
 import { Actions } from './registration-state-actions';
 import { TeamStateActions } from '../global/state/team-state-actions';
 
-import { CreateOrJoinTeamResponse, JOIN_TEAM } from '../../common/api';
+import { TeamStatus, JOIN_TEAM } from '../../common/api';
 import { AnyAction } from '../global/actions';
 
 import * as pie from './images/pie-trap.jpg';
@@ -88,7 +88,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
         return false;
     }
     private async submitFormData() {
-        let data: CreateOrJoinTeamResponse;
+        let data: TeamStatus;
         try {
             data = await callApi(JOIN_TEAM, {code: this.state.code});
         } catch (error) {
