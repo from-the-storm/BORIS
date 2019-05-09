@@ -17,7 +17,6 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@babel/runtime": "7.0.0-beta.42",
     "body-parser": "~1.18.2",
     "connect-redis": "~3.3.3",
     "express": "^4.16.3",
