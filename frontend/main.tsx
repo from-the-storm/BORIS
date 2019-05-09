@@ -72,10 +72,7 @@ callApi(GET_INITIAL_STATE, {}).then(async data => {
         if (data.team) {
             store.dispatch<AnyAction>({
                 type: TeamStateActions.JOIN_TEAM,
-                teamCode: data.team.code,
-                teamName: data.team.name,
-                isTeamAdmin: data.team.isTeamAdmin,
-                otherTeamMembers: data.team.otherTeamMembers,
+                ...data.team,
             });
             if (data.game) {
                 store.dispatch<AnyAction>({

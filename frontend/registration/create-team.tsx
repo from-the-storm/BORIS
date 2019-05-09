@@ -5,7 +5,7 @@ import {connect, DispatchProp} from 'react-redux';
 import {RootState} from '../global/state';
 import { TeamStateActions, TeamStateActionsType } from '../global/state/team-state-actions';
 import { Actions } from './registration-state-actions';
-import { CREATE_TEAM, CreateOrJoinTeamResponse } from '../../common/api';
+import { CREATE_TEAM, TeamStatus } from '../../common/api';
 import { callApi } from '../api';
 import { AnyAction } from '../global/actions';
 
@@ -87,7 +87,7 @@ class _CreateTeamComponent extends React.PureComponent<Props, State> {
         return false;
     }
     private async submitFormData() {
-        let response: CreateOrJoinTeamResponse;
+        let response: TeamStatus;
         try {
             response = await callApi(CREATE_TEAM, {
                 teamName: this.state.teamName,

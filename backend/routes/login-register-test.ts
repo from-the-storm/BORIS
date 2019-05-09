@@ -34,9 +34,9 @@ describe("Login/registration API tests", () => {
             await client.callApi(JOIN_TEAM, {code: teamInfo.teamCode});
             const joinedTeamData = await getTeamData();
             expect(joinedTeamData).not.toBeUndefined();
-            expect(joinedTeamData.code).toEqual(teamInfo.teamCode);
+            expect(joinedTeamData.teamCode).toEqual(teamInfo.teamCode);
             expect(joinedTeamData.isTeamAdmin).toEqual(false);
-            expect(joinedTeamData.name).toEqual(teamInfo.teamName);
+            expect(joinedTeamData.teamName).toEqual(teamInfo.teamName);
         });
 
         it("Is not case sensitive when joining a team by code", async () => {
@@ -46,7 +46,7 @@ describe("Login/registration API tests", () => {
             await client.callApi(JOIN_TEAM, {code: teamInfo.teamCode.toLocaleLowerCase()});
             const joinedTeamData = await getTeamData();
             expect(joinedTeamData).not.toBeUndefined();
-            expect(joinedTeamData.code).toEqual(teamInfo.teamCode);
+            expect(joinedTeamData.teamCode).toEqual(teamInfo.teamCode);
         });
     });
 

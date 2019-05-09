@@ -32,8 +32,8 @@ describe("App API tests", () => {
             await client.callApi(CREATE_TEAM, { teamName: "Test Team", organizationName: ""});
             const result = await client.callApi(GET_INITIAL_STATE, {});
             expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
-            expect(result.team.name).toEqual("Test Team");
-            expect(result.team.code).toHaveLength(5);
+            expect(result.team.teamName).toEqual("Test Team");
+            expect(result.team.teamCode).toHaveLength(5);
             expect(result.team.isTeamAdmin).toBe(true);
             expect(result.team.otherTeamMembers).toEqual([]);
         });
@@ -49,8 +49,8 @@ describe("App API tests", () => {
             // Now, the original user gets the initial state:
             const result = await client.callApi(GET_INITIAL_STATE, {});
             expect(result.user).toEqual({first_name: "Jamie", id: userInfo.id});
-            expect(result.team.name).toEqual("Test Team");
-            expect(result.team.code).toHaveLength(5);
+            expect(result.team.teamName).toEqual("Test Team");
+            expect(result.team.teamCode).toHaveLength(5);
             expect(result.team.isTeamAdmin).toBe(true);
             expect(result.team.otherTeamMembers).toHaveLength(1);
             expect(result.team.otherTeamMembers[0]).toEqual(
