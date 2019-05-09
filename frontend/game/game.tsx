@@ -18,10 +18,22 @@ import { BulletinStep } from './ui-steps/bulletin-step';
 import { FinishLineStep } from './ui-steps/finish-line-step';
 
 import * as back from './images/back.svg';
-import * as messageSoundUrl from './sounds/bulletin.mp3';
+import * as messageSound1Url from './sounds/alert-1.mp3';
+import * as messageSound2Url from './sounds/alert-2.mp3';
+import * as messageSound3Url from './sounds/alert-3.mp3';
+import * as messageSound4Url from './sounds/alert-4.mp3';
+import * as messageSound5Url from './sounds/alert-5.mp3';
 
 // Include our SCSS (via webpack magic)
 import './game.scss';
+
+const messageSoundsUrls = [
+    messageSound1Url,
+    messageSound2Url,
+    messageSound3Url,
+    messageSound4Url,
+    messageSound5Url,
+];
 
 interface OwnProps {
 }
@@ -29,6 +41,9 @@ interface Props extends OwnProps, DispatchProp<RootState> {
     scenarioName: string;
     uiState: List<AnyUiState>;
     gameIsFinished: boolean;
+    // Each player on the team is assigned a unique teamIndex value (from 0 to the # of players - 1)
+    // used to give each player a unique alert sound.
+    teamIndex: number;
 }
 interface State {
     showHelpPrompt: boolean;
@@ -43,7 +58,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
         super(props);
         this.state = {showHelpPrompt: false, showQuitPrompt: false, hasSeenSplash: false};
         this.messageSound = new Howl({
-            src: [messageSoundUrl],
+            src: [messageSoundsUrls[this.props.teamIndex % messageSoundsUrls.length]],
         });
     }
     public render() {
@@ -137,8 +152,23 @@ class _GameComponent extends React.PureComponent<Props, State> {
     }
 }
 
+/**
+ * We want each player to hear a unique alert sound when BORIS
+ * sends a message to their device. Since roles sometimes overlap
+ * we compute a unique index for each player based on the order
+ * of their user IDs in the team, and assign them a unique sound
+ * based on that.
+ * @param state 
+ */
+function getTeamIndex(state: RootState) {
+    const allTeamMemberIds = [state.userState.id, ...state.teamState.otherTeamMembers.map(tm => tm.id)];
+    allTeamMemberIds.sort((a, b) => a - b);
+    return allTeamMemberIds.indexOf(state.userState.id);
+}
+
 export const GameComponent = connect((state: RootState, ownProps: OwnProps) => ({
     scenarioName: state.gameState.scenarioName,
     uiState: state.gameState.uiState,
     gameIsFinished: state.gameState.isReviewingGame,
+    teamIndex: getTeamIndex(state),
 }))(_GameComponent);
