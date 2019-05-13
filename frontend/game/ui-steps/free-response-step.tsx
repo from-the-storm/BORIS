@@ -30,7 +30,7 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
             <div className="response-segment free-response">
                 {this.props.invalidGuesses.map((guessString, idx) => <React.Fragment key={idx}>
                     <div className="past-entry wrong">{guessString}</div>
-                    <div className="past-entry">That doesn’t make any sense. Try something else. </div>
+                    <div className="past-entry">Hmm. Try something else!</div>
                 </React.Fragment>)}
                 {
                     this.props.complete ?
@@ -41,9 +41,9 @@ export class _FreeResponseStep extends React.PureComponent<Props, State> {
                         <form onSubmit={() => false}>
                             {
                                 this.props.multiline ?
-                                    <textarea value={this.state.value} onChange={this.valueChanged} className="deselected" required rows={4} cols={30} placeholder="..." aria-label="Response to Question" />
+                                    <textarea value={this.state.value} onChange={this.valueChanged} className="deselected" required rows={4} cols={30} placeholder="Type here" aria-label="Response to Question" />
                                 :
-                                    <input value={this.state.value} onChange={this.valueChanged} className="deselected" required type="text" placeholder="..." aria-label="Response to Question" />
+                                    <input value={this.state.value} onChange={this.valueChanged} className="deselected" required type="text" placeholder="Type here" aria-label="Response to Question" />
                             }
                             <button disabled={this.state.answerIsbeingSubmitted} onClick={this.handleSubmit}>Submit</button>
                         </form>

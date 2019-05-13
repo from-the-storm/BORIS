@@ -9,8 +9,6 @@ import { REGISTER_USER } from '../../common/api';
 import { callApi } from '../api';
 import { AnyAction } from '../global/actions';
 
-import * as backfeed from '../other-images/backfeed.png';
-
 interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {
@@ -57,8 +55,8 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
         } else if (!this.state.hasConsented) {
             return <div>
                 <p className="steps">Step 1 of 2</p>
-                <h1>Consent #1</h1>
-                <div className="grid"><p>Apocalypse Made Easy! is part of a study led by Peter Klein (email: peter.klein@ubc.ca; phone: 604-822-5823), along with Andrew Munroe at the University of British Columbia, Melbourne-based First Person Consulting, and the Propel Centre for Population Health Impact at the University of Waterloo.</p><img src={backfeed} alt="Apocalypse Made Easy! | Backfeed" /></div>
+                <h1>Consent</h1>
+                <div className="grid"><p>Apocalypse Made Easy! is part of a study led by Peter Klein (email: peter.klein@ubc.ca; phone: 604-822-5823), along with Andrew Munroe at the University of British Columbia, Melbourne-based First Person Consulting, and the Propel Centre for Population Health Impact at the University of Waterloo.</p></div>
                 
                 <p>As a Social Innovators Challenge Project funded by the Movember Foundation, its focus is on social connectedness. In order to study social connectedness and improve the program, the way you interact with Apocalypse Made Easy!, along with limited demographic data you supply while registering a profile, is recorded and stored. This data will be anonymized and stored on secure servers in Canada, and only accessible to the research team.</p>
 
