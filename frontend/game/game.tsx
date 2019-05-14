@@ -24,9 +24,6 @@ import * as messageSound3Url from './sounds/alert-3.mp3';
 import * as messageSound4Url from './sounds/alert-4.mp3';
 import * as messageSound5Url from './sounds/alert-5.mp3';
 
-// Include our SCSS (via webpack magic)
-import './game.scss';
-
 const messageSoundsUrls = [
     messageSound1Url,
     messageSound2Url,

@@ -4,10 +4,6 @@ import { connect, DispatchProp } from 'react-redux';
 import { RootState } from '../global/state';
 import { RpcClientConnectionStatus } from './rpc-client-actions';
 
-// Include our SCSS (via webpack magic)
-import './rpc-status-indicator.scss';
-
-
 interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {

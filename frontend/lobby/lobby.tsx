@@ -16,9 +16,6 @@ import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator
 import * as back from './images/back.svg';
 import * as teams from './images/teams-icon.svg';
 
-// Include our SCSS (via webpack magic)
-import './lobby.scss';
-
 interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {

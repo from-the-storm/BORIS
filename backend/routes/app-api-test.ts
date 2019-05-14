@@ -3,7 +3,7 @@ import { TestClient, TestServer } from '../test-lib/utils';
 import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM } from '../../common/api';
 
 describe("App API tests", () => {
-    describe("getInitialState", async () => {
+    describe("getInitialState", () => {
         let client: TestClient;
         let server: TestServer;
         beforeAll(async () => {

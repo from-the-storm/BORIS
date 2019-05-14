@@ -54,7 +54,7 @@ describe("Goto Target Integration tests", () => {
         const wayfinderMessages = messageQueue.filter(msg => msg.userId === wayfinderUserId);
         const burdenedMessages = messageQueue.filter(msg => msg.userId === burdenedUserId);
 
-        const expectMessage = (msg, expected) => {
+        const expectMessage = (msg: any, expected: string[]) => {
             expect(msg.stepUi.type === StepType.MessageStep);
             expect(msg.stepUi.messages).toEqual(expected);
         }

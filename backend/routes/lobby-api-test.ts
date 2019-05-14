@@ -17,7 +17,7 @@ describe("Lobby API tests", () => {
         await server.close();
     });
 
-    describe("GET_LEADERS", async () => {
+    describe("GET_LEADERS", () => {
         it("Runs without error", async () => {
             await client.callApi(GET_LEADERS, {});
         });

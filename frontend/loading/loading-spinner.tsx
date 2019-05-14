@@ -2,9 +2,6 @@ import bind from 'bind-decorator';
 import * as React from 'react';
 import { LoadingState } from './loading-state';
 
-// Include our SCSS (via webpack magic)
-import './loading-spinner.scss';
-
 interface OwnProps {
     state: LoadingState;
     onTryAgain: () => void;

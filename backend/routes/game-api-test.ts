@@ -1,12 +1,12 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, START_GAME, ABANDON_GAME, GET_UI_STATE } from '../../common/api';
+import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM, TeamStatus, LEAVE_TEAM, START_GAME, ABANDON_GAME, GET_UI_STATE } from '../../common/api';
 
 describe("Game API tests", () => {
     let server: TestServer;
     let client1: TestClient, client2: TestClient;
     let user1: TestUserData, user2: TestUserData;
-    let team: CreateOrJoinTeamResponse;
+    let team: TeamStatus;
     const scenarioId = 123; // Defined in 'db/schema/test-data.sql' fixture file
     beforeAll(async () => {
         server = new TestServer();
@@ -23,7 +23,7 @@ describe("Game API tests", () => {
     afterAll(async () => {
         await server.close();
     });
-    describe("START_GAME", async () => {
+    describe("START_GAME", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});
@@ -62,7 +62,7 @@ describe("Game API tests", () => {
         });
 
     });
-    describe("GET_UI_STATE", async () => {
+    describe("GET_UI_STATE", () => {
 
         it("states that no game is active if one is not active", async () => {
             const result = await client1.callApi(GET_UI_STATE, {});
@@ -115,7 +115,7 @@ describe("Game API tests", () => {
     });
 
 
-    describe("ABANDON_GAME", async () => {
+    describe("ABANDON_GAME", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});

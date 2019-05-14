@@ -1,6 +1,6 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { CREATE_TEAM, GET_INITIAL_STATE, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, KICK_OFF_TEAM } from '../../common/api';
+import { CREATE_TEAM, GET_INITIAL_STATE, JOIN_TEAM, TeamStatus, LEAVE_TEAM, KICK_OFF_TEAM } from '../../common/api';
 
 describe("Login/registration API tests", () => {
     let client: TestClient;
@@ -18,8 +18,8 @@ describe("Login/registration API tests", () => {
     const getTeamData = async (_client = client) => { return (await _client.callApi(GET_INITIAL_STATE, {})).team; }
 
     //CREATE_TEAM
-    describe("JOIN_TEAM", async () => {
-        let teamInfo: CreateOrJoinTeamResponse;
+    describe("JOIN_TEAM", () => {
+        let teamInfo: TeamStatus;
         beforeAll(async () => {
             // Create a team for use in testing:
             const adminClient = new TestClient(server);
@@ -50,7 +50,7 @@ describe("Login/registration API tests", () => {
         });
     });
 
-    describe("LEAVE_TEAM", async () => {
+    describe("LEAVE_TEAM", () => {
 
         it("Allows leaving a team", async () => {
             const userInfo = await client.registerAndLogin();
@@ -65,8 +65,8 @@ describe("Login/registration API tests", () => {
         });
 
     });
-    describe("KICK_OFF_TEAM", async () => {
-        let teamInfo: CreateOrJoinTeamResponse;
+    describe("KICK_OFF_TEAM", () => {
+        let teamInfo: TeamStatus;
         let adminClient: TestClient;
         let adminUserInfo: TestUserData;
         let userInfo: TestUserData;

@@ -1,21 +1,11 @@
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-
-const extraPlugins = (
-    process.env.NODE_ENV === 'production' ? [
-        new UglifyJsPlugin({
-            sourceMap: true,
-            parallel: true,
-        }),
-    ] : []
-);
-
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
     entry: {
         main: "./main.tsx",
         admin: "./admin/app.tsx",
+        style: "./global/global-styles.scss",
     },
     output: {
         filename: "[name].js",
@@ -34,7 +24,15 @@ module.exports = {
     module: {
         rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+            {
+                test: /\.tsx?$/,
+                loader: "awesome-typescript-loader",
+                options: {
+                    // Supress warnings related to random .ts files that may be found in node_modules
+                    // but aren't even used by our app. Only report errors for our frontend code.
+                    reportFiles: "./**/*.{ts,tsx}"
+                },
+            },
 
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
             { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
@@ -42,12 +40,15 @@ module.exports = {
             // We include SCSS files and extract them to a combined output file
             {
                 test: /\.scss$/,
-                loader: ExtractTextPlugin.extract({
-                    use: [
-                        { loader: 'css-loader', options: { minimize: true } },
-                        { loader: 'sass-loader' },
-                    ],
-                }),
+                use: [
+                    MiniCssExtractPlugin.loader, // 4: extract the style sheets into a dedicated file
+                    'css-loader',                // 3: translates CSS into CommonJS
+                    'resolve-url-loader',        // 2: Fix relative url() references that Sass can't do natively
+                    { 
+                        loader: 'sass-loader',   // 1: compiles Sass to CSS, using Node Sass by default
+                        options: {sourceMap: true, }  // SourceMap is required for resolve-url-loader
+                    }
+                ],
             },
             // Include images, either automatically inlined as data URLs or served from the 'dist' folder.
             {
@@ -84,12 +85,13 @@ module.exports = {
     },
 
     plugins: [
-        new ExtractTextPlugin('style.css', {
-            allChunks: true,
-        }),
         new CopyWebpackPlugin([
-            {from:'other-images',to:'images'} 
+            {from:'other-images', to:'images'} 
         ]),
-        ...extraPlugins
-    ]
+        new MiniCssExtractPlugin({
+            // Options similar to the same options in webpackOptions.output
+            // both options are optional
+            filename: '[name].css',
+        }),
+    ],
 };

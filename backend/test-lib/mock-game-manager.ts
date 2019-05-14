@@ -41,7 +41,7 @@ export class MockGameManager implements GameManagerStepInterface {
 
     /** A helper method for test cases to use to load Steps from YAML strings */
     static loadStepFromYaml(yamlData: string, manager = new MockGameManager()): Step {
-        const data = yaml.safeLoad(yamlData);
+        const data = yaml.safeLoad(yamlData) as any[];
         return loadStepFromData(data[0], 1, manager);
     }
 }

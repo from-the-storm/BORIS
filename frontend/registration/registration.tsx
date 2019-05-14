@@ -11,10 +11,7 @@ import {LoginComponent} from './login';
 import {LogoutComponent} from './logout';
 import {Mode} from './registration-state';
 import {Actions} from './registration-state-actions';
-
-// Include our SCSS (via webpack magic)
-import './registration.scss';
-import { AnyAction } from '../global/actions';
+import {AnyAction} from '../global/actions';
 
 interface OwnProps {
 }
