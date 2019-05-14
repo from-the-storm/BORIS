@@ -1,12 +1,12 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, START_GAME, ABANDON_GAME, GET_UI_STATE } from '../../common/api';
+import { GET_INITIAL_STATE, CREATE_TEAM, JOIN_TEAM, TeamStatus, LEAVE_TEAM, START_GAME, ABANDON_GAME, GET_UI_STATE } from '../../common/api';
 
 describe("Game API tests", () => {
     let server: TestServer;
     let client1: TestClient, client2: TestClient;
     let user1: TestUserData, user2: TestUserData;
-    let team: CreateOrJoinTeamResponse;
+    let team: TeamStatus;
     const scenarioId = 123; // Defined in 'db/schema/test-data.sql' fixture file
     beforeAll(async () => {
         server = new TestServer();

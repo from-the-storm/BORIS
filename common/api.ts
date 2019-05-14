@@ -31,18 +31,20 @@ export interface GameDetailedStatus {
     scenarioName?: string; // Only set if isActive is true
 }
 
+export interface TeamStatus {
+    teamName: string;
+    teamCode: string;
+    isTeamAdmin: boolean;
+    otherTeamMembers: Array<OtherTeamMember>;
+};
+
 /** GET_INITIAL_STATE response */
 export interface InitialStateResponse {
     user?: {
         id: number;
         first_name: string;
     };
-    team?: {
-        code: string;
-        name: string;
-        isTeamAdmin: boolean;
-        otherTeamMembers: Array<OtherTeamMember>;
-    };
+    team?: TeamStatus;
     game?: GameDetailedStatus;
 };
 
@@ -84,14 +86,7 @@ export interface CreateTeamRequest {
 }
 
 /** CREATE_TEAM and JOIN_TEAM Response */
-export interface CreateOrJoinTeamResponse {
-    teamName: string;
-    teamCode: string;
-    isTeamAdmin: boolean;
-    otherTeamMembers: Array<OtherTeamMember>;
-};
-
-export const CREATE_TEAM: ApiMethod<CreateTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/create', type: 'POST'};
+export const CREATE_TEAM: ApiMethod<CreateTeamRequest, TeamStatus> = {path: '/auth/team/create', type: 'POST'};
 
 // Join a team:
 
@@ -100,7 +95,7 @@ export interface JoinTeamRequest {
     code: string;
 }
 
-export const JOIN_TEAM: ApiMethod<JoinTeamRequest, CreateOrJoinTeamResponse> = {path: '/auth/team/join', type: 'POST'};
+export const JOIN_TEAM: ApiMethod<JoinTeamRequest, TeamStatus> = {path: '/auth/team/join', type: 'POST'};
 
 // Leave a team:
 

@@ -1,6 +1,6 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { CREATE_TEAM, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, GET_TEAM_MARKET_VARS, BUY_PUNCHCARD, MarketStatus } from '../../common/api';
+import { CREATE_TEAM, JOIN_TEAM, TeamStatus, LEAVE_TEAM, GET_TEAM_MARKET_VARS, BUY_PUNCHCARD, MarketStatus } from '../../common/api';
 import { punchcards } from '../../common/market';
 import { getTeamVar, setTeamVar } from '../game/team-vars';
 import { getDB } from '../db/db';
@@ -11,7 +11,7 @@ describe("Game API tests", () => {
     let server: TestServer;
     let client1: TestClient, client2: TestClient;
     let user1: TestUserData, user2: TestUserData;
-    let team: CreateOrJoinTeamResponse;
+    let team: TeamStatus;
     const scenarioId = 123; // Defined in 'db/schema/test-data.sql' fixture file
     beforeAll(async () => {
         server = new TestServer();

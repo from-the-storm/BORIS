@@ -1,6 +1,6 @@
 import 'jest';
 import { TestClient, TestServer, TestUserData } from '../test-lib/utils';
-import { CREATE_TEAM, GET_INITIAL_STATE, JOIN_TEAM, CreateOrJoinTeamResponse, LEAVE_TEAM, KICK_OFF_TEAM } from '../../common/api';
+import { CREATE_TEAM, GET_INITIAL_STATE, JOIN_TEAM, TeamStatus, LEAVE_TEAM, KICK_OFF_TEAM } from '../../common/api';
 
 describe("Login/registration API tests", () => {
     let client: TestClient;
@@ -19,7 +19,7 @@ describe("Login/registration API tests", () => {
 
     //CREATE_TEAM
     describe("JOIN_TEAM", () => {
-        let teamInfo: CreateOrJoinTeamResponse;
+        let teamInfo: TeamStatus;
         beforeAll(async () => {
             // Create a team for use in testing:
             const adminClient = new TestClient(server);
@@ -34,9 +34,9 @@ describe("Login/registration API tests", () => {
             await client.callApi(JOIN_TEAM, {code: teamInfo.teamCode});
             const joinedTeamData = await getTeamData();
             expect(joinedTeamData).not.toBeUndefined();
-            expect(joinedTeamData.code).toEqual(teamInfo.teamCode);
+            expect(joinedTeamData.teamCode).toEqual(teamInfo.teamCode);
             expect(joinedTeamData.isTeamAdmin).toEqual(false);
-            expect(joinedTeamData.name).toEqual(teamInfo.teamName);
+            expect(joinedTeamData.teamName).toEqual(teamInfo.teamName);
         });
 
         it("Is not case sensitive when joining a team by code", async () => {
@@ -46,7 +46,7 @@ describe("Login/registration API tests", () => {
             await client.callApi(JOIN_TEAM, {code: teamInfo.teamCode.toLocaleLowerCase()});
             const joinedTeamData = await getTeamData();
             expect(joinedTeamData).not.toBeUndefined();
-            expect(joinedTeamData.code).toEqual(teamInfo.teamCode);
+            expect(joinedTeamData.teamCode).toEqual(teamInfo.teamCode);
         });
     });
 
@@ -66,7 +66,7 @@ describe("Login/registration API tests", () => {
 
     });
     describe("KICK_OFF_TEAM", () => {
-        let teamInfo: CreateOrJoinTeamResponse;
+        let teamInfo: TeamStatus;
         let adminClient: TestClient;
         let adminUserInfo: TestUserData;
         let userInfo: TestUserData;
