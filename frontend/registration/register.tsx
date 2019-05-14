@@ -140,7 +140,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
     @bind private handleFormFieldChange(event: React.ChangeEvent<HTMLInputElement>) {
         const name = event.target.name;
         const value = (event.target.type === 'number' && event.target.value) ? parseInt(event.target.value) : event.target.value;
-        this.setState({[name as any]: value});
+        this.setState({[name]: value} as any);
     }
     @bind private undoConsent() { 
         if (!this.state.waitingForServerResponse) {
