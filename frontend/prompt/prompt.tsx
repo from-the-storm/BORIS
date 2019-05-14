@@ -1,8 +1,6 @@
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
-import './prompt.scss';
-
 // Use setAppElement to hide your application from screenreaders and other assistive technologies while the modal is open.
 ReactModal.setAppElement('#app-container');
 

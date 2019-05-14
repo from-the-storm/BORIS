@@ -8,6 +8,9 @@ import { AnyAction } from '../global/actions';
 import { RpcConnectionStatusIndicator } from '../rpc-client/rpc-status-indicator';
 import { updateMarketVars } from '../global/state/team-state-actions';
 import { punchcards } from '../../common/market';
+import { callApi } from '../api';
+import { BUY_PUNCHCARD } from '../../common/api';
+import { MessagesStateActions } from '../global/state/messages-state-actions';
 
 import * as back from '../lobby/images/back.svg';
 import * as saltine from '../lobby/images/saltine.svg';
@@ -25,12 +28,6 @@ const punchcardImages: {[k: string]: string} = {
     'pnp': card_img_pnp,
     'timehoarder': card_img_timehoarder,
 };
-
-// Include our SCSS (via webpack magic)
-import './market.scss';
-import { callApi } from '../api';
-import { BUY_PUNCHCARD, MarketStatus } from '../../common/api';
-import { MessagesStateActions } from '../global/state/messages-state-actions';
 
 interface OwnProps {
 }

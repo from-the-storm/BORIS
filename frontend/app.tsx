@@ -14,9 +14,6 @@ import { AnyAction } from './global/actions';
 import { MessagesStateActions } from './global/state/messages-state-actions';
 import { MarketComponent } from './market/market';
 
-// Include our SCSS (via webpack magic)
-import './global/global-styles.scss';
-
 interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {

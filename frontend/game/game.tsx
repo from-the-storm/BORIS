@@ -20,9 +20,6 @@ import { FinishLineStep } from './ui-steps/finish-line-step';
 import * as back from './images/back.svg';
 import * as messageSoundUrl from './sounds/bulletin.mp3';
 
-// Include our SCSS (via webpack magic)
-import './game.scss';
-
 interface OwnProps {
 }
 interface Props extends OwnProps, DispatchProp<RootState> {

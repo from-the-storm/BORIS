@@ -1,9 +1,6 @@
 import * as React from 'react';
 import GoogleMapReact from 'google-map-react';
 
-// Include our SCSS (via webpack magic)
-import './auto-wayfinder.scss';
-
 import * as marker from './images/you-are-here.svg';
 import * as starting from './images/starting-point.svg';
 
