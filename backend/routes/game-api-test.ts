@@ -23,7 +23,7 @@ describe("Game API tests", () => {
     afterAll(async () => {
         await server.close();
     });
-    describe("START_GAME", async () => {
+    describe("START_GAME", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});
@@ -62,7 +62,7 @@ describe("Game API tests", () => {
         });
 
     });
-    describe("GET_UI_STATE", async () => {
+    describe("GET_UI_STATE", () => {
 
         it("states that no game is active if one is not active", async () => {
             const result = await client1.callApi(GET_UI_STATE, {});
@@ -115,7 +115,7 @@ describe("Game API tests", () => {
     });
 
 
-    describe("ABANDON_GAME", async () => {
+    describe("ABANDON_GAME", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});

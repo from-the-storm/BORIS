@@ -45,7 +45,7 @@ describe("Set Variable Step Integration tests", () => {
         // Play through the whole script - there's no interaction in this test script.
         await manager.allPendingStepsFlushed();
 
-        const expectMessage = (msg, expected) => {
+        const expectMessage = (msg: any, expected: string[]) => {
             expect(msg.stepUi.type === StepType.MessageStep);
             expect(msg.stepUi.messages).toEqual(expected);
         }

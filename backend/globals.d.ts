@@ -71,6 +71,8 @@ declare module 'json-rpc-protocol' {
 }
 declare module 'json-rpc-peer';
 
+declare module 'jsonrpc-websocket-client';
+
 declare module 'js-interpreter' {
 
     type AST = never;

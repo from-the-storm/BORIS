@@ -18,7 +18,7 @@ describe("Login/registration API tests", () => {
     const getTeamData = async (_client = client) => { return (await _client.callApi(GET_INITIAL_STATE, {})).team; }
 
     //CREATE_TEAM
-    describe("JOIN_TEAM", async () => {
+    describe("JOIN_TEAM", () => {
         let teamInfo: CreateOrJoinTeamResponse;
         beforeAll(async () => {
             // Create a team for use in testing:
@@ -50,7 +50,7 @@ describe("Login/registration API tests", () => {
         });
     });
 
-    describe("LEAVE_TEAM", async () => {
+    describe("LEAVE_TEAM", () => {
 
         it("Allows leaving a team", async () => {
             const userInfo = await client.registerAndLogin();
@@ -65,7 +65,7 @@ describe("Login/registration API tests", () => {
         });
 
     });
-    describe("KICK_OFF_TEAM", async () => {
+    describe("KICK_OFF_TEAM", () => {
         let teamInfo: CreateOrJoinTeamResponse;
         let adminClient: TestClient;
         let adminUserInfo: TestUserData;

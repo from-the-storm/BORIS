@@ -11,7 +11,7 @@ describe("Redis tests", () => {
     afterAll(async () => {
         await server.close();
     });
-    describe("isUserOnline", async () => {
+    describe("isUserOnline", () => {
         it("Returns false for a random user ID", async () => {
             expect(await isUserOnline(99999999)).toBe(false);
         });

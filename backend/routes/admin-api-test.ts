@@ -64,8 +64,8 @@ describe("Admin API tests", () => {
     };
 
 
-    describe("Users", async () => {
-        describe("List Users (GET /api/admin/users)", async () => {
+    describe("Users", () => {
+        describe("List Users (GET /api/admin/users)", () => {
 
             checkSecurity(LIST_USERS);
 
@@ -83,7 +83,7 @@ describe("Admin API tests", () => {
             });
         });
 
-        describe("Get User (GET /api/admin/users/:id)", async () => {
+        describe("Get User (GET /api/admin/users/:id)", () => {
 
             checkSecurity(GET_USER);
 
@@ -98,13 +98,13 @@ describe("Admin API tests", () => {
         });
     });
 
-    describe("Teams", async () => {
-        describe("List Teams (GET /api/admin/teams)", async () => {
+    describe("Teams", () => {
+        describe("List Teams (GET /api/admin/teams)", () => {
 
             checkSecurity(LIST_TEAMS);
 
         });
-        describe("Team Details (GET /api/admin/teams/:id)", async () => {
+        describe("Team Details (GET /api/admin/teams/:id)", () => {
 
             checkSecurity(GET_TEAM, {id: "1"});
 
@@ -127,25 +127,25 @@ describe("Admin API tests", () => {
             });
 
         });
-        describe("Team Var Reset (POST /api/admin/teams/:id/reset)", async () => {
+        describe("Team Var Reset (POST /api/admin/teams/:id/reset)", () => {
 
             checkSecurity(RESET_TEAM_VARS, {id: "1"});
 
         });
-        describe("Delete Team (DELETE /api/admin/teams/:id)", async () => {
+        describe("Delete Team (DELETE /api/admin/teams/:id)", () => {
 
             checkSecurity(DELETE_TEAM, {id: "1"});
 
         });
     });
 
-    describe("Scenarios", async () => {
-        describe("List Scenarios (GET /api/admin/scenarios)", async () => {
+    describe("Scenarios", () => {
+        describe("List Scenarios (GET /api/admin/scenarios)", () => {
 
             checkSecurity(LIST_SCENARIOS);
 
         });
-        describe("Get Scenario (GET /api/admin/scenarios/:id)", async () => {
+        describe("Get Scenario (GET /api/admin/scenarios/:id)", () => {
 
             checkSecurity(GET_SCENARIO, {id: "1"});
 
@@ -167,7 +167,7 @@ describe("Admin API tests", () => {
             });
         });
 
-        describe("Create Scenario (POST /api/admin/scenarios)", async () => {
+        describe("Create Scenario (POST /api/admin/scenarios)", () => {
 
             checkSecurity(CREATE_SCENARIO);
 
@@ -191,7 +191,7 @@ describe("Admin API tests", () => {
             });
 
         });
-        describe("Update Scenario (PUT /api/admin/scenarios/:id)", async () => {
+        describe("Update Scenario (PUT /api/admin/scenarios/:id)", () => {
 
             checkSecurity(EDIT_SCENARIO, {id: String(TEST_SCENARIO_ID)});
 
@@ -226,7 +226,7 @@ describe("Admin API tests", () => {
                 expect(getResponse).toEqual(updateResponse);
             });
         });
-        describe("Delete Scenario (DELETE /api/admin/scenarios/:id)", async () => {
+        describe("Delete Scenario (DELETE /api/admin/scenarios/:id)", () => {
 
             checkSecurity(DELETE_SCENARIO, {id: "1"});
 
@@ -249,13 +249,13 @@ describe("Admin API tests", () => {
         });
     });
 
-    describe("Scripts", async () => {
+    describe("Scripts", () => {
 
         const EXISTING_SCRIPT_ID = 'test-script2';
 
         const MINIMAL_SCRIPT = `---\n- step: message\n  messages:\n  - Hello`; // A short (valid!) example script we can use in tests.
 
-        describe("List Scripts (GET /api/admin/scripts)", async () => {
+        describe("List Scripts (GET /api/admin/scripts)", () => {
 
             checkSecurity(LIST_SCRIPTS);
 
@@ -269,7 +269,7 @@ describe("Admin API tests", () => {
             });
 
         });
-        describe("Get Script (GET /api/admin/scripts/:id)", async () => {
+        describe("Get Script (GET /api/admin/scripts/:id)", () => {
 
             checkSecurity(GET_SCRIPT, {id: 'test-script'});
 
@@ -288,7 +288,7 @@ describe("Admin API tests", () => {
             });
 
         });
-        describe("Create Script (POST /api/admin/scripts)", async () => {
+        describe("Create Script (POST /api/admin/scripts)", () => {
 
             checkSecurity(CREATE_SCRIPT);
 
@@ -319,7 +319,7 @@ describe("Admin API tests", () => {
             });
 
         });
-        describe("Update Script (PUT /api/admin/scripts/:id)", async () => {
+        describe("Update Script (PUT /api/admin/scripts/:id)", () => {
 
             checkSecurity(EDIT_SCRIPT, {id: 'test-script'});
 
@@ -346,15 +346,15 @@ describe("Admin API tests", () => {
             });
 
         });
-        describe("Delete Script (DELETE /api/admin/scripts/:id)", async () => {
+        describe("Delete Script (DELETE /api/admin/scripts/:id)", () => {
 
             checkSecurity(DELETE_SCRIPT, {id: "script35"});
 
         });
     });
 
-    describe("Games", async () => {
-        describe("List Games (GET /api/admin/games)", async () => {
+    describe("Games", () => {
+        describe("List Games (GET /api/admin/games)", () => {
 
             checkSecurity(LIST_GAMES);
 

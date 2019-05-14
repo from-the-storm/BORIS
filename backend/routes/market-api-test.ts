@@ -29,7 +29,7 @@ describe("Game API tests", () => {
         await server.close();
     });
 
-    describe("GET_TEAM_MARKET_VARS", async () => {
+    describe("GET_TEAM_MARKET_VARS", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});
@@ -47,7 +47,7 @@ describe("Game API tests", () => {
 
     });
 
-    describe("BUY_PUNCHCARD", async () => {
+    describe("BUY_PUNCHCARD", () => {
 
         it("Requires the user to be on a team", async () => {
             await client1.callApi(LEAVE_TEAM, {});

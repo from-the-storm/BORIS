@@ -8,7 +8,7 @@ describe("Script Loader tests", () => {
     beforeAll(async () => { db = await getDB(); });
     afterAll(async () => { await db.instance.$pool.end(); });
 
-    describe("loadScript()", async () => {
+    describe("loadScript()", () => {
         it("can load a script from a file", async () => {
             const script = await loadScript(db, "test-script2");
             expect(Array.isArray(script)).toBe(true);

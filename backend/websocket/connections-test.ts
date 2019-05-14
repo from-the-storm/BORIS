@@ -11,7 +11,7 @@ describe("Websocket connection tests", () => {
     afterAll(async () => {
         await server.close();
     });
-    describe("User online status", async () => {
+    describe("User online status", () => {
         it("Shows a user as online while their websocket is open", async () => {
             const client = new TestClient(server);
             const user = await client.registerAndLogin();
