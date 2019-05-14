@@ -42,7 +42,7 @@ export abstract class Step {
     protected getVar<T>(variable: GameVar<T>): T {
         return this.manager.getVar(variable, this.id);
     }
-    protected async setVar<T>(variable: GameVar<T>, updaterOrValue: ((val: T) => T)|T): Promise<T> {
+    protected async setVar<T extends string|number|boolean|undefined|null|any[]>(variable: GameVar<T>, updaterOrValue: ((val: T) => T)|T): Promise<T> {
         const updater = (typeof updaterOrValue === 'function') ? updaterOrValue : () => updaterOrValue;
         return this.manager.setVar(variable, updater, this.id);
     }
