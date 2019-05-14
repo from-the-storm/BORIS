@@ -35,8 +35,8 @@ jobs:
       # build static assets
       - run: npm run build
 
-      # run tests!
-      - run: npm test
+      # run tests! (use runInBand to avoid memory issues and slowness - https://discuss.circleci.com/t/babel-7-jest-results-in-timeout/25383/3)
+      - run: npm run test -- --runInBand
   build:
     docker:
       - image: circleci/node:8.11.1-browsers
