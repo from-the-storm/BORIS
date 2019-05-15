@@ -9,6 +9,7 @@ export enum StepType {
     MultipleChoice = 'mc',
     BulletinStep = 'b',
     ProgressStep = 'p',
+    MapStep = 'ma',
     FinishLineStep = 'fin',
 }
 
@@ -42,6 +43,13 @@ export interface ProgressStepUiState extends UiState {
     percentage: number;
     messageHTML: string;
 }
+export interface MapStepUiState extends UiState {
+    type: StepType.MapStep;
+    latitude: number;
+    longitude: number;
+    zoomLevel: number;
+    messageHTML: string;
+}
 export interface FinishLineStepUiState extends UiState {
     type: StepType.FinishLineStep;
 }
@@ -51,6 +59,7 @@ export type AnyUiState = (
     |MultipleChoiceStepUiState
     |BulletinStepUiState
     |ProgressStepUiState
+    |MapStepUiState
     |FinishLineStepUiState
     |null
 );

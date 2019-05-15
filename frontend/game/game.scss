@@ -113,6 +113,10 @@
         margin: 0 0 1.5rem 40px;
         float: left;
         clear: both;
+        width: -moz-available;
+        width: -webkit-fill-available;
+        width: fill-available;
+
             p {
                 color: black;
                 background: $grey;
@@ -193,6 +197,11 @@
                 background-color: $green;
                 border-radius: 2.5px;
             }
+        }
+        // A Map shown at the top of a map step
+        div.map-step-map {
+            width: 100%;
+            height: 350px;
         }
     }
     .response-segment {
