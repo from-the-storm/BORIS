@@ -172,6 +172,28 @@
                     content: url('./images/chat-clarence.png');                    
                 }
             }
+
+        // A Progress step (which is inside a chat-segment):
+        h3.progress-heading {
+            color: #aaa;
+            font-size: 10px;
+            font-weight: normal;
+            text-transform: none;
+        }
+        progress {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 12px;
+
+            &::-webkit-progress-bar {
+                background-color: $grey;
+                border-radius: 2.5px;
+            }
+            &::-webkit-progress-value {
+                background-color: $green;
+                border-radius: 2.5px;
+            }
+        }
     }
     .response-segment {
         margin: 0 0 1.5rem 40px;

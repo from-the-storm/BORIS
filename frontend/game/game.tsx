@@ -15,6 +15,7 @@ import { MessageStep } from './ui-steps/message-step';
 import { FreeResponseStep } from './ui-steps/free-response-step';
 import { MultipleChoiceStep } from './ui-steps/choice-step';
 import { BulletinStep } from './ui-steps/bulletin-step';
+import { ProgressStep } from './ui-steps/progress-step';
 import { FinishLineStep } from './ui-steps/finish-line-step';
 
 import * as back from './images/back.svg';
@@ -67,6 +68,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
                 step.type === StepType.FreeResponse ? <FreeResponseStep key={step.stepId} {...step} /> :
                 step.type === StepType.MultipleChoice ? <MultipleChoiceStep key={step.stepId} {...step} /> :
                 step.type === StepType.BulletinStep ? <BulletinStep key={step.stepId} {...step} /> :
+                step.type === StepType.ProgressStep ? <ProgressStep key={step.stepId} {...step} /> :
                 step.type === StepType.FinishLineStep ? <FinishLineStep key={step.stepId} {...step} /> :
                 <div className="chat-segment"><strong>Unsupported step type</strong></div>
             );
