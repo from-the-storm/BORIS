@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory } from 'history';
 import { Admin, Resource } from 'react-admin';
 
 import { dataProvider } from './data-provider';
@@ -10,7 +10,7 @@ import { ScenarioList, ScenarioShow, ScenarioEdit, ScenarioCreate } from './scen
 import { ScriptsList, ScriptEdit, ScriptCreate, ScriptShow } from './scripts';
 import { GameList } from './games';
 
-const history = createHistory({ basename: '/admin' });
+const history = createBrowserHistory({ basename: '/admin' });
 
 const App = () => (
     <Admin title="Boris Admin" dataProvider={dataProvider} history={history}>
