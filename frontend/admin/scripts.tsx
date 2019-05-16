@@ -321,6 +321,30 @@ export const DocumentationAndStyles = (props: {}) => (
     <p>Your training starts now, and will be delivered by BORIS.</p>
 `.trim()}</pre></code>
 
+            <h2>Progress Step</h2>
+            <p>
+                Shows a progress bar displaying the user's progress toward a goal.
+            </p>
+            <h3>Example:</h3>
+<code><pre>{`
+- step: progress
+  percent: 38
+  message: You're <strong>38%</strong> of the way to the hidden reservoir!
+`.trim()}</pre></code>
+
+            <h2>Map Step</h2>
+            <p>
+                Shows a map displaying where the user should be.
+            </p>
+            <h3>Example:</h3>
+<code><pre>{`
+- step: map
+  message: You should be here.
+  lat: 49.273164
+  lng: -123.102509
+  zoom: 16
+`.trim()}</pre></code>
+
             <h2>Assign Roles Step</h2>
             <p>
                 If a script is going to use the roles, it should have <code>- step: assignroles</code> as early as

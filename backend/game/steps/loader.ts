@@ -11,6 +11,8 @@ import { AssignRolesStep } from "./assign-roles";
 import { BulletinStep } from "./bulletin";
 import { AwardSaltinesStep } from "./award-saltines";
 import { SetVariableStep } from "./set-step";
+import { ProgressStep } from "./progress-step";
+import { MapStep } from "./map-step";
 import { FinishLineStep } from "./finish-line-step";
 
 export function loadStepFromData(data: any, id: number, manager: GameManagerStepInterface): Step {
@@ -27,6 +29,8 @@ export function loadStepFromData(data: any, id: number, manager: GameManagerStep
         case 'bulletin': return new BulletinStep(args);
         case 'set': return new SetVariableStep(args);
         case 'assignroles': return new AssignRolesStep(args);
+        case 'progress': return new ProgressStep(args);
+        case 'map': return new MapStep(args);
         case 'finish line': return new FinishLineStep(args);
         default: throw new Error(`Unable to load type with step type "${step}".`);
     }
