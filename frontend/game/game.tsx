@@ -105,7 +105,7 @@ class _GameComponent extends React.PureComponent<Props, State> {
             >
                 <p><strong>Connection problems?</strong> Make sure your internet's good and/or refresh your browser. You should be brought back to where you were.</p>
                 <p><strong>If you're lost,</strong> retrace your steps. If you <strong>can't figure something out,</strong> answer anything and move on.</p>
-                <p>If a challenge is <strong>impossible,</strong> please <a href="mailto:info@apocalypsemadeeasy.com">email us</a> about it. We'll find a way to thank you.</p>
+                <p>If a challenge is <strong>impossible,</strong> please <a href="mailto:info@apocalypsemadeeasy.com">email us</a> about it.</p>
             </Prompt>
         </RpcConnectionStatusIndicator>;
     }

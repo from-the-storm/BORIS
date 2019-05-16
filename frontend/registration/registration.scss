@@ -48,6 +48,10 @@
         margin-bottom: 0;
     }
 
+    input#team-code {
+        text-transform: uppercase;
+    }
+
     // Error messages appearing on the login or registration forms:
     .login-error, .team-error {
         border: 1px solid darken($red, 20%);
