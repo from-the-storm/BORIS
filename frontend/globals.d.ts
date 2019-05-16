@@ -22,6 +22,4 @@ declare module '*.mp3' {
 
 declare module 'jsonrpc-websocket-client';
 
-declare module 'react-facebook-pixel';
-
 declare module 'react-admin';
