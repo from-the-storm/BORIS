@@ -39,7 +39,7 @@ class _JoinTeamComponent extends React.PureComponent<Props, State> {
                 <h1>Join Team</h1>
                 <p>Enter the team code:</p>
                 <form onSubmit={this.handleFormSubmit}>
-                    <input type="text" required maxLength={10} placeholder="e.g. ABCDE" onChange={this.handleCodeChanged} value={this.state.code} className={this.state.code ? 'selected' : 'deselected'} />
+                    <input id="team-code" type="text" required maxLength={10} placeholder="ABCDE" onChange={this.handleCodeChanged} value={this.state.code} className={this.state.code ? 'selected' : 'deselected'} />
                     {this.state.errorMessage ?
                         <div className="team-error">{this.state.errorMessage}</div>
                     :null}

@@ -145,9 +145,6 @@
                                 border-color: $red;
                             }
                     }
-                    span.negotiate {
-                        font-family: Impact, Charcoal, sans-serif;
-                    }
                     span.quake {
                         animation-duration: 0.7s;
                         animation-timing-function: ease-in-out;
@@ -179,10 +176,9 @@
 
         // A Progress step (which is inside a chat-segment):
         h3.progress-heading {
-            color: #aaa;
-            font-size: 10px;
-            font-weight: normal;
-            text-transform: none;
+            color: lighten($black, 10%);
+            font-size: 0.8em;
+            margin-bottom: 0.2rem;
         }
         progress {
             -webkit-appearance: none;
@@ -201,7 +197,7 @@
         // A Map shown at the top of a map step
         div.map-step-map {
             width: 100%;
-            height: 350px;
+            height: 220px;
         }
     }
     .response-segment {
@@ -224,13 +220,18 @@
                 margin: 0.1rem 0;
                 float: right;
                 clear: right;
+                    &:disabled {
+                        opacity: 0.5;
+                    }
                     &.correct {
                         background: $green;
                         color: $black;
+                        opacity: 1
                     }
                     &.wrong {
                         background: $red;
                         color: $white;
+                        opacity: 1
                     }
             }
             form {
@@ -244,6 +245,7 @@
                         margin-bottom: 0;
                         background: none;
                         color: $white;
+                        border-color: $white;
                         display: block;
                     }
                     button {
