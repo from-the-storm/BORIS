@@ -33,8 +33,11 @@ const convertDataProviderRequestToHTTP = (type: string, resource: string, params
     case GET_ONE:
         return { url: `${API_URL}/${resource}/${params.id}` };
     case GET_MANY: {
+        // Hack: Our 'scripts' resources have a custom ID field.
+        // https://marmelab.com/react-admin/FAQ.html#can-i-have-custom-identifiersprimary-keys-for-my-resources
+        const idField = (resource === 'scripts') ? 'name' : 'id';
         const queryStr = makeQueryString({
-            filter: JSON.stringify({ id: params.ids }),
+            filter: JSON.stringify({ [idField]: params.ids }),
         });
         return { url: `${API_URL}/${resource}${queryStr}` };
     }
