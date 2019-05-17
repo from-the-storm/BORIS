@@ -56,7 +56,7 @@ const TeamShowActions = (props: any) => (
         <RefreshButton />
         <DeleteButton basePath={props.basePath} record={props.data} resource={props.resource} />
         {/* Add your custom actions */}
-        <Button color="secondary" onClick={() => { resetTeam(props.data.id); }}>Reset Vars (!)</Button>
+        <Button color="secondary" onClick={() => { resetTeam(props.data.id); }} label="Reset Vars (!)" />
     </CardActions>
 );
 ////// End code to add a custom "Reset vars" button
