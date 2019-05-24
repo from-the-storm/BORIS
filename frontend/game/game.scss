@@ -162,6 +162,10 @@
                     &.in {
                         animation: pop-in 0.2s forwards ease-in;
                     }
+                img {
+                    // Offset paragraph padding
+                    margin-bottom: -0.4em;
+                }
             }
             &.backfeed {   
                 p:last-child:before {
@@ -197,7 +201,7 @@
         // A Map shown at the top of a map step
         div.map-step-map {
             width: 100%;
-            height: 220px;
+            height: 240px;
         }
     }
     .response-segment {
@@ -306,7 +310,7 @@
         padding: 0.5rem 0;
         &:after {
             content: 'BULLETIN';
-            opacity: 0.2;
+            opacity: 0.1;
             font-family: $fancyfont;
             font-size: 48px;
             transform: rotate(-10deg) translateY(-45%);
