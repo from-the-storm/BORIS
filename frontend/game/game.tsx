@@ -104,7 +104,9 @@ class _GameComponent extends React.PureComponent<Props, State> {
                 show={this.state.showHelpPrompt}
             >
                 <p><strong>Connection problems?</strong> Make sure your internet's good and/or refresh your browser. You should be brought back to where you were.</p>
-                <p><strong>If you're lost,</strong> retrace your steps. If you <strong>can't figure something out,</strong> answer anything and move on.</p>
+                <p><strong>If you're lost,</strong> retrace your steps.</p>
+                <p>If you <strong>can't see the trails on the map</strong>, try switching it to satellite view.</p>
+                <p>If you <strong>can't figure something out,</strong> answer anything and move on.</p>
                 <p>If a challenge is <strong>impossible,</strong> please <a href="mailto:info@apocalypsemadeeasy.com">email us</a> about it.</p>
             </Prompt>
         </RpcConnectionStatusIndicator>;
