@@ -63,7 +63,7 @@ export class BorisTestBrowser {
         switch (headerText) {
             case "WOULD YOU SURVIVE THE END OF THE WORLD?": return BorisPage.HOME_PAGE;
             // User Registration:
-            case "CONSENT #1": return BorisPage.REGISTER_CONSENT;
+            case "CONSENT": return BorisPage.REGISTER_CONSENT;
             case "CREATE A PROFILE": return BorisPage.REGISTER_FORM;
             case "CHECK YOUR EMAIL": return BorisPage.REGISTER_COMPLETE;
             // Teams:
