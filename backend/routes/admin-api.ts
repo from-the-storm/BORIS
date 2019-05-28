@@ -155,6 +155,26 @@ defineMethod(RESET_TEAM_VARS, async (data, app, user) => {
     return {result: 'ok'};
 });
 
+/** Give the team a more family-friendly name */
+export const SANITIZE_TEAM_NAME: ApiMethod<{id: string}, {}> = {path: `/api/admin/teams/:id/sanitize-team-name`, type: 'POST'};
+defineMethod(SANITIZE_TEAM_NAME, async (data, app, user) => {
+    const db: BorisDatabase = app.get("db");
+    const id = parseInt(data.id, 10);
+    if (isNaN(id)) {
+        throw new SafeError(`Invalid team ID.`);
+    }
+    const team = await db.teams.findOne(id);
+    if (team === null) {
+        throw new SafeError(`Team ${id} not found.`, 404);
+    }
+    await db.teams.update({id,}, {
+        name: 'The Team Formerly Known As',
+        organization: '(EXPLICIT)'
+    });
+    return {result: 'ok'};
+});
+
+
 export const DELETE_TEAM: ApiMethod<{id: string}, {}> = {path: `/api/admin/teams/:id`, type: 'DELETE'};
 defineMethod(DELETE_TEAM, async (data, app, user) => {
     const db: BorisDatabase = app.get("db");

@@ -31,7 +31,7 @@ export const TeamList = (props: any) => (
     </List>
 );
 
-////// Begin code to add a custom "Reset vars" button
+////// Begin code to add custom "Reset vars" and "Sanitize team name" button
 const cardActionStyle = {
     zIndex: 2,
     display: 'inline-block',
@@ -50,15 +50,28 @@ async function resetTeam(teamId: number) {
     }
 }
 
+async function sanitizeTeamName(teamId: number) {
+    if (confirm("Do you want to give this team a more family-friendly name?")) {
+        await fetch(`/api/admin/teams/${teamId}/sanitize-team-name`, {
+            credentials: 'include',
+            method: 'POST',
+            body: JSON.stringify({}),
+            headers: new Headers({"Content-Type": "application/json"}),
+        });
+        location.reload();
+    }
+}
+
 const TeamShowActions = (props: any) => (
     <CardActions style={cardActionStyle}>
         <ListButton basePath={props.basePath} />
         <RefreshButton />
         <DeleteButton basePath={props.basePath} record={props.data} resource={props.resource} />
-        {/* Add your custom actions */}
+        <Button color="secondary" onClick={() => { sanitizeTeamName(props.data.id); }} label="PG-13" />
         <Button color="secondary" onClick={() => { resetTeam(props.data.id); }} label="Reset Vars (!)" />
     </CardActions>
 );
+
 ////// End code to add a custom "Reset vars" button
 
 export const TeamShow = (props: any) => (
