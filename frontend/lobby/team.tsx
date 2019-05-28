@@ -6,6 +6,7 @@ import { List } from 'immutable';
 import { RootState } from '../global/state';
 import { OtherTeamMember } from '../../common/models';
 import { RpcClientConnectionStatus } from '../rpc-client/rpc-client-actions';
+import { leaveTeam } from '../global/state/team-state-actions';
 
 import { Prompt } from '../prompt/prompt';
 
@@ -114,7 +115,8 @@ interface Props extends OwnProps, DispatchProp<RootState> {
 interface State {
     teamView: boolean,
     editingTeam: boolean,
-    showPrompt: boolean
+    showPrompt: boolean,
+    showSwitchTeamPrompt: boolean,
 }
 
 class _TeamComponent extends React.PureComponent<Props, State> {
@@ -123,7 +125,8 @@ class _TeamComponent extends React.PureComponent<Props, State> {
         this.state = ({
             teamView: true,
             editingTeam: false,
-            showPrompt: false
+            showPrompt: false,
+            showSwitchTeamPrompt: false,
         });
 
         // Update the saltines balance:
@@ -156,6 +159,17 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                             <TeamMemberRow key={member.id} details={member} editable={this.state.editingTeam} isMe={false} />
                         )}
                     </ul>
+                    <button className="switch-teams" onClick={this.handleSwitchTeam}>Switch/start new team</button>
+                    { this.state.showSwitchTeamPrompt &&
+                        <Prompt
+                            close={this.handleCloseSwitchTeamPrompt}
+                            heading="Switch/start new team?"
+                            show={this.state.showSwitchTeamPrompt}
+                        >
+                            <p>Are you sure you want to switch/start a new team? (You can always rejoin your current team later.)</p>
+                            <button onClick={this.handleLeaveTeamButton}>Yes</button>
+                        </Prompt>
+                    }
                 </div>
             }
             { !teamView &&
@@ -197,6 +211,23 @@ class _TeamComponent extends React.PureComponent<Props, State> {
             }))
         }
     }
+
+    @bind private handleSwitchTeam() {
+        this.setState({
+            showSwitchTeamPrompt: true,
+        })
+    }
+
+    @bind private handleCloseSwitchTeamPrompt () {
+        this.setState({ 
+            showSwitchTeamPrompt: false,
+        });
+    }
+
+    @bind private handleLeaveTeamButton() {
+        this.props.dispatch(leaveTeam());
+    }
+
 }
 
 export const TeamComponent = connect((state: RootState, ownProps: OwnProps) => {
