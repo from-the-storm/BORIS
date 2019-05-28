@@ -15,6 +15,7 @@ import {
     EDIT_SCENARIO,
     GET_TEAM,
     RESET_TEAM_VARS,
+    SANITIZE_TEAM_NAME,
     GET_USER,
     DELETE_TEAM,
     DELETE_SCENARIO,
@@ -130,6 +131,11 @@ describe("Admin API tests", () => {
         describe("Team Var Reset (POST /api/admin/teams/:id/reset)", () => {
 
             checkSecurity(RESET_TEAM_VARS, {id: "1"});
+
+        });
+        describe("Team Name and Organization Sanitizing (POST /api/admin/teams/:id/sanitize-team-name)", () => {
+
+            checkSecurity(SANITIZE_TEAM_NAME, {id: "1"});
 
         });
         describe("Delete Team (DELETE /api/admin/teams/:id)", () => {
