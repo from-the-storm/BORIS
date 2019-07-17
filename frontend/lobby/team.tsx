@@ -178,10 +178,10 @@ class _TeamComponent extends React.PureComponent<Props, State> {
                     <table className="leaderboards">
                         <thead>
                             <tr>
-                                <th>Rank</th>
+                                <th>#</th>
                                 <th>Team</th>
-                                <th>Scenarios</th>
-                                <th>Score</th>
+                                <th>Games</th>
+                                <th>Pts</th>
                             </tr>
                         </thead>
                         <tbody>
