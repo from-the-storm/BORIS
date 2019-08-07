@@ -10,7 +10,7 @@ export const config = (() => {
         app_protocol: 'http' as ('http' | 'https'),
         listen_port: 3333,
         resource_url: '/s',
-        sparkpost_api_key: null as string|null, // Not required for development
+        mailgun_api_key: null as string|null, // Not required for development
         system_emails_from: "BORIS <no-reply@apocalypsemadeeasy.com>",
         redis_host: 'localhost',
         redis_port: 3331,

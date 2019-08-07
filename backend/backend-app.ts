@@ -3,7 +3,7 @@ import * as expressWebsocket from 'express-ws';
 import * as bodyParser from 'body-parser';
 import * as nodemailer from 'nodemailer';
 import { SendMailOptions } from 'nodemailer';
-import * as nodemailerSparkPostTransport from 'nodemailer-sparkpost-transport';
+import * as nodemailerMailGunTransport from 'nodemailer-mailgun-transport';
 import * as nodemailerMockTransport from 'nodemailer-mock-transport';
 import * as passport from 'passport';
 import {Strategy as UniqueTokenStrategy} from 'passport-unique-token';
@@ -82,13 +82,9 @@ app.use(session({
 app.set('sendMail', (function() {
     let transport;
     let logMessage = false;
-    if (environment === 'test') {
-        transport = nodemailerMockTransport();
-        app.set('mailTransport', transport);
-    } else if (config.sparkpost_api_key) {
-        transport = nodemailerSparkPostTransport({
-            sparkPostApiKey: config.sparkpost_api_key,
-            options: {click_tracking: false},
+    if (config.mailgun_api_key) {
+        transport = nodemailerMailGunTransport({
+            mailGunApiKey: config.mailgun_api_key,
         });
     } else {
         // Default: output to stdout only, don't actually send.

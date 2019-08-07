@@ -3,7 +3,7 @@ declare module 'express-ws' {
     var _a: any;
     export = _a;
 }
-declare module 'nodemailer-sparkpost-transport' {
+declare module 'nodemailer-mailgun-transport' {
     var _a: any;
     export = _a;
 }
