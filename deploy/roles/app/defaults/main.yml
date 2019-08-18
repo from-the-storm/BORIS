@@ -1,7 +1,7 @@
 boris_app_mode: production
 boris_app_domain: "something.apocalypsemadeeasy.com"
 boris_image_tag: "latest"
-boris_sparkpost_api_key: "{{ lookup('file', boris_deploy_private_dir + 'credentials/sparkpost_api_key') }}"
+boris_mailgun_api_key: "{{ lookup('file', boris_deploy_private_dir + 'credentials/mailgun_api_key') }}"
 boris_app_db_host: "{{traefik_docker_apps_network_host_ip}}"  # In order to be accessible to docker containers, spiped for the DB listens on this IP instead of 127.0.0.1
 boris_app_db_name: "boris_{{boris_instance_name}}"
 boris_app_db_user: "boris_{{boris_instance_name}}"
@@ -16,7 +16,7 @@ boris_config_base:
   app_protocol: 'https'
   listen_port: 3333
   resource_url: '/s'
-  sparkpost_api_key: "{{ boris_sparkpost_api_key }}"
+  mailgun_api_key: "{{ boris_mailgun_api_key }}"
   system_emails_from: "BORIS <info@apocalypsemadeeasy.com>"
   redis_host: "{{ traefik_docker_apps_network_host_ip }}"
   redis_port: "{{redis_secure_port}}"

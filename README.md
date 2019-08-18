@@ -57,7 +57,7 @@ Deployment currently needs two VMs, one for databases and the other for the app.
 cd deploy/
 mkdir ../../boris-private/ ../../boris-private/group_vars ../../boris-private/prod ../../boris-private/prod/credentials
 touch ../../boris-private/ssh_config ../../boris-private/ansible_hosts 
-touch ../../boris-private/group-vars/prod.yml ../../boris-private/prod/credentials/sparkpost_api_key
+touch ../../boris-private/group-vars/prod.yml ../../boris-private/prod/credentials/mailgun_api_key
 # Edit those files accordingly.
 # Now deploy:
 ansible-playbook playbook-db-server.yml -e "target=prod_db"
