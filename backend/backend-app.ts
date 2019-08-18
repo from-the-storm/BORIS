@@ -82,9 +82,15 @@ app.use(session({
 app.set('sendMail', (function() {
     let transport;
     let logMessage = false;
-    if (config.mailgun_api_key) {
+    if (environment === 'test') {
+        transport = nodemailerMockTransport();
+        app.set('mailTransport', transport);
+    } else if (config.mailgun_api_key) {
         transport = nodemailerMailGunTransport({
-            mailGunApiKey: config.mailgun_api_key,
+            auth: {
+                api_key: config.mailgun_api_key,
+                domain: config.mailgun_api_domain,
+            },
         });
     } else {
         // Default: output to stdout only, don't actually send.

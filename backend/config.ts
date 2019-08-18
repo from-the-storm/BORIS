@@ -11,6 +11,7 @@ export const config = (() => {
         listen_port: 3333,
         resource_url: '/s',
         mailgun_api_key: null as string|null, // Not required for development
+        mailgun_api_domain: 'mg.apocalypsemadeeasy.com',
         system_emails_from: "BORIS <no-reply@apocalypsemadeeasy.com>",
         redis_host: 'localhost',
         redis_port: 3331,
