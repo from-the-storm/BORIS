@@ -56,13 +56,7 @@ class _RegisterComponent extends React.PureComponent<Props, State> {
             return <div>
                 <p className="steps">Step 1 of 2</p>
                 <h1>Consent</h1>
-                <p>Apocalypse Made Easy! is part of a study led by Peter Klein (email: peter.klein@ubc.ca; phone: 604-822-5823), along with Andrew Munroe at the University of British Columbia, Melbourne-based First Person Consulting, and the Propel Centre for Population Health Impact at the University of Waterloo.</p>
-                
-                <p>As a Social Innovators Challenge Project funded by the Movember Foundation, its focus is on social connectedness. In order to study social connectedness and improve the program, the way you interact with Apocalypse Made Easy!, along with limited demographic data you supply while registering a profile, is recorded and stored. This data will be anonymized and stored on secure servers in Canada, and only accessible to the research team.</p>
-
-                <p>Each scenario that you choose to complete will take between 40 and 120 minutes. While using the program you are not required to do anything you are uncomfortable with.</p>
-
-                <p>If you have any concerns or complaints about your rights as a research participant and/or your experiences while participating in this study, contact the Research Participant Complaint Line in the University British Columbia’s Office of Research Ethics at 1-604-822-8598 or if long distance e-mail RSIL@ors.ubc.ca or call toll free 1-877-822-8598.</p>
+                <p>Apocalypse Made Easy! is a project based at the University of British Columbia. In order to improve the program, the way you interact with Apocalypse Made Easy!, along with the limited demographic data you supply while creating a profile, is recorded and stored.</p><p>This data will never be shared with outside parties. And it will be deleted once the project ends.</p>
                 <div className="button-split">
                     <a className="small" onClick={this.handleDoNotConsent}>I do not consent</a>
                     <button onClick={this.handleConsent}>I Consent</button>
