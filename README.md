@@ -1,8 +1,20 @@
 BORIS Web App
 =============
 
-This is a web application designed to deliver [apocalypse-preparation training](https://apocalypsemadeeasy.com)
+This was a web application designed to deliver [apocalypse-preparation training](https://apocalypsemadeeasy.com)
 activities to participants.
+
+<br>
+
+-----
+
+➡️ &nbsp; Check out [**Back & Forth**](https://github.com/GlobalRepCentre/back-and-forth), the newer and more customizable version of this software.
+
+*This repository is archived here for historical purposes only.*
+
+-----
+
+<br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br>
 
 Installation
 ------------
